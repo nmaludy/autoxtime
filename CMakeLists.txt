@@ -22,13 +22,13 @@ set(CMAKE_BUILD_TYPE Release)
 
 ###########
 # Testing
-if(${TEST_NAME} == "clang-tidy")
+if(${TEST_NAME} EQUAL "clang-tidy")
   set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-header-filter=include;-checks=*;-warnings-as-errors=*;")
-elseif(${TEST_NAME} == "cppcheck")
+elseif(${TEST_NAME} EQUAL "cppcheck")
   set(CMAKE_CXX_CPPCHECK "cppcheck")
-elseif(${TEST_NAME} == "include-what-you-use")
+elseif(${TEST_NAME} EQUAL "include-what-you-use")
   set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE "iwyu")
-elseif(${TEST_NAME} == "link-what-you-use")
+elseif(${TEST_NAME} EQUAL "link-what-you-use")
   set(CMAKE_LINK_WHAT_YOU_USE TRUE)
 endif()
   
