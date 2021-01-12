@@ -19,6 +19,19 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 # turn on debug builds
 # set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_BUILD_TYPE Release)
+
+###########
+# Testing
+if(${TEST_NAME} == "clang-tidy")
+  set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-header-filter=include;-checks=*;-warnings-as-errors=*;")
+elseif(${TEST_NAME} == "cppcheck")
+  set(CMAKE_CXX_CPPCHECK "cppcheck")
+elseif(${TEST_NAME} == "include-what-you-use")
+  set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE "iwyu")
+elseif(${TEST_NAME} == "link-what-you-use")
+  set(CMAKE_LINK_WHAT_YOU_USE TRUE)
+endif()
+  
   
 # find all source files and include them in our executable
 file(GLOB PROJECT_SRC "src/*.cpp" )
@@ -29,3 +42,4 @@ add_executable(${PROJECT_NAME} ${PROJECT_SRC})
 # add our include directory for finding headers
 # this must come after defining our executable 
 target_include_directories(${PROJECT_NAME} PUBLIC "include")
+
