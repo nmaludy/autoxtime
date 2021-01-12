@@ -1,4 +1,4 @@
-name: build
+name: compile
 
 on:
   push:
@@ -13,19 +13,27 @@ on:
 
 jobs:
   compile:
-    name: 'compile - ${{ matrix.os }}'
+    name: 'compile - ${{ matrix.os }} - ${{ matrix.compiler_c }}'
     runs-on: '${{ matrix.os }}'
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
           - os: windows-latest
+          - os: ubuntu-latest
+            compiler_c: gcc
+            compiler_cpp: c++
+          - os: ubuntu-latest
+            compiler_c: clang
+            compiler_cpp: clang++
+    env:
+      CC: '${{ matrix.compiler_c }}'
+      CXX: '${{ matrix.compiler_cpp }}'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
       - name: CMake Setup
         run: |
           cmake -S . -B build
-      - name: Compile
+      - name: Compile 
         run: |
-          cmake -S . -B build
+          cmake --build build
