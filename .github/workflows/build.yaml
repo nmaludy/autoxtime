@@ -1,0 +1,26 @@
+name: build
+
+on:
+  push:
+    branches: ['*']
+    tags:
+      - v*
+  pull_request:
+    type: [opened, reopened, edited]
+  schedule:
+    # run every night at midnight
+    - cron:  '0 0 * * *'
+
+jobs:
+  linux-compile:
+    name: '${{matrix.name}}'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: CMake Setup
+        run: |
+          cmake -S . -B build
+      - name: Compile
+        run: |
+          cmake -S . -B build
