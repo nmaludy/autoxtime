@@ -12,9 +12,14 @@ on:
     - cron:  '0 0 * * *'
 
 jobs:
-  linux-compile:
+  compile:
     name: '${{matrix.name}}'
-    runs-on: ubuntu-latest
+    runs-on: '${{ matrix.os }}'
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+          - os: windows-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
