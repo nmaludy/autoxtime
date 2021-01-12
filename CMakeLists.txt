@@ -22,16 +22,17 @@ set(CMAKE_BUILD_TYPE Release)
 
 ###########
 # Testing
-if(${TEST_NAME} EQUAL "clang-tidy")
-  set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-header-filter=include;-checks=*;-warnings-as-errors=*;")
-elseif(${TEST_NAME} EQUAL "cppcheck")
-  set(CMAKE_CXX_CPPCHECK "cppcheck")
-elseif(${TEST_NAME} EQUAL "include-what-you-use")
-  set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE "iwyu")
-elseif(${TEST_NAME} EQUAL "link-what-you-use")
-  set(CMAKE_LINK_WHAT_YOU_USE TRUE)
+if(${TEST_NAME})
+  if(${TEST_NAME} EQUAL "clang-tidy")
+    set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-header-filter=include;-checks=*;-warnings-as-errors=*;")
+  elseif(${TEST_NAME} EQUAL "cppcheck")
+    set(CMAKE_CXX_CPPCHECK "cppcheck")
+  elseif(${TEST_NAME} EQUAL "include-what-you-use")
+    set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE "iwyu")
+  elseif(${TEST_NAME} EQUAL "link-what-you-use")
+    set(CMAKE_LINK_WHAT_YOU_USE TRUE)
+  endif()
 endif()
-  
   
 # find all source files and include them in our executable
 file(GLOB PROJECT_SRC "src/*.cpp" )
