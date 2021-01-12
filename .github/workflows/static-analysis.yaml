@@ -18,6 +18,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+      - name: Install cppcheck
+        run: |
+          sudo apt-get -y install cppcheck
       - name: cppcheck
         run: |
           cppcheck src/
