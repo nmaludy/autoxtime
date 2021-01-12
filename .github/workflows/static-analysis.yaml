@@ -24,3 +24,17 @@ jobs:
       - name: cppcheck
         run: |
           cppcheck src/
+        
+  clang-static-analyzer:
+    name: 'static analysis - clang static analyzer'
+    runs-on: 'ubuntu-latest'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: scan-build CMake Setup
+        run: |
+          scan-build cmake -S . -B build
+      - name: scan-build Compile 
+        run: |
+          scan-build cmake --build build
+
