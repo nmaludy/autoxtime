@@ -31,6 +31,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+      - name: Install cppcheck
+        run: |
+          sudo apt-get -y install scan-build
       - name: scan-build CMake Setup
         run: |
           scan-build cmake -S . -B build
