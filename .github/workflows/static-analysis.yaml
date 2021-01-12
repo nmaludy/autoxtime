@@ -31,9 +31,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-      - name: Install cppcheck
+      - name: Install clang-tools
         run: |
-          sudo apt-get -y install scan-build
+          sudo apt-get -y install clang-tools
       - name: scan-build CMake Setup
         run: |
           scan-build cmake -S . -B build
