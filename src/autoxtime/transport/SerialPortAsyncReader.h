@@ -3,7 +3,6 @@
 
 #include <QSerialPortInfo>
 #include <QSerialPort>
-#include <QTextStream>
 #include <QTimer>
 
 #include "autoxtime/transport/ITransport.h"
@@ -26,7 +25,6 @@ class SerialPortAsyncReader : public ITransport
   
   QString mPortName;
   QSerialPort mSerialPort;
-  QTextStream mStandardOutput;
   QTimer mTimer;
 };
 

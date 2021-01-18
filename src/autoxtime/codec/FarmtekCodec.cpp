@@ -28,8 +28,7 @@ FarmtekCodec::FarmtekCodec(ITransport* pTransport, QObject* pParent)
 void FarmtekCodec::handleDataRead(const QByteArray& data)
 {
   // for (int i = 0; i < read_data.size(); ++i) {
-  //   mStandardOutput << "handleReadyRead(): read data[" << i << "]: " << (int)read_data[i]
-  //                   << Qt::endl;
+  //    qInfo().nospace() << "handleReadyRead(): read data[" << i << "]: " << (int)read_data[i];
   // }
   mDataBuffer.append(data);
   
