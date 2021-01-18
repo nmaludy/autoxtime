@@ -18,6 +18,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: '5.12.2'
       - name: Install cppcheck
         run: |
           sudo apt-get -y install cppcheck
@@ -34,6 +38,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: '5.12.2'
       - name: Install clang-tools
         run: |
           sudo apt-get -y install clang-tools
@@ -50,6 +58,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: '5.12.2'
       - name: Install clang-tools
         run: |
           sudo apt-get -y install clang-tools
@@ -66,6 +78,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: '5.12.2'
       - name: Install iwyu
         run: |
           sudo apt-get -y install iwyu
@@ -82,6 +98,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: '5.12.2'
       - name: lwyu CMake Setup
         run: |
           cmake -S . -B build -DTEST_NAME=lwyu
