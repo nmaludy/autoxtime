@@ -20,27 +20,31 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 # set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_BUILD_TYPE Release)
 
+# put all executables in the build/ directory root rather than in src/
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
+
+# Qt things
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+# TODO how to make this more dynamic?
+list(APPEND CMAKE_PREFIX_PATH "/usr/local/Qt-5.12.2")
+
+
 ###########
 # Testing
 if(${TEST_NAME})
   if(${TEST_NAME} EQUAL "clang-tidy")
-    set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-header-filter=include;-checks=*;-warnings-as-errors=*;")
+    set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-header-filter=src;-checks=*;-warnings-as-errors=*;")
   elseif(${TEST_NAME} EQUAL "cppcheck")
     set(CMAKE_CXX_CPPCHECK "cppcheck")
   elseif(${TEST_NAME} EQUAL "include-what-you-use")
     set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE "iwyu")
   elseif(${TEST_NAME} EQUAL "link-what-you-use")
-    set(CMAKE_LINK_WHAT_YOU_USE TRUE)
+    set(CMAKE_LINK_WHAT_YOU_USE cd ..TRUE)
   endif()
 endif()
-  
-# find all source files and include them in our executable
-file(GLOB PROJECT_SRC "src/*.cpp" )
 
-# create our executable from source
-add_executable(${PROJECT_NAME} ${PROJECT_SRC})
-
-# add our include directory for finding headers
-# this must come after defining our executable 
-target_include_directories(${PROJECT_NAME} PUBLIC "include")
+# Add any targets in our source directory
+add_subdirectory(src)
 
