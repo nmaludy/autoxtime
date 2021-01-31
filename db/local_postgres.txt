@@ -1,0 +1,22 @@
+# Local postgres notes
+
+# Connect to postgresql
+psql postgres
+
+# List databases
+\l
+
+# Create databse
+CREATE DATABASE <database>;
+
+# Switch databases
+\c <database>
+
+# List tables
+\dt
+
+# Inspect table
+\d <table>
+
+# Drop Table
+DROP TABLE IF EXISTS <table>;

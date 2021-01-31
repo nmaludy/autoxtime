@@ -33,3 +33,6 @@
 
 # CMake files
 build/
+
+# ignore mac BS file
+.DS_Store

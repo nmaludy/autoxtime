@@ -17,6 +17,7 @@ CREATE TABLE driver(
   first_name TEXT NOT NULL,
   last_name TEXT NOT NULL,
   email TEXT NOT NULL,
+  phone_number TEXT NOT NULL,
   msr_id INT NOT NULL,
   scca_id INT NOT NULL,
   workreq INT,
@@ -43,11 +44,13 @@ CREATE TABLE class(
 
 CREATE TABLE car(
   car_id INT GENERATED ALWAYS AS IDENTITY,
-  number INT NOT NULL,
+  car_number INT NOT NULL,
   year INT NOT NULL,
   make TEXT NOT NULL,
   model TEXT NOT NULL,
-  trim TEXT,
+  color TEXT NOT NULL,
+  sponsor TEXT NOT NULL,
+  tire_brand TEXT NOT NULL,
   class_id INT NOT NULL,
   driver_id INT NOT NULL,
   region_id INT NOT NULL,
@@ -97,7 +100,6 @@ CREATE TABLE run(
   pax_time NUMERIC,
   dnf bool,
   scored bool,
-  penalty INT,
   event_id INT NOT NULL,
   driver_id INT NOT NULL,
   car_id INT NOT NULL,
@@ -126,6 +128,18 @@ CREATE TABLE raw_times(
       REFERENCES run(run_id)
 );
 
+CREATE TABLE penalties(
+  penalty INT,
+  raw_id INT,
+  run_id INT,
+  CONSTRAINT fk_raw_times
+    FOREIGN KEY(raw_id)
+      REFERENCES raw_times(raw_id),
+  CONSTRAINT fk_run
+    FOREIGN KEY(run_id)
+      REFERENCES run(run_id)
+);
+
 CREATE TABLE points(
   points_id INT GENERATED ALWAYS AS IDENTITY,
   points NUMERIC,
@@ -148,5 +162,36 @@ CREATE TABLE points(
       REFERENCES car(car_id)
 );
 
+CREATE TABLE users(
+  user_id INT GENERATED ALWAYS AS IDENTITY,
+  username TEXT NOT NULL,
+  password TEXT NOT NULL,
+  driver_id INT,
+  active INT NOT NULL,
+  PRIMARY KEY(user_id),
+  CONSTRAINT fk_driver
+    FOREIGN KEY(driver_id)
+      REFERENCES driver(driver_id)
+);
 
+CREATE TABLE role (
+  role_id INT GENERATED ALWAYS AS IDENTITY,
+  role TEXT NOT NULL,
+  PRIMARY KEY (role_id)
+);
 
+CREATE TABLE user_role (
+  user_id INT,
+  role_id INT,
+  PRIMARY KEY (user_id, role_id),
+  CONSTRAINT fk_users
+    FOREIGN KEY(user_id)
+      REFERENCES users(user_id),
+  CONSTRAINT fk_role
+    FOREIGN KEY(role_id)
+      REFERENCES role(role_id)
+);
+
+INSERT INTO role (role) VALUES ('user_read');
+INSERT INTO role (role) VALUES ('user_write');
+INSERT INTO role (role) VALUES ('admin');
