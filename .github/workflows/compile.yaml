@@ -19,10 +19,13 @@ jobs:
       matrix:
         include:
           - os: windows-latest
+            qt_version: '5.12.2'
           - os: ubuntu-latest
+            qt_version: '5.12.2'
             compiler_c: gcc
             compiler_cpp: c++
           - os: ubuntu-latest
+            qt_version: '5.12.2'
             compiler_c: clang
             compiler_cpp: clang++
     env:
@@ -31,10 +34,19 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v1
+        with:
+          path: ../Qt
+          key: ${{ runner.os }}-QtCache-${{ matrix.qt_version }}
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
-          version: '5.12.2'
+          version: ${{ matrix.qt_version }}
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          setup-python: '${{ !steps.cache-qt.outputs.cache-hit }}'
+          install-deps: '${{ !steps.cache-qt.outputs.cache-hit }}'
       - name: CMake Setup
         run: |
           cmake -S . -B build
