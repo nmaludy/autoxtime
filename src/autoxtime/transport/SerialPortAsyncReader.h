@@ -11,7 +11,7 @@ class SerialPortAsyncReader : public ITransport
 {
   Q_OBJECT
  public:
-  SerialPortAsyncReader(const QString& portName, QObject* pParent = nullptr);
+  SerialPortAsyncReader(const QString& portName = QString(), QObject* pParent = nullptr);
                                                                             
  private slots:
   void handleReadyRead();

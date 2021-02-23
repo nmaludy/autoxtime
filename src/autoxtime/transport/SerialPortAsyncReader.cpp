@@ -1,5 +1,9 @@
 #include "autoxtime/transport/SerialPortAsyncReader.h"
 
+// autoxtime
+#include "autoxtime/config/ConfigStore.h"
+
+// other
 #include <iostream>
 #include <QMetaEnum>
 #include <QDebug>
@@ -10,19 +14,24 @@ SerialPortAsyncReader::SerialPortAsyncReader(const QString& portName,
       mPortName(portName),
       mSerialPort()
 {
-  // TODO configurable
-  mSerialPort.setBaudRate(QSerialPort::Baud4800);
-  mSerialPort.setDataBits(QSerialPort::Data8);
-  mSerialPort.setParity(QSerialPort::NoParity);
-  mSerialPort.setStopBits(QSerialPort::OneStop);
+  if (mPortName.isNull()) {
+    mPortName = ConfigStore::value("serial/port").toString();
+  }
+  mSerialPort.setBaudRate(ConfigStore::valueCast("serial/baud_rate", QSerialPort::Baud4800));
+  mSerialPort.setDataBits(ConfigStore::valueCast("serial/data_bits", QSerialPort::Data8));
+  mSerialPort.setParity(ConfigStore::valueCast("serial/parity", QSerialPort::NoParity));
+  mSerialPort.setStopBits(ConfigStore::valueCast("serial/stop_bits", QSerialPort::OneStop));
   // TODO should we cap the read buffer size? (default is unlimited)
 
-  connect(&mSerialPort, &QSerialPort::readyRead, this, &SerialPortAsyncReader::handleReadyRead);
-  connect(&mSerialPort, &QSerialPort::errorOccurred, this, &SerialPortAsyncReader::handleError);
-  connect(&mTimer, &QTimer::timeout, this, &SerialPortAsyncReader::handleTimeout);
+  connect(&mSerialPort, &QSerialPort::readyRead,
+          this, &SerialPortAsyncReader::handleReadyRead);
+  connect(&mSerialPort, &QSerialPort::errorOccurred,
+          this, &SerialPortAsyncReader::handleError);
+  connect(&mTimer, &QTimer::timeout,
+          this, &SerialPortAsyncReader::handleTimeout);
 
   tryConnect();
-  mTimer.start(5000); // TODO configurable
+  mTimer.start(ConfigStore::valueCast("serial/reconnect_interval_ms", 5000));
 }
 
 QSerialPortInfo SerialPortAsyncReader::findPortInfo(const QString& portName)
