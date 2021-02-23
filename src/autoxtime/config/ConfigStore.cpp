@@ -14,7 +14,7 @@ ConfigStore& ConfigStore::instance(const QString& filePath)
 
 const QString& ConfigStore::filePath() const
 {
-  return mPath;
+  return mFilePath;
 }
 
 QVariant ConfigStore::value(const QString& key, const QVariant& defaultValue) const

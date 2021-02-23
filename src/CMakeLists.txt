@@ -9,6 +9,7 @@ find_package(Qt5 COMPONENTS SerialPort REQUIRED)
 add_executable(${PROJECT_NAME}_timers
   autoxtime/exe/timers.cpp
   autoxtime/codec/FarmtekCodec.cpp
+  autoxtime/config/ConfigStore.cpp
   autoxtime/transport/SerialPortAsyncReader.cpp
   autoxtime/transport/ITransport.cpp)
 
