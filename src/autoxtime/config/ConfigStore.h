@@ -5,7 +5,7 @@
 #include <QHash>
 #include <QObject>
 #include <QSettings>
-#include <QString>
+#include <QStringList>
 
 class QCommandLineParser;
 
@@ -14,9 +14,11 @@ class ConfigStore : public QObject
   Q_OBJECT
 
  public:
+  typedef QHash<QString, QStringList> ConfigCliOptsMap;
+  
   static ConfigStore& init(const QString& filePath = QString(),
                            QCommandLineParser* pParser = nullptr,
-                           const QHash<QString, QString>& configCliMap = QHash<QString, QString>());
+                           const ConfigCliOptsMap& configCliMap = ConfigCliOptsMap());
 
   static const QString& filePath();
 
@@ -35,13 +37,13 @@ class ConfigStore : public QObject
  private:
   ConfigStore(const QString& filePath,
               QCommandLineParser* pParser,
-              const QHash<QString, QString>& configCliMap,
+              const QHash<QString, QStringList>& configCliMap,
               QObject* pParent = nullptr);
 
   QString mFilePath;
   QSettings mSettings;
   QCommandLineParser* mpParser;
-  QHash<QString, QString> mConfigCliMap;
+  ConfigCliOptsMap mConfigCliMap;
 };
 
 #endif // AUTOXTIME_CONFIG_CONFIGSTORE

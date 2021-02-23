@@ -36,13 +36,13 @@ int main(int argc, char *argv[])
 
   // map from config option to CLI parser option name
   // this way we can "override" any config options with CLI options if we so choose
-  QHash<QString, QString> config_cli_map;
-  config_cli_map["serial/port"] = "port";
-  config_cli_map["serial/baud_rate"] = "baud-rate";
-  config_cli_map["serial/data_bits"] = "data-bits";
-  config_cli_map["serial/parity"] = "parity";
-  config_cli_map["serial/stop_bits"] = "stop-bits";
-  config_cli_map["serial/reconnect_interval_ms"] = "reconnect-interval-ms";
+  QHash<QString, QStringList> config_cli_map;
+  config_cli_map["serial/port"] = QStringList() << "p" << "port";
+  config_cli_map["serial/baud_rate"] = QStringList() << "baud-rate";
+  config_cli_map["serial/data_bits"] = QStringList() <<"data-bits";
+  config_cli_map["serial/parity"] = QStringList() <<"parity";
+  config_cli_map["serial/stop_bits"] = QStringList() <<"stop-bits";
+  config_cli_map["serial/reconnect_interval_ms"] = QStringList() <<"reconnect-interval-ms";
 
   // initialize our config with our parser and our map before initializing any other
   // classes, this way other classes can just call ConfigStore::instance().value()
