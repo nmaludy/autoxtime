@@ -12,28 +12,82 @@ on:
     - cron:  '0 0 * * *'
 
 jobs:
-  cppcheck:
-    name: 'static analysis - cppcheck'
-    runs-on: 'ubuntu-latest'
+  static_analysis_check:
+    name: 'static analysis - ${{ matrix.test_name_pretty }}'
+    runs-on: '${{ matrix.os }}'
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            qt_version: '5.12.2'
+            apt_packages: 'cppcheck'
+            test_name: "cppcheck"
+            test_name_pretty: "cppcheck"
+          - os: ubuntu-latest
+            qt_version: '5.12.2'
+            apt_packages: 'clang-tools'
+            test_name: "clang-tidy"
+            test_name_pretty: "clang tidy"
+          - os: ubuntu-latest
+            qt_version: '5.12.2'
+            apt_packages: 'iwyu'
+            test_name: "clang-tidy"
+            test_name_pretty: "include what you use"
+          - os: ubuntu-latest
+            qt_version: '5.12.2'
+            test_name: "lwyu"
+            test_name_pretty: "link what you use"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-      - name: Install cppcheck
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v1
+        with:
+          path: ../Qt
+          key: ${{ runner.os }}-QtCache-${{ matrix.qt_version }}
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: ${{ matrix.qt_version }}
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          setup-python: '${{ !steps.cache-qt.outputs.cache-hit }}'
+          install-deps: '${{ !steps.cache-qt.outputs.cache-hit }}'
+      - name: Install packages required for testing
+        if: ${{ matrix.apt_packages }}
         run: |
-          sudo apt-get -y install cppcheck
-      - name: cppcheck CMake Setup
+          sudo apt-get -y install ${{ matrix.apt_packages }}
+      - name: CMake Setup
         run: |
-          cmake -S . -B build -DTEST_NAME=cppcheck
-      - name: cppcheck
+          cmake -S . -B build -DTEST_NAME=${{ matrix.test_name }}
+      - name: CMake Build/Test
         run: |
           cmake --build build
-        
+
   clang-static-analyzer:
     name: 'static analysis - clang static analyzer'
-    runs-on: 'ubuntu-latest'
+    runs-on: '${{ matrix.os }}'
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            qt_version: '5.12.2'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v1
+        with:
+          path: ../Qt
+          key: ${{ runner.os }}-QtCache-${{ matrix.qt_version }}
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: ${{ matrix.qt_version }}
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          setup-python: '${{ !steps.cache-qt.outputs.cache-hit }}'
+          install-deps: '${{ !steps.cache-qt.outputs.cache-hit }}'
       - name: Install clang-tools
         run: |
           sudo apt-get -y install clang-tools
@@ -43,49 +97,3 @@ jobs:
       - name: scan-build Compile 
         run: |
           scan-build cmake --build build
-
-  clang-tidy:
-    name: 'static analysis - clang tidy'
-    runs-on: 'ubuntu-latest'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      - name: Install clang-tools
-        run: |
-          sudo apt-get -y install clang-tools
-      - name: clang-tidy CMake Setup
-        run: |
-          cmake -S . -B build -DTEST_NAME=clang-tidy
-      - name: clang-tidy
-        run: |
-          cmake --build build
-
-  include-what-you-use:
-    name: 'static analysis - include what you use'
-    runs-on: 'ubuntu-latest'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      - name: Install iwyu
-        run: |
-          sudo apt-get -y install iwyu
-      - name: iwyu CMake Setup
-        run: |
-          cmake -S . -B build -DTEST_NAME=iwyu
-      - name: iwyu
-        run: |
-          cmake --build build
-
-  link-what-you-use:
-    name: 'static analysis - link what you use'
-    runs-on: 'ubuntu-latest'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      - name: lwyu CMake Setup
-        run: |
-          cmake -S . -B build -DTEST_NAME=lwyu
-      - name: lwyu
-        run: |
-          cmake --build build
-
