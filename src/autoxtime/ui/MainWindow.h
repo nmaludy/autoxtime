@@ -1,20 +1,19 @@
 #ifndef AUTOXTIME_UI_MAINWINDOW
 #define AUTOXTIME_UI_MAINWINDOW
 
-#include <QObject>
+#include <autoxtime.h>
+#include <QMainWindow>
 
-class ITransport;
+AUTOXTIME_NAMESPACE_BEG
 
-class MainWindow : public QObject
+class MainWindow : public QMainWindow
 {
   Q_OBJECT
 
  public:
-  MainWindow(QObject* pParent = nullptr);
-
- private:
-  ITransport* mpTransport;
-  QByteArray mDataBuffer;
+  MainWindow(QWidget* pParent = nullptr);
 };
+
+AUTOXTIME_NAMESPACE_END
 
 #endif // AUTOXTIME_UI_MAINWINDOW

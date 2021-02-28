@@ -27,9 +27,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
-# TODO how to make this more dynamic?
-list(APPEND CMAKE_PREFIX_PATH "/usr/local/Qt-5.12.2")
+# find the Qt 5 installation and include it
+file(GLOB QT_DIR_LIST "/usr/local/Qt-5.*" )
+list(APPEND CMAKE_PREFIX_PATH ${QT_DIR_LIST})
 
+# AutoXTime Variables
+set(PROJECT_EXTERN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/extern")
 
 ###########
 # Testing
@@ -45,6 +48,8 @@ if(${TEST_NAME})
   endif()
 endif()
 
-# Add any targets in our source directory
+# Add any targets in our source directories
+add_subdirectory(extern)
 add_subdirectory(src)
+
 

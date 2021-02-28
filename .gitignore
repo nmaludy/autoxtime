@@ -34,5 +34,11 @@
 # CMake files
 build/
 
+# Extern build files
+extern/lib
+extern/src
+extern/tmp
+
 # ignore mac BS file
 .DS_Store
+

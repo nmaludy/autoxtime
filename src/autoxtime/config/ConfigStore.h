@@ -1,6 +1,9 @@
 #ifndef AUTOXTIME_CONFIG_CONFIGSTORE
 #define AUTOXTIME_CONFIG_CONFIGSTORE
 
+#include <autoxtime.h>
+
+// Qt
 #include <QDebug>
 #include <QHash>
 #include <QObject>
@@ -8,6 +11,8 @@
 #include <QStringList>
 
 class QCommandLineParser;
+
+AUTOXTIME_NAMESPACE_BEG
 
 class ConfigStore : public QObject
 {
@@ -45,5 +50,7 @@ class ConfigStore : public QObject
   QCommandLineParser* mpParser;
   ConfigCliOptsMap mConfigCliMap;
 };
+
+AUTOXTIME_NAMESPACE_END
 
 #endif // AUTOXTIME_CONFIG_CONFIGSTORE

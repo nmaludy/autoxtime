@@ -1,0 +1,13 @@
+#ifndef AUTOXTIME_H
+#define AUTOXTIME_H
+
+#define AUTOXTIME_VERSION 1.0
+#define AUTOXTIME_VERSION_STR "AUTOXTIME_VERSION"
+
+#define AUTOXTIME_ORG_NAME "autoxtime"
+#define AUTOXTIME_ORG_DOMAIN "autoxtime.io"
+
+#define AUTOXTIME_NAMESPACE_BEG namespace autoxtime {
+#define AUTOXTIME_NAMESPACE_END }
+
+#endif // AUTOXTIME_H

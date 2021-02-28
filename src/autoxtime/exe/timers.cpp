@@ -1,10 +1,12 @@
+#include <autoxtime/codec/FarmtekCodec.h>
+#include <autoxtime/config/ConfigStore.h>
+#include <autoxtime/transport/SerialPortAsyncReader.h>
+
+// Qt
 #include <QCoreApplication>
 #include <QCommandLineParser>
 #include <QHash>
 #include <QSerialPortInfo>
-#include "autoxtime/codec/FarmtekCodec.h"
-#include "autoxtime/config/ConfigStore.h"
-#include "autoxtime/transport/SerialPortAsyncReader.h"
 
 
 void initCliParser(QCommandLineParser& parser) {
@@ -24,10 +26,10 @@ void initCliParser(QCommandLineParser& parser) {
 int main(int argc, char *argv[])
 {
   QCoreApplication app(argc, argv);
-  QCoreApplication::setOrganizationName("autoxtime");
-  QCoreApplication::setOrganizationDomain("autoxtime.io");
+  QCoreApplication::setOrganizationName(AUTOXTIME_ORG_NAME);
+  QCoreApplication::setOrganizationDomain(AUTOXTIME_ORG_DOMAIN);
   QCoreApplication::setApplicationName("autoxtime_timers");
-  QCoreApplication::setApplicationVersion("1.0");
+  QCoreApplication::setApplicationVersion(AUTOXTIME_VERSION_STR);
   
   // Process the actual command line arguments given by the user
   QCommandLineParser parser;
@@ -47,9 +49,9 @@ int main(int argc, char *argv[])
   // initialize our config with our parser and our map before initializing any other
   // classes, this way other classes can just call ConfigStore::instance().value()
   // and get what they are after
-  ConfigStore::init(parser.value("config"), &parser, config_cli_map);
+  autoxtime::ConfigStore::init(parser.value("config"), &parser, config_cli_map);
 
-  SerialPortAsyncReader serialPortReader(QString(), &app);
-  FarmtekCodec farmtekCodec(&serialPortReader, &app);
+  autoxtime::SerialPortAsyncReader serialPortReader(QString(), &app);
+  autoxtime::FarmtekCodec farmtekCodec(&serialPortReader, &app);
   return app.exec();  
 }

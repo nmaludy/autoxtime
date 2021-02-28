@@ -1,7 +1,12 @@
 #ifndef AUTOXTIME_CODEC_FARMTEKCODEC
 #define AUTOXTIME_CODEC_FARMTEKCODEC
 
+#include <autoxtime.h>
+
+// Qt
 #include <QObject>
+
+AUTOXTIME_NAMESPACE_BEG
 
 class ITransport;
 
@@ -19,5 +24,7 @@ class FarmtekCodec : public QObject
   ITransport* mpTransport;
   QByteArray mDataBuffer;
 };
+
+AUTOXTIME_NAMESPACE_END
 
 #endif // AUTOXTIME_CODEC_FARMTEKCODEC

@@ -1,6 +1,10 @@
-#include "autoxtime/config/ConfigStore.h"
+#include <autoxtime/config/ConfigStore.h>
+
+// Qt
 #include <QCommandLineParser>
 #include <QDebug>
+
+AUTOXTIME_NAMESPACE_BEG
 
 ConfigStore::ConfigStore(const QString& filePath,
                          QCommandLineParser* pParser,
@@ -67,3 +71,5 @@ void ConfigStore::setValue(const QString& key,
   ConfigStore::init().mSettings.setValue(key, value);
   ConfigStore::init().mSettings.sync(); // save changes to disk
 }
+
+AUTOXTIME_NAMESPACE_END
