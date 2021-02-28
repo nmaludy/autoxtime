@@ -22,10 +22,12 @@ jobs:
             qt_version: '5.12.2'
           - os: ubuntu-latest
             qt_version: '5.12.2'
+            apt_packages: 'mesa-common-dev libglu1-mesa-dev'
             compiler_c: gcc
             compiler_cpp: c++
           - os: ubuntu-latest
             qt_version: '5.12.2'
+            apt_packages: 'mesa-common-dev libglu1-mesa-dev'
             compiler_c: clang
             compiler_cpp: clang++
     env:
@@ -47,6 +49,10 @@ jobs:
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
           setup-python: '${{ !steps.cache-qt.outputs.cache-hit }}'
           install-deps: '${{ !steps.cache-qt.outputs.cache-hit }}'
+      - name: Install packages required for testing
+        if: ${{ matrix.apt_packages }}
+        run: |
+          sudo apt-get -y install ${{ matrix.apt_packages }}
       - name: CMake Setup
         run: |
           cmake -S . -B build

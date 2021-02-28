@@ -1,9 +1,10 @@
-#include "autoxtime/codec/FarmtekCodec.h"
+#include <autoxtime/codec/FarmtekCodec.h>
+#include <autoxtime/transport/ITransport.h>
 
-#include "autoxtime/transport/ITransport.h"
-
+// Qt
 #include <QDebug>
 
+AUTOXTIME_NAMESPACE_BEG
 
 // 13 byte fixed format message
 // First character is either B or R (although some modes of the Polaris unit may also give you a S and F, Start finish)
@@ -72,3 +73,5 @@ void FarmtekCodec::handleDataRead(const QByteArray& data)
   }
     
 }
+
+AUTOXTIME_NAMESPACE_END

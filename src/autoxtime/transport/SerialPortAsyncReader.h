@@ -1,11 +1,14 @@
 #ifndef AUTOXTIME_TRANSPORT_SERIALPORTASYNCREADER
 #define AUTOXTIME_TRANSPORT_SERIALPORTASYNCREADER
 
+#include <autoxtime.h>
+#include <autoxtime/transport/ITransport.h>
+
 #include <QSerialPortInfo>
 #include <QSerialPort>
 #include <QTimer>
 
-#include "autoxtime/transport/ITransport.h"
+AUTOXTIME_NAMESPACE_BEG
 
 class SerialPortAsyncReader : public ITransport
 {
@@ -27,5 +30,7 @@ class SerialPortAsyncReader : public ITransport
   QSerialPort mSerialPort;
   QTimer mTimer;
 };
+
+AUTOXTIME_NAMESPACE_END
 
 #endif // AUTOXTIME_TRANSPORT_SERIALPORTASYNCREADER

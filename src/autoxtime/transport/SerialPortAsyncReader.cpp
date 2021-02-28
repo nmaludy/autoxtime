@@ -1,12 +1,14 @@
-#include "autoxtime/transport/SerialPortAsyncReader.h"
+#include <autoxtime/transport/SerialPortAsyncReader.h>
 
 // autoxtime
-#include "autoxtime/config/ConfigStore.h"
+#include <autoxtime/config/ConfigStore.h>
 
 // other
 #include <iostream>
 #include <QMetaEnum>
 #include <QDebug>
+
+AUTOXTIME_NAMESPACE_BEG
 
 SerialPortAsyncReader::SerialPortAsyncReader(const QString& portName,
                                              QObject* pParent)
@@ -153,3 +155,5 @@ void SerialPortAsyncReader::handleError(QSerialPort::SerialPortError serialPortE
     resetError();
   }
 }
+
+AUTOXTIME_NAMESPACE_END
