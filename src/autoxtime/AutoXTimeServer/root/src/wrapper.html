@@ -1,0 +1,29 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <title>{{ template }}</title>
+    <link rel="stylesheet" href="/static/css/main.css" />
+  </head>
+  <body>
+    <div id="navigationbar">
+      <ul>
+          <li><a href="/" title="Cutelyst Welcome Page">Home</a></li>
+          <li class="dropdown">
+              <a href="javascript:void(0)" class="dropbtn">Driver</a>
+              <div class="dropdown-content">
+                <a href="/driver/find">Find</a>
+                <a href="/driver/list">List</a>
+                <a href="/driver/form_create">New</a>
+              </div>
+          </li>
+      </ul>
+    </div>
+    <div id="content">
+      {% comment %} Status and error messages {% endcomment %}
+        <span class="message">{{ status_msg }}{{ c.request.queryParams.status_msg|escape }}</span>
+        <span class="error">{{ error_msg }}</span>
+      {% comment %} This is where Grantlee will stick all of your template's contents.{% endcomment %}
+      {{ content }}
+    </div>
+    <div id="footer">Copyright © 2021 AutoXTime. All rights reserved.</div>
+  </body>
+</html>

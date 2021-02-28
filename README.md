@@ -30,3 +30,51 @@ sudo yum install libxcb libxcb-devel xcb-util xcb-util-devel mesa-libGL-devel li
 make -j`nproc`
 sudo make install
 ```
+
+
+#cutelsyst notes:
+
+```shell
+# Compiling c++
+cmake .. -G "MinGW Makefiles" "-DCMAKE_PREFIX_PATH=C:\Users\bradl\Qt\5.15.2\mingw81_64\bin"
+cmake --build .
+cmake --build . --target install
+
+# Programs
+https://github.com/cutelyst/asql
+https://github.com/cutelyst/cutelyst
+https://github.com/cutelyst/cutelyst/wiki/Installing-Cutelyst
+https://github.com/cutelyst/simple-mail
+https://github.com/steveire/grantlee
+https://github.com/cutelyst/cutelee
+
+# Tutorial
+https://github.com/cutelyst/cutelyst-tutorial/tree/master/Hello
+https://github.com/cutelyst/cutelyst/wiki/Tutorial_02_CutelystBasics
+https://doc.qt.io/qtvstools/qtvstools-getting-started.html
+
+# Cutelyst
+## compile
+cmake .. -G "MinGW Makefiles" "-DCMAKE_PREFIX_PATH=C:\Users\bradl\Qt\5.15.2\mingw81_64\bin" -DPLUGIN_VIEW_GRANTLEE=on
+cmake --build . --config Release
+cmake --build . --target install --config Release
+
+## New app
+cutelyst2 --create-app AutoXTimeServer
+### First time compile
+cmake .. -G "MinGW Makefiles" "-DCMAKE_PREFIX_PATH=C:\Users\bradl\Qt\5.15.2\mingw81_64\bin"
+
+## Add new controller
+cutelyst2 --controller Login
+
+## start server
+cutelyst2 -r --server --app-file src/libAutoXTimeServer -- --chdir ..
+
+## compile application (just updating files)
+make
+
+## If we add new components like a new controller, etc.
+## We need to rebuild then compile
+cmake ..
+make
+```
