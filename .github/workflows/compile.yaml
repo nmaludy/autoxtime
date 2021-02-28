@@ -22,12 +22,16 @@ jobs:
             qt_version: '5.12.2'
           - os: ubuntu-latest
             qt_version: '5.12.2'
-            apt_packages: 'mesa-common-dev libglu1-mesa-dev'
+            apt_packages: >-
+             mesa-common-dev libglu1-mesa-dev
+             uwsgi uuid-dev libcap-dev libzmq3-dev libpwquality-dev libmemcached-dev libjemalloc-dev
             compiler_c: gcc
             compiler_cpp: c++
           - os: ubuntu-latest
             qt_version: '5.12.2'
-            apt_packages: 'mesa-common-dev libglu1-mesa-dev'
+            apt_packages: >-
+             mesa-common-dev libglu1-mesa-dev
+             uwsgi uuid-dev libcap-dev libzmq3-dev libpwquality-dev libmemcached-dev libjemalloc-dev
             compiler_c: clang
             compiler_cpp: clang++
     env:

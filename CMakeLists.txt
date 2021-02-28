@@ -28,6 +28,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 # find the Qt 5 installation and include it
+# need to set this BEFORE including externs
 file(GLOB QT_DIR_LIST "/usr/local/Qt-5.*" )
 list(APPEND CMAKE_PREFIX_PATH ${QT_DIR_LIST})
 

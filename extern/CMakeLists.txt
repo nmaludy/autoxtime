@@ -26,6 +26,21 @@ ExternalProject_Add(extern_rapidcsv
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${PROJECT_EXTERN_DIR} -DBUILD_TESTS=OFF -DBUILD_SHARED=ON -DWITH_DOCS=OFF
 )
 
+ExternalProject_Add(extern_grantlee
+  PREFIX ${PROJECT_EXTERN_DIR}
+  GIT_REPOSITORY "https://github.com/steveire/grantlee.git"
+  GIT_TAG "v5.2.0"
+  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${PROJECT_EXTERN_DIR} -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH} -DBUILD_TESTS=off
+)
+
+ExternalProject_Add(extern_cutelyst
+  PREFIX ${PROJECT_EXTERN_DIR}
+  GIT_REPOSITORY "https://github.com/cutelyst/cutelyst.git"
+  GIT_TAG "v2.14.2"
+  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${PROJECT_EXTERN_DIR} -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH} -DPLUGIN_VIEW_GRANTLEE=on -DPLUGIN_VIEW_CLEARSILVER=off  -DPLUGIN_VIEW_EMAIL=off
+  )
+ExternalProject_Add_StepDependencies(extern_cutelyst build extern_grantlee)
+
 # # ASIO is header-only, so there's no build command here
 # # ASIO uses autotools for configuring/building
 # ExternalProject_Add(extern_asio
