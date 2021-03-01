@@ -35,6 +35,10 @@ list(APPEND CMAKE_PREFIX_PATH ${QT_DIR_LIST})
 # AutoXTime Variables
 set(PROJECT_EXTERN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/extern")
 
+# allows find_package to find all of our libraries (cmake specifically) in
+# the extern/ directory
+list(APPEND CMAKE_PREFIX_PATH ${PROJECT_EXTERN_DIR})
+
 ###########
 # Testing
 if(${TEST_NAME})

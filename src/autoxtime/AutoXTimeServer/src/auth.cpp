@@ -2,6 +2,7 @@
 
 using namespace Cutelyst;
 
+
 Auth::Auth(QObject *parent) : Controller(parent)
 {
 }
@@ -14,4 +15,3 @@ void Auth::index(Context *c)
 {
     c->response()->body() = "Matched Controller::Auth in Auth.";
 }
-

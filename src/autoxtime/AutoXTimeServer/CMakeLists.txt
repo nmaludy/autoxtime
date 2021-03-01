@@ -1,5 +1,7 @@
 project(AutoXTimeServer)
 
+message(STATUS "autoxtimeserver CMAKE_PREFIX_PATH = ${CMAKE_PREFIX_PATH}")
+
 cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
 if (POLICY CMP0043)
   cmake_policy(SET CMP0043 NEW)
@@ -11,9 +13,6 @@ if(WIN32)
     add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
   endif()
 endif()
-
-find_package(Qt5 COMPONENTS Core Network Sql REQUIRED)
-find_package(Cutelyst2Qt5 REQUIRED)
 
 # Auto generate moc files
 set(CMAKE_AUTOMOC ON)

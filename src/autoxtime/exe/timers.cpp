@@ -9,7 +9,8 @@
 #include <QSerialPortInfo>
 
 
-void initCliParser(QCommandLineParser& parser) {
+void initCliParser(QCommandLineParser& parser)
+{
   parser.setApplicationDescription("Reads data from timers (serial) and sends it to the server");
   parser.addHelpOption();
   parser.addVersionOption();

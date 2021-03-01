@@ -41,6 +41,8 @@ ExternalProject_Add(extern_cutelyst
   )
 ExternalProject_Add_StepDependencies(extern_cutelyst build extern_grantlee)
 
+
+message(STATUS "CMAKE_MODULE_PATH = ${CMAKE_MODULE_PATH}")
 # # ASIO is header-only, so there's no build command here
 # # ASIO uses autotools for configuring/building
 # ExternalProject_Add(extern_asio
