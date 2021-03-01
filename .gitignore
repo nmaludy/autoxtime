@@ -35,8 +35,12 @@
 build/
 
 # Extern build files
+extern/bin
+extern/include
 extern/lib
+extern/lib64
 extern/src
+extern/share
 extern/tmp
 
 # ignore mac BS file
