@@ -166,14 +166,14 @@ void Driver::find(Context *c)
 void Driver::find_do(Context *c)
 {
     // Retrieve the values from the form
-    QString first_name = c->request()->bodyParam("first_name");
-    QString last_name = c->request()->bodyParam("last_name", "");
-    QString email = c->request()->bodyParam("email", "");
-    QString phone_number = c->request()->bodyParam("phone_number", "");
+    QString first_name = QString("\%%1\%").arg(c->request()->bodyParam("first_name"));
+    QString last_name = QString("\%%1\%").arg(c->request()->bodyParam("last_name"));
+    QString email = QString("\%%1\%").arg(c->request()->bodyParam("email"));
+    QString phone_number = QString("\%%1\%").arg(c->request()->bodyParam("phone_number"));
     QString msr_id = c->request()->bodyParam("msr_id", "");
     QString scca_id = c->request()->bodyParam("scca_id", "");
 
-    QSqlQuery query = CPreparedSqlQueryThreadForDB("SELECT * FROM driver WHERE first_name = :first_name AND last_name = :last_name AND email = :email AND phone_number = :phone_number AND msr_id = :msr_id AND scca_id = :scca_id", "AutoXTimeDB");
+    QSqlQuery query = CPreparedSqlQueryThreadForDB("SELECT * FROM driver WHERE first_name ILIKE :first_name OR last_name ILIKE :last_name OR email ILIKE :email OR phone_number ILIKE :phone_number OR msr_id = :msr_id OR scca_id = :scca_id", "AutoXTimeDB");
 
     query.bindValue(":first_name", first_name);
     query.bindValue(":last_name", last_name);
@@ -195,10 +195,8 @@ void Driver::find_do(Context *c)
                               {"status_msg", "Could not find Driver with the information provided!" }
                           }));
         } else {
-            c->stash({
-               {"drivers", Sql::queryToHashList(query)},
-               {"template", "driver/list.html"}
-            });
+            c->setStash("drivers", Sql::queryToHashList(query));
+            c->response()->redirect(c->uriFor(CActionFor("list")));
         }
     } else {
         // Set an error message to be displayed at the top of the view
