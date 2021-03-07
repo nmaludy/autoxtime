@@ -1,3 +1,5 @@
+message("autoxtime_EXTERNAL_PREFIX = ${autoxtime_EXTERNAL_PREFIX}")
+
 ExternalProject_Add(external_rapidcsv
   PREFIX ${autoxtime_EXTERNAL_PREFIX}
   INSTALL_DIR ${autoxtime_INSTALL_PREFIX}

@@ -1,7 +1,7 @@
 #ifndef AUTOXTIME_TRANSPORT_MOTORSPORTSREGREADER
 #define AUTOXTIME_TRANSPORT_MOTORSPORTSREGREADER
 
-#include <autoxtime.h>
+#include <autoxtime/autoxtime.h>
 #include <autoxtime/transport/ITransport.h>
 
 AUTOXTIME_NAMESPACE_BEG

@@ -1,3 +1,4 @@
+#include <autoxtime/autoxtime.h>
 #include <autoxtime/codec/FarmtekCodec.h>
 #include <autoxtime/config/ConfigStore.h>
 #include <autoxtime/transport/SerialPortAsyncReader.h>

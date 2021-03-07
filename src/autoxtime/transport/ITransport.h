@@ -1,7 +1,7 @@
 #ifndef AUTOXTIME_TRANSPORT_ITRANSPORT
 #define AUTOXTIME_TRANSPORT_ITRANSPORT
 
-#include <autoxtime.h>
+#include <autoxtime/autoxtime.h>
 #include <QByteArray>
 #include <QList>
 #include <QObject>

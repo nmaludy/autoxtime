@@ -1,7 +1,7 @@
 #ifndef AUTOXTIME_CONFIG_CONFIGSTORE
 #define AUTOXTIME_CONFIG_CONFIGSTORE
 
-#include <autoxtime.h>
+#include <autoxtime/autoxtime.h>
 
 // Qt
 #include <QDebug>

@@ -1,4 +1,4 @@
-#include <autoxtime.h>
+#include <autoxtime/autoxtime.h>
 #include <autoxtime/ui/MainWindow.h>
 #include <autoxtime/config/ConfigStore.h>
 #include <autoxtime/transport/MotorSportsRegReader.h>
