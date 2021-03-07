@@ -60,7 +60,7 @@ jobs:
           key: ${{ runner.os }}-QtCache-${{ matrix.qt_version }}
       - name: Cache External Cutelyst
         id: cache-external-cutelyst
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: |
             build/external-prefix/src/external_cutelyst
@@ -69,7 +69,7 @@ jobs:
           key: ${{ runner.os }}-external-cutelyst-${{ hashFiles('cmake/external_cutelyst.cmake') }}
       - name: Cache External Grantlee
         id: cache-external-grantlee
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: |
             build/external-prefix/src/external_grantlee
@@ -78,7 +78,7 @@ jobs:
           key: ${{ runner.os }}-external-grantlee-${{ hashFiles('cmake/external_grantlee.cmake') }}
       - name: Cache External Rapidcsv
         id: cache-external-rapidcsv
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: |
             build/external-prefix/src/external_rapidcsv
@@ -123,7 +123,7 @@ jobs:
           key: ${{ runner.os }}-QtCache-${{ matrix.qt_version }}
       - name: Cache External Cutelyst
         id: cache-external-cutelyst
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: |
             build/external-prefix/src/external_cutelyst
@@ -132,7 +132,7 @@ jobs:
           key: ${{ runner.os }}-external-cutelyst-${{ hashFiles('cmake/external_cutelyst.cmake') }}
       - name: Cache External Grantlee
         id: cache-external-grantlee
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: |
             build/external-prefix/src/external_grantlee
@@ -141,7 +141,7 @@ jobs:
           key: ${{ runner.os }}-external-grantlee-${{ hashFiles('cmake/external_grantlee.cmake') }}
       - name: Cache External Rapidcsv
         id: cache-external-rapidcsv
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: |
             build/external-prefix/src/external_rapidcsv
