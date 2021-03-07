@@ -11,8 +11,8 @@ set(AutoXTimeServer_SRCS
 # Create the application
 add_library(AutoXTimeServer SHARED ${AutoXTimeServer_SRCS})
 
-add_dependencies(AutoXTimeServer extern_cutelyst)
 find_package(Qt5 COMPONENTS Core Network Sql REQUIRED)
+# not needed because its externalized and already added to our build path
 find_package(Cutelyst2Qt5 REQUIRED)
 
 # Link to Cutelyst
@@ -27,7 +27,3 @@ target_link_libraries(AutoXTimeServer
     Qt5::Network
     Qt5::Sql
 )
-
-
-
-

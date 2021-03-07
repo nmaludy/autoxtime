@@ -5,7 +5,10 @@ project(autoxtime
   VERSION 1.0
   DESCRIPTION "AutoX Timing System"
   LANGUAGES CXX)
-
+set(autoxtime_INSTALL_PREFIX "${autoxtime_BINARY_DIR}/prefix")
+set(autoxtime_EXTERNAL_PREFIX "${autoxtime_BINARY_DIR}/external")
+list(APPEND CMAKE_PREFIX_PATH ${autoxtime_INSTALL_PREFIX})
+  
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -22,6 +25,10 @@ set(CMAKE_BUILD_TYPE Release)
 
 # put all executables in the build/ directory root rather than in src/
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake"
+  ${CMAKE_MODULE_PATH})
+option(BUILD_SHARED_LIBS "Build libraries as SHARED" ON)
+
 
 # Qt things
 set(CMAKE_AUTOMOC ON)
@@ -30,14 +37,16 @@ set(CMAKE_AUTOUIC ON)
 # find the Qt 5 installation and include it
 # need to set this BEFORE including externs
 file(GLOB QT_DIR_LIST "/usr/local/Qt-5.*" )
+message(STATUS "QT_DIR_LIST= '${QT_DIR_LIST}'")
 list(APPEND CMAKE_PREFIX_PATH ${QT_DIR_LIST})
 
-# AutoXTime Variables
-set(PROJECT_EXTERN_DIR "${CMAKE_CURRENT_SOURCE_DIR}/extern")
-
-# allows find_package to find all of our libraries (cmake specifically) in
-# the extern/ directory
-list(APPEND CMAKE_PREFIX_PATH ${PROJECT_EXTERN_DIR})
+# Setup directorie so sub-projects work
+# https://stackoverflow.com/questions/45414507/pass-a-list-of-prefix-paths-to-externalproject-add-in-cmake-args
+string(REPLACE ";" "|" CMAKE_PREFIX_PATH_ALT_SEP "${CMAKE_PREFIX_PATH}")
+set(autoxtime_DEFAULT_ARGS
+  "-DBUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}"
+  "-DCMAKE_PREFIX_PATH:PATH=${CMAKE_PREFIX_PATH_ALT_SEP}"
+  "-DCMAKE_INSTALL_PREFIX:PATH=${autoxtime_INSTALL_PREFIX}")
 
 ###########
 # Testing
@@ -54,7 +63,14 @@ if(${TEST_NAME})
 endif()
 
 # Add any targets in our source directories
-add_subdirectory(extern)
+include(ExternalProject)
+
+# our includes
+include(external_rapidcsv)
+include(external_grantlee)
+include(external_cutelyst)
+
+# TODO convert our directory into an external project
 add_subdirectory(src)
 
 
