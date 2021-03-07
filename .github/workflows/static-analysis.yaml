@@ -58,33 +58,13 @@ jobs:
         with:
           path: ../Qt
           key: ${{ runner.os }}-QtCache-${{ matrix.qt_version }}
-      - name: Cache External Cutelyst
+      - name: Cache External Builds
         id: cache-external-cutelyst
         uses: actions/cache@v2
         with:
           path: |
-            build/external-prefix/src/external_cutelyst
-            build/external-prefix/src/external_cutelyst-build
-            build/external-prefix/src/external_cutelyst-stamp
-          key: ${{ runner.os }}-external-cutelyst-${{ hashFiles('cmake/external_cutelyst.cmake') }}
-      - name: Cache External Grantlee
-        id: cache-external-grantlee
-        uses: actions/cache@v2
-        with:
-          path: |
-            build/external-prefix/src/external_grantlee
-            build/external-prefix/src/external_grantlee-build
-            build/external-prefix/src/external_grantlee-stamp
-          key: ${{ runner.os }}-external-grantlee-${{ hashFiles('cmake/external_grantlee.cmake') }}
-      - name: Cache External Rapidcsv
-        id: cache-external-rapidcsv
-        uses: actions/cache@v2
-        with:
-          path: |
-            build/external-prefix/src/external_rapidcsv
-            build/external-prefix/src/external_rapidcsv-build
-            build/external-prefix/src/external_rapidcsv-stamp
-          key: ${{ runner.os }}-external-rapidcsv-${{ hashFiles('cmake/external_rapidcsv.cmake') }}
+            build/external-prefix
+          key: ${{ runner.os }}-external-cutelyst-${{ hashFiles('cmake/*.cmake') }}
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
@@ -121,33 +101,13 @@ jobs:
         with:
           path: ../Qt
           key: ${{ runner.os }}-QtCache-${{ matrix.qt_version }}
-      - name: Cache External Cutelyst
+      - name: Cache External Builds
         id: cache-external-cutelyst
         uses: actions/cache@v2
         with:
           path: |
-            build/external-prefix/src/external_cutelyst
-            build/external-prefix/src/external_cutelyst-build
-            build/external-prefix/src/external_cutelyst-stamp
-          key: ${{ runner.os }}-external-cutelyst-${{ hashFiles('cmake/external_cutelyst.cmake') }}
-      - name: Cache External Grantlee
-        id: cache-external-grantlee
-        uses: actions/cache@v2
-        with:
-          path: |
-            build/external-prefix/src/external_grantlee
-            build/external-prefix/src/external_grantlee-build
-            build/external-prefix/src/external_grantlee-stamp
-          key: ${{ runner.os }}-external-grantlee-${{ hashFiles('cmake/external_grantlee.cmake') }}
-      - name: Cache External Rapidcsv
-        id: cache-external-rapidcsv
-        uses: actions/cache@v2
-        with:
-          path: |
-            build/external-prefix/src/external_rapidcsv
-            build/external-prefix/src/external_rapidcsv-build
-            build/external-prefix/src/external_rapidcsv-stamp
-          key: ${{ runner.os }}-external-rapidcsv-${{ hashFiles('cmake/external_rapidcsv.cmake') }}
+            build/external-prefix
+          key: ${{ runner.os }}-external-cutelyst-${{ hashFiles('cmake/*.cmake') }}
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
