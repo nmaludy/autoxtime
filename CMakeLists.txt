@@ -22,6 +22,9 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 # to always look for includes there:
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+# Windows bullshit
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
 # setup shared lib builds
 option(BUILD_SHARED_LIBS "Build libraries as SHARED" ON)
 
