@@ -78,27 +78,13 @@ target_link_libraries(${PROJECT_NAME}_ui Qt5::Widgets)
 
 ########################
 # Server
-add_subdirectory(autoxtime/AutoXTimeServer)
-
-# ########################
-# # Server
-# include(ExternalProject)
-
-# set(_source "${CMAKE_CURRENT_SOURCE_DIR}/autoxtime/AutoXTimeServer")
-# set(_build "${CMAKE_CURRENT_BINARY_DIR}/autoxtime/AutoXTimeServer")
-# set(_install "${CMAKE_CURRENT_BINARY_DIR}/prefix")
-
-# message(STATUS "CMAKE_PREFIX_PATH= '${CMAKE_PREFIX_PATH}'")
-
-# # https://stackoverflow.com/questions/45414507/pass-a-list-of-prefix-paths-to-externalproject-add-in-cmake-args
-# string(REPLACE ";" "|" CMAKE_PREFIX_PATH_ALT_SEP "${CMAKE_PREFIX_PATH}")
-
-# ExternalProject_Add(AutoXTimeServer
-#   SOURCE_DIR ${_source}
-#   BINARY_DIR ${_build}
-#   INSTALL_DIR ${_install}
-#   INSTALL_COMMAND ""
-#   LIST_SEPARATOR | # Use the alternate list separator
-#   CMAKE_ARGS -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH_ALT_SEP} -DINCLUDE_DIRECTORIES=${INCLUDE_DIRECTORIES} -DLINK_DIRECTORIES=${LINK_DIRECTORIES}
-#   DEPENDS extern_grantlee extern_grantlee
-# )
+include(ExternalProject)
+ExternalProject_Add(AutoXTimeServer
+  SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/autoxtime/AutoXTimeServer"
+  PREFIX ${autoxtime_AUTOXTIME_PREFIX}
+  INSTALL_DIR ${autoxtime_INSTALL_PREFIX}
+  LIST_SEPARATOR "|"
+  CMAKE_ARGS ${autoxtime_DEFAULT_ARGS}
+)
+ExternalProject_Add_StepDependencies(AutoXTimeServer build external_grantlee)
+ExternalProject_Add_StepDependencies(AutoXTimeServer build external_cutelyst)

@@ -5,8 +5,9 @@ project(autoxtime
   VERSION 1.0
   DESCRIPTION "AutoX Timing System"
   LANGUAGES CXX)
-set(autoxtime_INSTALL_PREFIX "${autoxtime_BINARY_DIR}/prefix")
-set(autoxtime_EXTERNAL_PREFIX "${autoxtime_BINARY_DIR}/external")
+set(autoxtime_INSTALL_PREFIX "${autoxtime_BINARY_DIR}/install-prefix")
+set(autoxtime_AUTOXTIME_PREFIX "${autoxtime_BINARY_DIR}/autoxtime-prefix")
+set(autoxtime_EXTERNAL_PREFIX "${autoxtime_BINARY_DIR}/external-prefix")
 list(APPEND CMAKE_PREFIX_PATH ${autoxtime_INSTALL_PREFIX})
   
 # specify the C++ standard
@@ -38,6 +39,8 @@ set(CMAKE_AUTOUIC ON)
 # need to set this BEFORE including externs
 file(GLOB QT_DIR_LIST "/usr/local/Qt-5.*" )
 message(STATUS "QT_DIR_LIST= '${QT_DIR_LIST}'")
+# append QT directory that we found to CMAKE_PREFIX_PATH so that our sub-modules and external
+# projects get it passed in on the CMake arguments (below)
 list(APPEND CMAKE_PREFIX_PATH ${QT_DIR_LIST})
 
 # Setup directorie so sub-projects work

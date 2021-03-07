@@ -26,4 +26,10 @@ target_link_libraries(AutoXTimeServer
     Qt5::Core
     Qt5::Network
     Qt5::Sql
+    )
+
+install(TARGETS AutoXTimeServer
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib64
+  ARCHIVE DESTINATION lib64
 )
