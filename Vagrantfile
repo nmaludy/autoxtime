@@ -13,8 +13,8 @@
 #   - Start vagrant VM
 #       vagrant up
 ##
-#   - Login to vagrant VM
-#       vagrant ssh
+#   - Login to vagrant VM with RDP (on Linux, under the hood runs xfreerdp)
+#       vagrant rdp -- /cert-ignore
 #
 #   - Destroy VM
 #       vagrant destroy -f
