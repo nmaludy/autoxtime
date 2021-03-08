@@ -89,6 +89,13 @@ jobs:
         # windows specific
       - name: Setup MSYS/MinGW
         uses: msys2/setup-msys2@v2
+        with:
+          msystem: MSYS
+          install: >-
+            git
+            base-devel
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
       - name: Cache Qt
         id: cache-qt
         uses: actions/cache@v2
