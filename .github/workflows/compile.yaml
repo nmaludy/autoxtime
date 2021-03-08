@@ -97,12 +97,7 @@ jobs:
             base-devel
             mingw-w64-x86_64-gcc
             mingw-w64-x86_64-cmake
-      - name: Cache Qt
-        id: cache-qt
-        uses: actions/cache@v2
-        with:
-          path: ../Qt
-          key: ${{ runner.os }}-QtCache-${{ matrix.qt_version }}
+            mingw-w64-x86_64-qt5
       - name: Cache External Builds
         id: cache-external-cutelyst
         uses: actions/cache@v2
