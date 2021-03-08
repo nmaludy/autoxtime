@@ -105,13 +105,6 @@ jobs:
           path: |
             build/external-prefix
           key: ${{ runner.os }}-external-cutelyst-${{ hashFiles('cmake/*.cmake') }}
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v2
-        with:
-          version: ${{ matrix.qt_version }}
-          cached: ${{ steps.cache-qt.outputs.cache-hit }}
-          setup-python: '${{ !steps.cache-qt.outputs.cache-hit }}'
-          install-deps: '${{ !steps.cache-qt.outputs.cache-hit }}'
       - name: CMake Setup
         shell: msys2 {0}
         run: |
