@@ -1,7 +1,7 @@
 #ifndef AUTOXTIME_CODEC_FARMTEKCODEC
 #define AUTOXTIME_CODEC_FARMTEKCODEC
 
-#include <autoxtime.h>
+#include <autoxtime/autoxtime.h>
 
 // Qt
 #include <QObject>

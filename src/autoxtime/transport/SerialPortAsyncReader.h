@@ -1,7 +1,7 @@
 #ifndef AUTOXTIME_TRANSPORT_SERIALPORTASYNCREADER
 #define AUTOXTIME_TRANSPORT_SERIALPORTASYNCREADER
 
-#include <autoxtime.h>
+#include <autoxtime/autoxtime.h>
 #include <autoxtime/transport/ITransport.h>
 
 #include <QSerialPortInfo>

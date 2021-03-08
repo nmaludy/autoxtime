@@ -1,7 +1,7 @@
 #ifndef AUTOXTIME_UI_MAINWINDOW
 #define AUTOXTIME_UI_MAINWINDOW
 
-#include <autoxtime.h>
+#include <autoxtime/autoxtime.h>
 #include <QMainWindow>
 
 AUTOXTIME_NAMESPACE_BEG

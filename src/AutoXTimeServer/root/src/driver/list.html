@@ -1,0 +1,26 @@
+<table id="autoxtable">
+<tr>
+  <th>First Name</th>
+  <th>Last Name</th>
+  <th>Email</th>
+  <th>PhoneNumber</th>
+  <th>MSR #</th>
+  <th>SCCA #</th>
+</tr>
+{% for driver in drivers %}
+  <tr onclick="document.location='/driver/{{ driver.driver_id }}/driver_get'">
+    <td>{{ driver.first_name }}</td>
+    <td>{{ driver.last_name }}</td>
+    <td>{{ driver.email }}</td>
+    <td>{{ driver.phone_number }}</td>
+    <td>{{ driver.msr_id }}</td>
+    <td>{{ driver.scca_id }}</td>
+    <!--
+    <td>
+      {% comment %} Add a link to delete a book {% endcomment %}
+      <a href="/books/id/{{ book.id }}/delete">Delete</a>
+    </td>
+    -->
+  </tr>
+{% endfor %}
+</table>

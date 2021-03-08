@@ -1,4 +1,4 @@
-#include <autoxtime.h>
+#include <autoxtime/autoxtime.h>
 #include <autoxtime/ui/MainWindow.h>
 #include <autoxtime/config/ConfigStore.h>
 #include <autoxtime/transport/MotorSportsRegReader.h>
@@ -36,10 +36,10 @@ int main(int argc, char *argv[])
   // and get what they are after
   autoxtime::ConfigStore::init(parser.value("config"), &parser);
 
-  // autoxtime::MainWindow w;
-  // w.show();
+  autoxtime::MainWindow w;
+  w.show();
 
-  autoxtime::MotorSportsRegReader reader;
-  reader.readFile("");
+  //autoxtime::MotorSportsRegReader reader;
+  // reader.readFile("");
   return app.exec();  
 }

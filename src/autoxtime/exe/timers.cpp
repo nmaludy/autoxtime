@@ -1,3 +1,4 @@
+#include <autoxtime/autoxtime.h>
 #include <autoxtime/codec/FarmtekCodec.h>
 #include <autoxtime/config/ConfigStore.h>
 #include <autoxtime/transport/SerialPortAsyncReader.h>
@@ -9,7 +10,8 @@
 #include <QSerialPortInfo>
 
 
-void initCliParser(QCommandLineParser& parser) {
+void initCliParser(QCommandLineParser& parser)
+{
   parser.setApplicationDescription("Reads data from timers (serial) and sends it to the server");
   parser.addHelpOption();
   parser.addVersionOption();
