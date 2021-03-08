@@ -54,7 +54,7 @@ set(CMAKE_AUTOUIC ON)
 # need to set this BEFORE including externs
 if (WIN32)
   # hard coded here for github actions... annoying
-  set(QT_DIR_LIST "D:/a/_temp/msys/msys64/mingw64/lib/")
+  set(QT_DIR_LIST "D:/a/_temp/msys/msys64/mingw64")
 else ()
   file(GLOB QT_DIR_LIST "/usr/local/Qt-5.*" )
 endif()
