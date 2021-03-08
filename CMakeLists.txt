@@ -52,7 +52,12 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 # find the Qt 5 installation and include it
 # need to set this BEFORE including externs
-file(GLOB QT_DIR_LIST "/usr/local/Qt-5.*" )
+if (WIN32)
+  # hard coded here for github actions... annoying
+  set(QT_DIR_LIST "D:/a/_temp/msys/msys64/mingw64/lib/")
+else ()
+  file(GLOB QT_DIR_LIST "/usr/local/Qt-5.*" )
+endif()
 message(STATUS "QT_DIR_LIST= '${QT_DIR_LIST}'")
 
 # append QT directory that we found to CMAKE_PREFIX_PATH so that our sub-modules and external

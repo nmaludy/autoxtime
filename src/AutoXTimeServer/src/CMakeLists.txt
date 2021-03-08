@@ -31,7 +31,6 @@ target_link_libraries(AutoXTimeServer Qt5::Sql)
 target_link_libraries(AutoXTimeServer
   Cutelyst2Qt5
   Cutelyst2Qt5Authentication
-  Cutelyst2Qt5EventLoopEpoll
   Cutelyst2Qt5Session
   Cutelyst2Qt5StaticSimple
   Cutelyst2Qt5StatusMessage
@@ -43,6 +42,11 @@ target_link_libraries(AutoXTimeServer
   Cutelyst2Qt5ViewGrantlee
   Cutelyst2Qt5ViewJson
   Cutelyst2Qt5Wsgi)
+
+if (NOT WIN32)
+  target_link_libraries(AutoXTimeServer 
+    Cutelyst2Qt5EventLoopEpoll)
+endif()
 
 install(TARGETS AutoXTimeServer
   RUNTIME DESTINATION bin
