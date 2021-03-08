@@ -18,6 +18,11 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
+# if windows, use MSYS/MinGW... not visualstudio (PITA)
+if (WIN32)
+  set(CMAKE_GENERATOR "MSYS Makefiles")
+endif()
+
 # As moc files are generated in the binary dir, tell CMake
 # to always look for includes there:
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -57,6 +62,7 @@ list(APPEND CMAKE_PREFIX_PATH ${QT_DIR_LIST})
 # https://stackoverflow.com/questions/45414507/pass-a-list-of-prefix-paths-to-externalproject-add-in-cmake-args
 string(REPLACE ";" "|" CMAKE_PREFIX_PATH_ALT_SEP "${CMAKE_PREFIX_PATH}")
 set(autoxtime_DEFAULT_ARGS
+  -G ${CMAKE_GENERATOR}
   "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
   "-DBUILD_SHARED_LIBS:BOOL=${BUILD_SHARED_LIBS}"
   "-DCMAKE_PREFIX_PATH:PATH=${CMAKE_PREFIX_PATH_ALT_SEP}"

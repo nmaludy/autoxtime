@@ -18,8 +18,6 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: windows-latest
-            qt_version: '5.12.2'
           - os: ubuntu-latest
             qt_version: '5.12.2'
             apt_packages: >-
@@ -68,5 +66,54 @@ jobs:
         run: |
           cmake -S . -B build
       - name: Compile 
+        run: |
+          cmake --build build
+
+# TODO figure out how to consolidate
+  compile_windows:
+    name: 'compile - ${{ matrix.os }} - ${{ matrix.compiler_c }}'
+    runs-on: '${{ matrix.os }}'
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            qt_version: '5.12.2'
+            compiler_c: gcc
+            compiler_cpp: c++
+    env:
+      CC: '${{ matrix.compiler_c }}'
+      CXX: '${{ matrix.compiler_cpp }}'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        # windows specific
+      - name: Setup MSYS/MinGW
+        uses: msys2/setup-msys2@v2
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v2
+        with:
+          path: ../Qt
+          key: ${{ runner.os }}-QtCache-${{ matrix.qt_version }}
+      - name: Cache External Builds
+        id: cache-external-cutelyst
+        uses: actions/cache@v2
+        with:
+          path: |
+            build/external-prefix
+          key: ${{ runner.os }}-external-cutelyst-${{ hashFiles('cmake/*.cmake') }}
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: ${{ matrix.qt_version }}
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          setup-python: '${{ !steps.cache-qt.outputs.cache-hit }}'
+          install-deps: '${{ !steps.cache-qt.outputs.cache-hit }}'
+      - name: CMake Setup
+        shell: msys2 {0}
+        run: |
+          cmake -S . -B build -G "MSYS Makefiles"
+      - name: Compile
+        shell: msys2 {0}
         run: |
           cmake --build build
