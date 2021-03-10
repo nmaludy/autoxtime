@@ -52,9 +52,10 @@ bool AutoXTimeServer::init()
 bool AutoXTimeServer::postFork()
 {
     QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", Sql::databaseNameThread("AutoXTimeDB"));
+    // TODO make these configurable
     db.setDatabaseName("autoxtime");
-    db.setUserName("postgres");
-    db.setPassword("password");
+    db.setUserName("autoxtime");
+    db.setPassword("@ut0XTime++");
     db.setHostName("localhost");
     db.setPort(5432);
     if (!db.open()) {

@@ -1,0 +1,2 @@
+CREATE USER autoxtime WITH PASSWORD '@ut0XTime++';
+GRANT ALL PRIVILEGES ON DATABASE autoxtime TO autoxtime;

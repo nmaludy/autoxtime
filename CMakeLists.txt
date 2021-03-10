@@ -41,7 +41,7 @@ option(BUILD_SHARED_LIBS "Build libraries as SHARED" ON)
 
 # turn on debug builds
 # set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 # output our executables in the build/ directory
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
@@ -56,6 +56,9 @@ if (WIN32)
   if(DEFINED ENV{GITHUB_ACTIONS})
     # hard coded here for github actions... annoying
     set(QT_DIR_LIST "D:/a/_temp/msys/msys64/mingw64")
+  endif()
+
+  if(CMAKE_BUILD_TYPE STREQUAL Release)
   endif()
 else ()
   file(GLOB QT_DIR_LIST "/usr/local/Qt-5.*" )
