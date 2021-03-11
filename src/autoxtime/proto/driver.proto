@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package autoxtime.proto;
+
+message Driver {
+  int64 id = 1;
+  string first_name = 2;
+  string last_name = 3;
+  string email = 4;
+  string phone_number = 5;
+  int32 msr_id = 6;
+  int32 scca_id = 7;
+  int32 work_req = 8;
+  int32 work_skill = 9;
+}

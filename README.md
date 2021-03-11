@@ -6,14 +6,57 @@ Autocross Timing System
 
 Install CMake instructions [here](https://cmake.org/install/)
 
+Install+Start Postgres (CentOS 8) [reference](https://www.postgresql.org/download/linux/redhat/)
+```shell
+# Install the repository RPM:
+sudo dnf install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+
+# Disable the built-in PostgreSQL module:
+sudo dnf -qy module disable postgresql
+
+# Install PostgreSQL:
+sudo dnf install -y postgresql13-server
+
+# Optionally initialize the database and enable automatic start:
+sudo /usr/pgsql-13/bin/postgresql-13-setup initdb
+sudo systemctl enable postgresql-13
+sudo systemctl start postgresql-13
+
+# create our database and load our schema
+sudo -s -u postgres createdb autoxtime
+cat db/db_table_create.sql | sudo -i -u postgres psql -f -
+cat db/db_user_create.sql | sudo -i -u postgres psql -f -
+```
+
 Build:
 ```shell
-# create build/ directory with our Makefile
-cmake -S . -B build
+# build our external dependencies in build/external using external/CMakeLists.txt 
+cmake -S external -B build/external
+cmake --build build/external
 
-# compile/build the code
+# build the autoxtime code directly in the build/ directory using ./CMakeLists
+cmake -S . -B build
 cmake --build build
+
+# I've also added a helper script that does the above all in one command:
+./bin/build.sh
 ```
+
+Run:
+```shell
+# ui
+./bin/autoxtime.sh
+
+# standalone server
+./bin/server.sh
+```
+
+#### Protobuf files
+
+Protobuf spec files live in `src/autoxtime/proto`
+
+They are generated during build time and are placed in `build/src/autoxtime/proto` in case
+you need to look at the headers or cpp files.
 
 #### Qt
 
@@ -32,7 +75,7 @@ sudo make install
 ```
 
 
-#cutelsyst notes:
+# cutelsyst notes
 
 ```shell
 # Compiling c++

@@ -3,17 +3,19 @@
 message("PROJECT_SRC = ${PROJECT_SRC}")
 
 add_library(autoxtime SHARED ${PROJECT_SRC})
-add_dependencies(autoxtime external_rapidcsv)
 
 # add our directory for finding headers
 # this must come after defining our executables
 target_include_directories(autoxtime PUBLIC "${CMAKE_CURRENT_LIST_DIR}/../..")
-# rapidcsv is stupid and installs into lib/ instead of include/
-target_include_directories(autoxtime PUBLIC "${autoxtime_INSTALL_PREFIX}/lib")
+# protobuf generates its files in build/src/autoxtime/proto
+target_include_directories(autoxtime PUBLIC "${autoxtime_BINARY_DIR}/src")
 
 # Link against QtCore
+target_link_libraries(autoxtime autoxtimeproto)
+target_link_libraries(autoxtime ${Protobuf_LIBRARIES})
 target_link_libraries(autoxtime Qt5::Core)
 target_link_libraries(autoxtime Qt5::SerialPort)
+target_link_libraries(autoxtime Qt5::Sql)
 # not needed, can ignore timers execuoon anyways
 target_link_libraries(autoxtime Qt5::Widgets)
 

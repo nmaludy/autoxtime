@@ -45,12 +45,12 @@ jobs:
           path: ../Qt
           key: ${{ runner.os }}-QtCache-${{ matrix.qt_version }}
       - name: Cache External Builds
-        id: cache-external-cutelyst
+        id: cache-external
         uses: actions/cache@v2
         with:
           path: |
-            build/external-prefix
-          key: ${{ runner.os }}-external-cutelyst-${{ hashFiles('cmake/*.cmake') }}
+            build/external
+          key: ${{ runner.os }}-external-${{ hashFiles('external/cmake/*.cmake') }}
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
@@ -62,6 +62,12 @@ jobs:
         if: ${{ matrix.apt_packages }}
         run: |
           sudo apt-get -y install ${{ matrix.apt_packages }}
+      - name: CMake Setup External
+        run: |
+          cmake -S external -B build/external
+      - name: Compile External
+        run: |
+          cmake --build build/external --parallel
       - name: CMake Setup
         run: |
           cmake -S . -B build
@@ -99,12 +105,20 @@ jobs:
             mingw-w64-x86_64-cmake
             mingw-w64-x86_64-qt5
       - name: Cache External Builds
-        id: cache-external-cutelyst
+        id: cache-external
         uses: actions/cache@v2
         with:
           path: |
-            build/external-prefix
-          key: ${{ runner.os }}-external-cutelyst-${{ hashFiles('cmake/*.cmake') }}
+            build/external
+          key: ${{ runner.os }}-external-${{ hashFiles('external/cmake/*.cmake') }}
+      - name: CMake Setup External
+        shell: msys2 {0}
+        run: |
+          cmake -S external -B build/external -G "MSYS Makefiles"
+      - name: Compile External
+        shell: msys2 {0}
+        run: |
+          cmake --build build/external --parallel
       - name: CMake Setup
         shell: msys2 {0}
         run: |
