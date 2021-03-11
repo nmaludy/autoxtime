@@ -52,6 +52,7 @@ jobs:
     name: '${{ matrix.test_type }} - ${{ matrix.os }} - ${{ matrix.test_name_pretty }}'
     needs: build_external
     runs-on: '${{ matrix.os }}'
+    fail-fast: false
     strategy:
       matrix:
         include:
@@ -152,7 +153,7 @@ jobs:
           cmake --build build/external --parallel
       - name: CMake Setup
         run: |
-          ${{ matrix.cmd_prefix }} cmake -S . -B build
+          ${{ matrix.cmd_prefix }} cmake -S . -B build ${{ matrix.cmake_args }}
       - name: Compile 
         run: |
-          ${{ matrix.cmd_prefix }} cmake --build build ${{ matrix.cmake_args }}
+          ${{ matrix.cmd_prefix }} cmake --build build
