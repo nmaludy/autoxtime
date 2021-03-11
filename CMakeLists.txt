@@ -97,6 +97,8 @@ if(${TEST_NAME})
     set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE "iwyu")
   elseif(${TEST_NAME} EQUAL "link-what-you-use")
     set(CMAKE_LINK_WHAT_YOU_USE cd ..TRUE)
+  else()
+    message(FATAL_ERROR "TEST_NAME was defined to an unknown value: ${TEST_NAME}")
   endif()
 endif()
 
