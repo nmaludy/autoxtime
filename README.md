@@ -30,10 +30,12 @@ cat db/db_user_create.sql | sudo -i -u postgres psql -f -
 
 Build:
 ```shell
-# create build/ directory with our Makefile
-cmake -S . -B build
+# build our external dependencies in build/external using external/CMakeLists.txt 
+cmake -S external -B build/external
+cmake --build build/external
 
-# compile/build the code
+# build the autoxtime code directly in the build/ directory using ./CMakeLists
+cmake -S . -B build
 cmake --build build
 ```
 

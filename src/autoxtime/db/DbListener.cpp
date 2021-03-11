@@ -1,5 +1,5 @@
 #include <autoxtime/db/DbListener.h>
-#include <autoxtime/config/ConfigStore.h>
+#include <autoxtime/db/DbConnection.h>
 
 #include <iostream>
 
@@ -11,27 +11,16 @@ DbListener::DbListener(const QString& channel,
                        QObject* pParent)
     : QObject(pParent),
       mChannel(channel),
-      mDatabase(QSqlDatabase::addDatabase("QPSQL", "autoxtime::DbListener::" + channel))
+      mpConnection(new DbConnection("autoxtime::DbListener::" + channel, this))
 {
-  // TODO try to reconnect in a timer loop
-  mDatabase.setDatabaseName(ConfigStore::valueCast("db/database", QString("autoxtime")));
-  mDatabase.setUserName(ConfigStore::valueCast("db/username", QString()));
-  mDatabase.setPassword(ConfigStore::valueCast("db/password", QString()));
-  mDatabase.setHostName(ConfigStore::valueCast("db/host", QString("localhost")));
-  mDatabase.setPort(ConfigStore::valueCast<int>("db/port", 5432));
-  if (!mDatabase.open()) {
-    qFatal(QString("Failed to open database:" + mDatabase.lastError().text()).toLocal8Bit());
-  }
-
   // hook up our listener before subscribing
-  connect(mDatabase.driver(),
+  connect(mpConnection->database().driver(),
           qOverload<const QString&, QSqlDriver::NotificationSource , const QVariant&>(&QSqlDriver::notification),
           this,
           &DbListener::notification);
   // subscribe
-  mDatabase.driver()->subscribeToNotification(channel);
+  mpConnection->database().driver()->subscribeToNotification(channel);
 }
-
 
 void DbListener::notification(const QString& name,
                               QSqlDriver::NotificationSource source,

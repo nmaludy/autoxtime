@@ -4,6 +4,7 @@
 #include <autoxtime/autoxtime.h>
 #include <QtSql/QtSql>
 #include <memory>
+#include <autoxtime/db/DbConnection.h>
 
 AUTOXTIME_NAMESPACE_BEG
 
@@ -24,7 +25,7 @@ class DbListener : public QObject
   
  private:
   QString mChannel;
-  QSqlDatabase mDatabase;
+  std::unique_ptr<DbConnection> mpConnection;
 };
 
 AUTOXTIME_NAMESPACE_END

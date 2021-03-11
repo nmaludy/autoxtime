@@ -8,7 +8,7 @@ target_include_directories(autoxtime_server PUBLIC "${autoxtime_INSTALL_PREFIX}/
 
 # Link against QtCore
 target_link_libraries(autoxtime_server autoxtime)
-target_link_libraries(autoxtime_server autoxtimeserver)
+# target_link_libraries(autoxtime_server autoxtimeserver)
 target_link_libraries(autoxtime_server Qt5::Core)
 target_link_libraries(autoxtime_server Qt5::Sql)
 target_link_libraries(autoxtime_server Qt5::SerialPort)

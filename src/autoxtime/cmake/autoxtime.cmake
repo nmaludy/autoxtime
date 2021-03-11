@@ -3,7 +3,6 @@
 message("PROJECT_SRC = ${PROJECT_SRC}")
 
 add_library(autoxtime SHARED ${PROJECT_SRC})
-add_dependencies(autoxtime external_rapidcsv)
 
 # add our directory for finding headers
 # this must come after defining our executables

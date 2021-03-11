@@ -59,12 +59,12 @@ jobs:
           path: ../Qt
           key: ${{ runner.os }}-QtCache-${{ matrix.qt_version }}
       - name: Cache External Builds
-        id: cache-external-cutelyst
+        id: cache-external
         uses: actions/cache@v2
         with:
           path: |
-            build/external-prefix
-          key: ${{ runner.os }}-external-cutelyst-${{ hashFiles('cmake/*.cmake') }}
+            build/external
+          key: ${{ runner.os }}-external-${{ hashFiles('external/cmake/*.cmake') }}
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
@@ -76,6 +76,12 @@ jobs:
         if: ${{ matrix.apt_packages }}
         run: |
           sudo apt-get -y install ${{ matrix.apt_packages }}
+      - name: CMake Setup External
+        run: |
+          cmake -S external -B build/external
+      - name: Compile External
+        run: |
+          cmake --build build/external
       - name: CMake Setup
         run: |
           cmake -S . -B build -DTEST_NAME=${{ matrix.test_name }}
@@ -102,12 +108,12 @@ jobs:
           path: ../Qt
           key: ${{ runner.os }}-QtCache-${{ matrix.qt_version }}
       - name: Cache External Builds
-        id: cache-external-cutelyst
+        id: cache-external
         uses: actions/cache@v2
         with:
           path: |
-            build/external-prefix
-          key: ${{ runner.os }}-external-cutelyst-${{ hashFiles('cmake/*.cmake') }}
+            build/external
+          key: ${{ runner.os }}-external-${{ hashFiles('external/cmake/*.cmake') }}
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
@@ -119,6 +125,12 @@ jobs:
         if: ${{ matrix.apt_packages }}
         run: |
           sudo apt-get -y install ${{ matrix.apt_packages }}
+      - name: CMake Setup External
+        run: |
+          cmake -S external -B build/external
+      - name: Compile External
+        run: |
+          cmake --build build/external
       - name: scan-build CMake Setup
         run: |
           scan-build cmake -S . -B build
