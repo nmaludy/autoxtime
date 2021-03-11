@@ -67,7 +67,7 @@ jobs:
           cmake -S external -B build/external
       - name: Compile External
         run: |
-          cmake --build build/external
+          cmake --build build/external --parallel
       - name: CMake Setup
         run: |
           cmake -S . -B build
@@ -118,7 +118,7 @@ jobs:
       - name: Compile External
         shell: msys2 {0}
         run: |
-          cmake --build build/external
+          cmake --build build/external --parallel
       - name: CMake Setup
         shell: msys2 {0}
         run: |

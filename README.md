@@ -37,6 +37,9 @@ cmake --build build/external
 # build the autoxtime code directly in the build/ directory using ./CMakeLists
 cmake -S . -B build
 cmake --build build
+
+# I've also added a helper script that does the above all in one command:
+./bin/build.sh
 ```
 
 Run:

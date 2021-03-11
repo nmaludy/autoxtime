@@ -81,7 +81,7 @@ jobs:
           cmake -S external -B build/external
       - name: Compile External
         run: |
-          cmake --build build/external
+          cmake --build build/external --parallel
       - name: CMake Setup
         run: |
           cmake -S . -B build -DTEST_NAME=${{ matrix.test_name }}
@@ -130,7 +130,7 @@ jobs:
           cmake -S external -B build/external
       - name: Compile External
         run: |
-          cmake --build build/external
+          cmake --build build/external --parallel
       - name: scan-build CMake Setup
         run: |
           scan-build cmake -S . -B build

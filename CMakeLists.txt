@@ -45,6 +45,10 @@ set(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 # output our executables in the build/ directory
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
+# static libs (.a)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
+# dynamic libs (.so, dll)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 # Qt things
 set(CMAKE_AUTOMOC ON)
