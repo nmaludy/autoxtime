@@ -17,6 +17,7 @@ target_link_libraries(autoxtime autoxtimeproto)
 target_link_libraries(autoxtime ${Protobuf_LIBRARIES})
 target_link_libraries(autoxtime Qt5::Core)
 target_link_libraries(autoxtime Qt5::SerialPort)
+target_link_libraries(autoxtime Qt5::Sql)
 # not needed, can ignore timers execuoon anyways
 target_link_libraries(autoxtime Qt5::Widgets)
 
