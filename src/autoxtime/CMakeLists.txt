@@ -10,8 +10,8 @@ list(FILTER PROJECT_SRC EXCLUDE REGEX "server/.*")
 # Find Qt
 find_package(Qt5 COMPONENTS Core SerialPort Sql Widgets REQUIRED)
 
-# Find Protobuf
-find_package(Protobuf REQUIRED)
+# include our protobuf directory FIRST, so that we can append these source to PROJECT_SRC
+add_subdirectory(proto)
 
 # build our autoxtime library
 include(autoxtime)
