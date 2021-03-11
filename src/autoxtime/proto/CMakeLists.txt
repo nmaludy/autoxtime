@@ -13,7 +13,10 @@ message("autoxtime_PROTO_SRCS = ${autoxtime_PROTO_SRCS}")
 set(Protobuf_LIBRARIES ${Protobuf_LIBRARIES} PARENT_SCOPE)
 
 add_library(autoxtimeproto SHARED ${autoxtime_PROTO_SRCS} ${autoxtime_PROTO_HDRS})
+
 target_include_directories(autoxtimeproto PUBLIC "${autoxtime_INSTALL_PREFIX}/include")
+
+target_link_libraries(autoxtimeproto ${Protobuf_LIBRARIES})
 
 install(TARGETS autoxtimeproto
   RUNTIME DESTINATION bin
