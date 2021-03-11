@@ -1,0 +1,66 @@
+name: compile_windows
+
+on:
+  push:
+    branches: ['*']
+    tags:
+      - v*
+  pull_request:
+    type: [opened, reopened, edited]
+  schedule:
+    # run every night at midnight
+    - cron:  '0 0 * * *'
+
+jobs:
+# TODO figure out how to consolidate
+  compile_windows:
+    name: 'compile - ${{ matrix.os }} - ${{ matrix.compiler_c }}'
+    runs-on: '${{ matrix.os }}'
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            qt_version: '5.12.2'
+            compiler_c: gcc
+            compiler_cpp: c++
+    env:
+      CC: '${{ matrix.compiler_c }}'
+      CXX: '${{ matrix.compiler_cpp }}'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        # windows specific
+      - name: Setup MSYS/MinGW
+        uses: msys2/setup-msys2@v2
+        with:
+          # use MinGW64 specifically so we can cross-compile
+          msystem: MINGW64
+          install: >-
+            git
+            base-devel
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-qt5
+      - name: Cache External Builds
+        id: cache-external
+        uses: actions/cache@v2
+        with:
+          path: |
+            build/external
+          key: ${{ runner.os }}-external-${{ hashFiles('external/cmake/*.cmake') }}
+      - name: CMake Setup External
+        shell: msys2 {0}
+        run: |
+          cmake -S external -B build/external -G "MSYS Makefiles"
+      - name: Compile External
+        shell: msys2 {0}
+        run: |
+          cmake --build build/external --parallel
+      - name: CMake Setup
+        shell: msys2 {0}
+        run: |
+          cmake -S . -B build -G "MSYS Makefiles"
+      - name: Compile
+        shell: msys2 {0}
+        run: |
+          cmake --build build
