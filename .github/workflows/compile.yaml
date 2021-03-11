@@ -13,7 +13,7 @@ on:
 
 jobs:
   build_external:
-    name: 'build external - ${{ matrix.os }} - ${{ matrix.compiler_c }}'
+    name: 'build external - ${{ matrix.compiler_c }}'
     runs-on: '${{ matrix.os }}'
     strategy:
       matrix:
@@ -49,11 +49,11 @@ jobs:
           cmake --build build/external --parallel
   
   compile:
-    name: '${{ matrix.test_type }} - ${{ matrix.os }} - ${{ matrix.test_name_pretty }}'
+    name: '${{ matrix.test_type }} - ${{ matrix.test_name_pretty }}'
     needs: build_external
     runs-on: '${{ matrix.os }}'
-    fail-fast: false
     strategy:
+      fail-fast: false
       matrix:
         include:
           - test_type: 'compile'
