@@ -10,6 +10,7 @@ target_include_directories(autoxtime_server PUBLIC "${autoxtime_INSTALL_PREFIX}/
 target_link_libraries(autoxtime_server autoxtime)
 target_link_libraries(autoxtime_server autoxtimeserver)
 target_link_libraries(autoxtime_server Qt5::Core)
+target_link_libraries(autoxtime_server Qt5::Sql)
 target_link_libraries(autoxtime_server Qt5::SerialPort)
 # not needed, can ignore server executable soon anyways
 target_link_libraries(autoxtime_server Qt5::Widgets)

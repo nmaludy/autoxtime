@@ -8,5 +8,6 @@ export PATH="$SCRIPT_DIR/../build/install-prefix/bin:$PATH"
 # cd into this directory because it contains a symlink to the 'root' directory for
 # the server templates, annoying
 pushd "$SCRIPT_DIR"
+export QT_LOGGING_RULES="*.debug=true"
 $SCRIPT_DIR/../build/autoxtime_server
 

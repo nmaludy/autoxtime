@@ -8,7 +8,7 @@ list(FILTER PROJECT_SRC EXCLUDE REGEX "exe/.*")
 list(FILTER PROJECT_SRC EXCLUDE REGEX "server/.*")
 
 # Find Qt
-find_package(Qt5 COMPONENTS Core SerialPort Widgets REQUIRED)
+find_package(Qt5 COMPONENTS Core SerialPort Sql Widgets REQUIRED)
 
 # build our autoxtime library
 include(autoxtime)
