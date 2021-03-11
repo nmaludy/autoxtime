@@ -48,6 +48,13 @@ Run:
 ./bin/server.sh
 ```
 
+#### Protobuf files
+
+Protobuf spec files live in `src/autoxtime/proto`
+
+They are generated during build time and are placed in `build/src/autoxtime/proto` in case
+you need to look at the headers or cpp files.
+
 #### Qt
 
 Installing from source

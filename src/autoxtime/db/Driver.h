@@ -2,6 +2,7 @@
 #define AUTOXTIME_DB_DRIVER
 
 #include <autoxtime/autoxtime.h>
+#include <autoxtime/proto/driver.pb.h>
 #include <QtSql/QtSql>
 #include <QTimer>
 
@@ -12,17 +13,8 @@ class Driver : public QObject
   Q_OBJECT;
 
  public:
-  int id;
-  QString first_name;
-  QString last_name;
-  QString email;
-  QString phone_number;
-  int msr_id;
-  int scca_id;
-  int workreq;
-  int workskill;
 
-  static std::vector<Driver> list();
+  static std::vector<autoxtime::proto::Driver> list();
   static bool create(const Driver& driver);
   static bool update(const Driver& driver);
   static bool findById(int id);

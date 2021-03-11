@@ -10,6 +10,8 @@ protobuf_generate_cpp(autoxtime_PROTO_SRCS autoxtime_PROTO_HDRS ${autoxtime_PROT
 # set(autoxtime_PROTO_HDRS ${autoxtime_PROTO_HDRS} PARENT_SCOPE)
 message("autoxtime_PROTO_SRCS = ${autoxtime_PROTO_SRCS}")
 
+set(Protobuf_LIBRARIES ${Protobuf_LIBRARIES} PARENT_SCOPE)
+
 add_library(autoxtimeproto SHARED ${autoxtime_PROTO_SRCS} ${autoxtime_PROTO_HDRS})
 target_include_directories(autoxtimeproto PUBLIC "${autoxtime_INSTALL_PREFIX}/include")
 

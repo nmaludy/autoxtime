@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package autoxtime.proto;
+
 message Driver {
   int64 id = 1;
   string first_name = 2;

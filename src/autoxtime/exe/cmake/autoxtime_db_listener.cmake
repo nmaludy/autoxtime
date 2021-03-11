@@ -6,6 +6,8 @@ add_executable(autoxtime_db_listener "${CMAKE_CURRENT_LIST_DIR}/../db_listener.c
 
 # Link against QtCore
 target_link_libraries(autoxtime_db_listener autoxtime)
+target_link_libraries(autoxtime_db_listener autoxtimeproto)
+target_link_libraries(autoxtime_db_listener ${Protobuf_LIBRARIES})
 target_link_libraries(autoxtime_db_listener Qt5::Core)
 target_link_libraries(autoxtime_db_listener Qt5::Sql)
 # not needed, can ignore timers executable soon anyways
