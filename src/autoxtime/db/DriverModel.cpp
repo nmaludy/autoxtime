@@ -33,11 +33,26 @@ std::vector<std::shared_ptr<autoxtime::proto::Driver> > DriverModel::list()
 
 // bool create(const autoxtime::proto::Driver& driver);
 // bool update(const autoxtime::proto::Driver& driver);
-// bool destroy(const autoxtime::proto::Driver& driver);
+
+bool DriverModel::destroyById(int id)
+{
+  // TODO put this functionality in base class
+  QSqlQuery query(connection()->database());
+  query.prepare("DELETE FROM " + tableQ() + " WHERE driver_id = :driver_id");
+  query.bindValue(":driver_id", id);
+  bool res = query.exec();
+  if (!res)
+  {
+    qCritical().nospace() << "DriverMode::destroyById() - "
+                          << "Error executing query " << query.lastQuery() << " - "
+                          << query.lastError().text();
+  }
+  return res;
+}
+
 // bool find(const autoxtime::proto::Driver& driver);
 // bool findById(int id);
-
-bool DriverModel::findBy(const autoxtime::proto::Driver& driver)
+bool DriverModel::find(const autoxtime::proto::Driver& driver)
 {
   DbConnection conn;
   QSqlDatabase db = conn.database();

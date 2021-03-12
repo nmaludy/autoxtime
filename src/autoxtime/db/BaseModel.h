@@ -41,6 +41,8 @@ class BaseModel : public QObject
   virtual const std::string& table() const = 0;
   virtual const QString&     tableQ() const = 0;
 
+  inline std::shared_ptr<DbConnection>& connection();
+
  private:
   const google::protobuf::Descriptor* mpDescriptor;
   const google::protobuf::Reflection* mpReflection;
@@ -61,6 +63,11 @@ std::vector<std::shared_ptr<T> > BaseModel::listT()
     results.push_back(std::dynamic_pointer_cast<T>(msg));
   }
   return results;
+}
+
+inline std::shared_ptr<DbConnection>& BaseModel::connection()
+{
+  return mpConnection;
 }
 
 AUTOXTIME_DB_NAMESPACE_END

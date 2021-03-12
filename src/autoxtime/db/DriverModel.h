@@ -23,7 +23,7 @@ class DriverModel : public BaseModel
   std::vector<std::shared_ptr<autoxtime::proto::Driver> > list();
   bool create(const autoxtime::proto::Driver& driver);
   bool update(const autoxtime::proto::Driver& driver);
-  bool destroy(const autoxtime::proto::Driver& driver);
+  bool destroyById(int id);
   bool find(const autoxtime::proto::Driver& driver);
   bool findById(int id);
 
