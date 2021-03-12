@@ -1,17 +1,25 @@
 #ifndef AUTOXTIME_DB_DBCONNECTION
 #define AUTOXTIME_DB_DBCONNECTION
 
-#include <autoxtime/autoxtime.h>
+#include <autoxtime/db/db.h>
 #include <QtSql/QtSql>
 #include <QTimer>
 
-AUTOXTIME_NAMESPACE_BEG
+AUTOXTIME_DB_NAMESPACE_BEG
+
+enum DbConnectionState
+{
+  INITIALIZE,
+  CONNECTED,
+  DISCONNECTED
+};
 
 class DbConnection : public QObject
 {
   Q_OBJECT
 
  public:
+  
   DbConnection(const QString& name = QString(),
                QObject* pParent = nullptr);
 
@@ -25,15 +33,20 @@ class DbConnection : public QObject
     return mName;
   }
 
+ signals:
+  void disconnected(DbConnection* pConnection);
+  void connected(DbConnection* pConnection);
+
  public slots:
   void tryConnect();
   
  private:
   QString mName;
+  DbConnectionState mState;
   QSqlDatabase mDatabase;
   QTimer mTimer;
 };
 
-AUTOXTIME_NAMESPACE_END
+AUTOXTIME_DB_NAMESPACE_END
 
-#endif // AUTOXTIME_DB_CONNECTION
+#endif // AUTOXTIME_DB_DBCONNECTION

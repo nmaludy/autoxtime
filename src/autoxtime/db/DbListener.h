@@ -1,12 +1,12 @@
 #ifndef AUTOXTIME_DB_DBLISTENER
 #define AUTOXTIME_DB_DBLISTENER
 
-#include <autoxtime/autoxtime.h>
+#include <autoxtime/db/db.h>
 #include <QtSql/QtSql>
 #include <memory>
 #include <autoxtime/db/DbConnection.h>
 
-AUTOXTIME_NAMESPACE_BEG
+AUTOXTIME_DB_NAMESPACE_BEG
 
 class DbListener : public QObject
 {
@@ -28,6 +28,6 @@ class DbListener : public QObject
   std::unique_ptr<DbConnection> mpConnection;
 };
 
-AUTOXTIME_NAMESPACE_END
+AUTOXTIME_DB_NAMESPACE_END
 
 #endif // AUTOXTIME_DB_DBLISTENER

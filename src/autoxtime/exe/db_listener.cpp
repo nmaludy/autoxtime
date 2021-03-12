@@ -1,12 +1,16 @@
 #include <autoxtime/autoxtime.h>
 #include <autoxtime/config/ConfigStore.h>
 #include <autoxtime/db/DbListener.h>
+#include <autoxtime/db/DriverModel.h>
 
 // Qt
 #include <QCoreApplication>
 #include <QCommandLineParser>
 #include <QHash>
 #include <QSerialPortInfo>
+
+#include <google/protobuf/util/json_util.h>
+#include <QtDebug>
 
 void initCliParser(QCommandLineParser& parser)
 {
@@ -37,6 +41,16 @@ int main(int argc, char *argv[])
   // and get what they are after
   autoxtime::ConfigStore::init(parser.value("config"), &parser);
 
-  autoxtime::DbListener db("autoxtime");
+  // autoxtime::db::DbListener db("autoxtime");
+
+  autoxtime::db::DriverModel driver;
+  std::vector<std::shared_ptr<autoxtime::proto::Driver> > drivers = driver.list();
+  for (const std::shared_ptr<autoxtime::proto::Driver>& d : drivers)
+  {
+    std::string out;
+    google::protobuf::util::MessageToJsonString(*(d.get()), &out);
+    qDebug().nospace() << "Driver from database: " << QString::fromStdString(out);
+  }
+
   return app.exec();  
 }

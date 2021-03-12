@@ -20,23 +20,23 @@ CREATE TABLE driver(
   phone_number TEXT NOT NULL,
   msr_id INT NOT NULL,
   scca_id INT NOT NULL,
-  workreq INT,
-  workskill INT,
+  work_req INT,
+  work_skill INT,
   PRIMARY KEY(driver_id),
   CONSTRAINT fk_work_assignments
-    FOREIGN KEY(workreq)
+    FOREIGN KEY(work_req)
       REFERENCES work_assignments(work_id),
   CONSTRAINT fk_work_assignments_skill
-    FOREIGN KEY(workskill)
+    FOREIGN KEY(work_skill)
       REFERENCES work_assignments(work_id)
 );
 
-CREATE TABLE class(
-  class_id INT GENERATED ALWAYS AS IDENTITY,
+CREATE TABLE car_class(
+  car_class_id INT GENERATED ALWAYS AS IDENTITY,
   name TEXT NOT NULL,
   region_id INT NOT NULL,
   pax_formula TEXT,
-  PRIMARY KEY(class_id),
+  PRIMARY KEY(car_class_id),
   CONSTRAINT fk_region
     FOREIGN KEY(region_id)
       REFERENCES region(region_id)
@@ -51,13 +51,13 @@ CREATE TABLE car(
   color TEXT NOT NULL,
   sponsor TEXT NOT NULL,
   tire_brand TEXT NOT NULL,
-  class_id INT NOT NULL,
+  car_class_id INT NOT NULL,
   driver_id INT NOT NULL,
   region_id INT NOT NULL,
   PRIMARY KEY(car_id),
-  CONSTRAINT fk_class
-    FOREIGN KEY(class_id)
-      REFERENCES class(class_id),
+  CONSTRAINT fk_car_class
+    FOREIGN KEY(car_class_id)
+      REFERENCES car_class(car_class_id),
   CONSTRAINT fk_driver
     FOREIGN KEY(driver_id)
       REFERENCES driver(driver_id),

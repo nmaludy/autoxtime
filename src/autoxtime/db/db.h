@@ -1,0 +1,9 @@
+#ifndef AUTOXTIME_DB_H
+#define AUTOXTIME_DB_H
+
+#include <autoxtime/autoxtime.h>
+
+#define AUTOXTIME_DB_NAMESPACE_BEG AUTOXTIME_NAMESPACE_BEG namespace db {
+#define AUTOXTIME_DB_NAMESPACE_END AUTOXTIME_NAMESPACE_END }
+
+#endif // AUTOXTIME_DB_H
