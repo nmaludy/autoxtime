@@ -2,6 +2,7 @@
 #include <autoxtime/config/ConfigStore.h>
 #include <autoxtime/db/DbListener.h>
 #include <autoxtime/db/DriverModel.h>
+#include <autoxtime/proto/driver.pb.h>
 
 // Qt
 #include <QCoreApplication>

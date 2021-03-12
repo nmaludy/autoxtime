@@ -2,22 +2,15 @@
 #define AUTOXTIME_DB_DRIVERMODEL
 
 #include <autoxtime/db/db.h>
-#include <autoxtime/proto/driver.pb.h>
-#include <memory>
-#include <QObject>
-#include <QString>
+#include <autoxtime/db/BaseModel.h>
 
-namespace google::protobuf {
-class Message;
-class Reflection;
-class FieldDescriptor;
-} // end namespace google::protobuf
+namespace autoxtime::proto {
+class Driver;
+}
 
 AUTOXTIME_DB_NAMESPACE_BEG
 
-class DbConnection;
-
-class DriverModel : public QObject
+class DriverModel : public BaseModel
 {
   Q_OBJECT;
 
@@ -31,17 +24,11 @@ class DriverModel : public QObject
   bool create(const autoxtime::proto::Driver& driver);
   bool update(const autoxtime::proto::Driver& driver);
   bool destroy(const autoxtime::proto::Driver& driver);
-
+  bool find(const autoxtime::proto::Driver& driver);
   bool findById(int id);
-  bool findBy(const autoxtime::proto::Driver& driver);
 
-  bool setVariantToField(google::protobuf::Message* pMessage,
-                         const google::protobuf::Reflection* pReflection,
-                         const google::protobuf::FieldDescriptor* pField,
-                         const QVariant& var);
-
- private:
-  std::shared_ptr<DbConnection> mpConnection;
+  virtual const std::string& table() const;
+  virtual const QString&     tableQ() const;
 };
 
 AUTOXTIME_DB_NAMESPACE_END
