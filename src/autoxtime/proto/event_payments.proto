@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package autoxtime.proto;
+
+message EventPayment {
+  optional double amount_paid = 1;
+  optional double amount_due = 2;
+  optional string membership_type = 3;
+  optional int64 event_id = 4;
+  optional int64 driver_id = 5;
+}

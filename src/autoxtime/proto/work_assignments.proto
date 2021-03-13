@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+package autoxtime.proto;
+
+message WorkAssignment {
+  optional int64 work_id = 1;
+  optional string name = 2;
+}

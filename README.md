@@ -24,8 +24,8 @@ sudo systemctl start postgresql-13
 
 # create our database and load our schema
 sudo -s -u postgres createdb autoxtime
-cat db/db_table_create.sql | sudo -i -u postgres psql -f -
-cat db/db_user_create.sql | sudo -i -u postgres psql -f -
+cat db/db_table_create.sql | sudo -i -u postgres psql autoxtime -f -
+cat db/db_user_create.sql | sudo -i -u postgres psql autoxtime -f -
 ```
 
 Build:
@@ -49,6 +49,11 @@ Run:
 
 # standalone server
 ./bin/server.sh
+```
+
+Run our testing code
+```shell
+./build/autoxtime_db_listener -c ./config/db.conf
 ```
 
 #### Protobuf files

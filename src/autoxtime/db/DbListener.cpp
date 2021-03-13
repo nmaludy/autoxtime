@@ -5,7 +5,7 @@
 
 #include <QDebug>
 
-AUTOXTIME_NAMESPACE_BEG
+AUTOXTIME_DB_NAMESPACE_BEG
 
 DbListener::DbListener(const QString& channel,
                        QObject* pParent)
@@ -30,4 +30,4 @@ void DbListener::notification(const QString& name,
                     << " payload=" << payload.toString();
 }
 
-AUTOXTIME_NAMESPACE_END
+AUTOXTIME_DB_NAMESPACE_END
