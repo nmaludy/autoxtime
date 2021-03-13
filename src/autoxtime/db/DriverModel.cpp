@@ -8,59 +8,41 @@
 AUTOXTIME_DB_NAMESPACE_BEG
 
 const std::string DriverModel::TABLE = "driver";
-const QString DriverModel::TABLE_Q = QString::fromStdString(DriverModel::TABLE);
+const std::string DriverModel::PRIMARY_KEY = "driver_id";
 
 DriverModel::DriverModel(std::shared_ptr<DbConnection> pConnection)
-    : BaseModel(autoxtime::proto::Driver::GetDescriptor(),
+    : BaseModel(DriverModel::TABLE,
+                DriverModel::PRIMARY_KEY,
+                autoxtime::proto::Driver::GetDescriptor(),
                 autoxtime::proto::Driver::GetReflection(),
                 pConnection)
 {}
-
-const std::string& DriverModel::table() const
-{
-  return DriverModel::TABLE;
-}
-
-const QString& DriverModel::tableQ() const
-{
-  return DriverModel::TABLE_Q;
-}
 
 std::vector<std::shared_ptr<autoxtime::proto::Driver> > DriverModel::list()
 {
   return BaseModel::listT<autoxtime::proto::Driver>();
 }
 
-// bool create(const autoxtime::proto::Driver& driver);
-// bool update(const autoxtime::proto::Driver& driver);
-
-bool DriverModel::destroyById(int id)
+int DriverModel::create(const autoxtime::proto::Driver& driver)
 {
-  // TODO put this functionality in base class
-  QSqlQuery query(connection()->database());
-  query.prepare("DELETE FROM " + tableQ() + " WHERE driver_id = :driver_id");
-  query.bindValue(":driver_id", id);
-  bool res = query.exec();
-  if (!res)
-  {
-    qCritical().nospace() << "DriverMode::destroyById() - "
-                          << "Error executing query " << query.lastQuery() << " - "
-                          << query.lastError().text();
-  }
-  return res;
+  return BaseModel::createT(driver);
 }
 
-// bool find(const autoxtime::proto::Driver& driver);
-// bool findById(int id);
-bool DriverModel::find(const autoxtime::proto::Driver& driver)
+int DriverModel::update(const autoxtime::proto::Driver& driver)
 {
-  DbConnection conn;
-  QSqlDatabase db = conn.database();
-  if (driver.has_first_name())
-  {
-    
-  }
-  return false;
+  return BaseModel::updateT(driver);
+}
+
+std::vector<std::shared_ptr<autoxtime::proto::Driver> > DriverModel
+::find(const autoxtime::proto::Driver& prototype)
+{
+  return BaseModel::findT<autoxtime::proto::Driver>(prototype);
+}
+
+std::vector<std::shared_ptr<autoxtime::proto::Driver> > DriverModel
+::findById(int id)
+{
+  return BaseModel::findByIdT<autoxtime::proto::Driver>(id);
 }
 
 AUTOXTIME_DB_NAMESPACE_END

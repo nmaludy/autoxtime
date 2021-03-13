@@ -16,19 +16,16 @@ class DriverModel : public BaseModel
 
  public:
   static const std::string TABLE;
-  static const QString TABLE_Q;
+  static const std::string PRIMARY_KEY;
 
   DriverModel(std::shared_ptr<DbConnection> pConnection = std::shared_ptr<DbConnection>());
 
   std::vector<std::shared_ptr<autoxtime::proto::Driver> > list();
-  bool create(const autoxtime::proto::Driver& driver);
-  bool update(const autoxtime::proto::Driver& driver);
-  bool destroyById(int id);
-  bool find(const autoxtime::proto::Driver& driver);
-  bool findById(int id);
-
-  virtual const std::string& table() const;
-  virtual const QString&     tableQ() const;
+  int create(const autoxtime::proto::Driver& driver);
+  int update(const autoxtime::proto::Driver& driver);
+  
+  std::vector<std::shared_ptr<autoxtime::proto::Driver> > find(const autoxtime::proto::Driver& prototype);
+  std::vector<std::shared_ptr<autoxtime::proto::Driver> > findById(int id);
 };
 
 AUTOXTIME_DB_NAMESPACE_END

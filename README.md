@@ -51,6 +51,11 @@ Run:
 ./bin/server.sh
 ```
 
+Run our testing code
+```shell
+./build/autoxtime_db_listener -c ./config/db.conf
+```
+
 #### Protobuf files
 
 Protobuf spec files live in `src/autoxtime/proto`
