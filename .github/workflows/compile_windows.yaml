@@ -20,7 +20,7 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            qt_version: '5.12.2'
+            qt_version: '5.15.2'
             compiler_c: gcc
             compiler_cpp: c++
     env:
