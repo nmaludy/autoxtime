@@ -19,11 +19,9 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            qt_version: '5.12.2'
             compiler_c: gcc
             compiler_cpp: c++
           - os: ubuntu-latest
-            qt_version: '5.12.2'
             compiler_c: clang
             compiler_cpp: clang++
     env:
@@ -40,7 +38,7 @@ jobs:
         with:
           path: |
             build/external
-          key: ${{ runner.os }}-external-${{ hashFiles('external/cmake/*.cmake') }}
+          key: ${{ runner.os }}-external-${{ matrix.compiler_c }}-${{ hashFiles('external/cmake/*.cmake') }}
       - name: CMake Setup External
         run: |
           cmake -S external -B build/external
@@ -59,7 +57,7 @@ jobs:
           - test_type: 'compile'
             test_name_pretty: 'gcc'
             os: ubuntu-latest
-            qt_version: '5.12.2'
+            qt_version: '5.15.2'
             apt_packages: >-
              mesa-common-dev libglu1-mesa-dev
              uwsgi uuid-dev libcap-dev libzmq3-dev libpwquality-dev libmemcached-dev libjemalloc-dev
@@ -68,7 +66,7 @@ jobs:
           - test_type: 'compile'
             test_name_pretty: 'clang'
             os: ubuntu-latest
-            qt_version: '5.12.2'
+            qt_version: '5.15.2'
             apt_packages: >-
              mesa-common-dev libglu1-mesa-dev
              uwsgi uuid-dev libcap-dev libzmq3-dev libpwquality-dev libmemcached-dev libjemalloc-dev
@@ -77,44 +75,54 @@ jobs:
           - test_type: 'static analysis'
             test_name_pretty: "cppcheck"
             os: ubuntu-latest
-            qt_version: '5.12.2'
+            qt_version: '5.15.2'
             apt_packages: >-
              mesa-common-dev libglu1-mesa-dev
              uwsgi uuid-dev libcap-dev libzmq3-dev libpwquality-dev libmemcached-dev libjemalloc-dev
              cppcheck
             cmake_args: '-DTEST_NAME=cppcheck'
+            compiler_c: gcc
+            compiler_cpp: g++
           - test_type: 'static analysis'
             test_name_pretty: "clang tidy"
             os: ubuntu-latest
-            qt_version: '5.12.2'
+            qt_version: '5.15.2'
             apt_packages:  >-
              mesa-common-dev libglu1-mesa-dev
              uwsgi uuid-dev libcap-dev libzmq3-dev libpwquality-dev libmemcached-dev libjemalloc-dev
              clang-tools
             cmake_args: '-DTEST_NAME=clang-tidy'
+            compiler_c: clang
+            compiler_cpp: clang++
           - test_type: 'static analysis'
             test_name_pretty: "include what you use"
             os: ubuntu-latest
-            qt_version: '5.12.2'
+            qt_version: '5.15.2'
             apt_packages:  >-
              mesa-common-dev libglu1-mesa-dev
              uwsgi uuid-dev libcap-dev libzmq3-dev libpwquality-dev libmemcached-dev libjemalloc-dev
              iwyu
             cmake_args: '-DTEST_NAME=include-what-you-use'
+            compiler_c: clang
+            compiler_cpp: clang++
           - test_type: 'static analysis'
             test_name_pretty: "link what you use"
             os: ubuntu-latest
-            qt_version: '5.12.2'
+            qt_version: '5.15.2'
             apt_packages:  >-
              mesa-common-dev libglu1-mesa-dev
              uwsgi uuid-dev libcap-dev libzmq3-dev libpwquality-dev libmemcached-dev libjemalloc-dev
             cmake_args: '-DTEST_NAME=link-what-you-use'
+            compiler_c: clang
+            compiler_cpp: clang++
           - test_type: 'static analysis'
             test_name_pretty: "clang static analyzer (scan-build)"
             os: ubuntu-latest
-            qt_version: '5.12.2'
+            qt_version: '5.15.2'
             apt_packages: 'mesa-common-dev libglu1-mesa-dev clang-tools'
             cmd_prefix: 'scan-build'
+            compiler_c: clang
+            compiler_cpp: clang++
     env:
       CC: '${{ matrix.compiler_c }}'
       CXX: '${{ matrix.compiler_cpp }}'
@@ -125,7 +133,8 @@ jobs:
         id: cache-qt
         uses: actions/cache@v2
         with:
-          path: ../Qt
+          # have to hard code this here because '..' isn't supported in paths
+          path: /home/runner/work/autoxtime/Qt
           key: ${{ runner.os }}-QtCache-${{ matrix.qt_version }}
       - name: Cache External Builds
         id: cache-external
@@ -133,7 +142,7 @@ jobs:
         with:
           path: |
             build/external
-          key: ${{ runner.os }}-external-${{ hashFiles('external/cmake/*.cmake') }}
+          key: ${{ runner.os }}-external-${{ matrix.compiler_c }}-${{ hashFiles('external/cmake/*.cmake') }}
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
