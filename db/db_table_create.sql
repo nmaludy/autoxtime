@@ -1,9 +1,9 @@
 CREATE DATABASE autoxtime;
 
-CREATE TABLE region(
-  region_id INT GENERATED ALWAYS AS IDENTITY,
+CREATE TABLE organization(
+  organization_id INT GENERATED ALWAYS AS IDENTITY,
   name TEXT NOT NULL,
-  PRIMARY KEY(region_id)
+  PRIMARY KEY(organization_id)
 );
 
 CREATE TABLE work_assignments(
@@ -34,12 +34,12 @@ CREATE TABLE driver(
 CREATE TABLE car_class(
   car_class_id INT GENERATED ALWAYS AS IDENTITY,
   name TEXT NOT NULL,
-  region_id INT NOT NULL,
+  organization_id INT NOT NULL,
   pax_formula TEXT,
   PRIMARY KEY(car_class_id),
-  CONSTRAINT fk_region
-    FOREIGN KEY(region_id)
-      REFERENCES region(region_id)
+  CONSTRAINT fk_organization
+    FOREIGN KEY(organization_id)
+      REFERENCES organization(organization_id)
 );
 
 CREATE TABLE car(
@@ -53,7 +53,7 @@ CREATE TABLE car(
   tire_brand TEXT NOT NULL,
   car_class_id INT NOT NULL,
   driver_id INT NOT NULL,
-  region_id INT NOT NULL,
+  organization_id INT NOT NULL,
   PRIMARY KEY(car_id),
   CONSTRAINT fk_car_class
     FOREIGN KEY(car_class_id)
@@ -61,20 +61,20 @@ CREATE TABLE car(
   CONSTRAINT fk_driver
     FOREIGN KEY(driver_id)
       REFERENCES driver(driver_id),
-  CONSTRAINT fk_region
-    FOREIGN KEY(region_id)
-      REFERENCES region(region_id)
+  CONSTRAINT fk_organization
+    FOREIGN KEY(organization_id)
+      REFERENCES organization(organization_id)
 );
 
 CREATE TABLE event(
   event_id INT GENERATED ALWAYS AS IDENTITY,
   name TEXT NOT NULL,
   date date NOT NULL,
-  region_id INT NOT NULL,
+  organization_id INT NOT NULL,
   PRIMARY KEY(event_id),
-  CONSTRAINT fk_region
-    FOREIGN KEY(region_id)
-      REFERENCES region(region_id)
+  CONSTRAINT fk_organization
+    FOREIGN KEY(organization_id)
+      REFERENCES organization(organization_id)
 );
 
 CREATE TABLE event_payments(
@@ -146,11 +146,11 @@ CREATE TABLE points(
   event_id INT NOT NULL,
   driver_id INT NOT NULL,
   car_id INT NOT NULL,
-  region_id INT NOT NULL,
+  organization_id INT NOT NULL,
   PRIMARY KEY(points_id),
-  CONSTRAINT fk_region
-    FOREIGN KEY(region_id)
-      REFERENCES region(region_id),
+  CONSTRAINT fk_organization
+    FOREIGN KEY(organization_id)
+      REFERENCES organization(organization_id),
   CONSTRAINT fk_event
     FOREIGN KEY(event_id)
       REFERENCES event(event_id),

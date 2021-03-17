@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package autoxtime.proto;
 
-message Region {
-  optional int64 region_id = 1;
+message Organization {
+  optional int64 organization_id = 1;
   optional string name = 2;
 }

@@ -13,5 +13,5 @@ message Car {
   optional string tire_brand = 8;
   optional int64 class_id = 9;
   optional int64 driver_id = 10;
-  optional int64 region_id = 11;
+  optional int64 organization_id = 11;
 }
