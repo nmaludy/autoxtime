@@ -4,6 +4,7 @@
 #include <autoxtime/config/ConfigStore.h>
 
 // other
+#include <algorithm>
 #include <iostream>
 #include <QMetaEnum>
 #include <QDebug>
@@ -37,22 +38,26 @@ SerialPortAsyncReader::SerialPortAsyncReader(const QString& portName,
 }
 
 QSerialPortInfo SerialPortAsyncReader::findPortInfo(const QString& portName)
-{  
-  QSerialPortInfo found_port;
-  for (const QSerialPortInfo& serialPortInfo: QSerialPortInfo::availablePorts())
-  {
-    if (portName == serialPortInfo.portName())
-    {
-      found_port = serialPortInfo;
-      qInfo().nospace() << "Found port: " << serialPortInfo.portName();
-      break;
-    }
-  }
+{
+  QList<QSerialPortInfo> available_ports = QSerialPortInfo::availablePorts();
+  QList<QSerialPortInfo>::iterator iter = std::find_if(
+      available_ports.begin(),
+      available_ports.end(),
+      [=](const QSerialPortInfo& serial_port_info) {
+        return serial_port_info.portName() == portName;
+      });
 
-  if (found_port.isNull()) {
+  QSerialPortInfo found_port;
+  if (iter != available_ports.end())
+  {
+    found_port = *iter;
+    qInfo().nospace() << "Found port: " << found_port.portName();
+  }
+  else
+  {
     qInfo().nospace() << "Couldn't find port with name: " << portName << "\n"
                       <<  "Available ports are: \n";
-    for (const QSerialPortInfo& serialPortInfo: QSerialPortInfo::availablePorts())
+    for (const QSerialPortInfo& serialPortInfo: available_ports)
     {
       const QString& description = serialPortInfo.description();
       const QString& manufacturer = serialPortInfo.manufacturer();
@@ -98,7 +103,7 @@ bool SerialPortAsyncReader::tryConnect()
     }
   }
   else
-  {  
+  {
     qInfo().nospace() << "Port is open: " << mPortName;
   }
   return true;
@@ -112,7 +117,7 @@ void SerialPortAsyncReader::resetError()
                          << " , error: %2" << mSerialPort.errorString()
                          << "\n"
                          << "Clearing error and trying again";
-    
+
     if (mSerialPort.isOpen()) {
       mSerialPort.close();
     }
