@@ -20,7 +20,7 @@ class DbConnection : public QObject
 
  public:
   explicit DbConnection(QObject* pParent = nullptr);
-  DbConnection(const QString& name, QObject* pParent = nullptr);
+  explicit DbConnection(const QString& name, QObject* pParent = nullptr);
 
   QSqlDatabase& database()
   {
