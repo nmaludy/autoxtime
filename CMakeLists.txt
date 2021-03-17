@@ -98,8 +98,11 @@ if(TEST_NAME)
     set(CMAKE_CXX_CPPCHECK "cppcheck")
     list(APPEND CMAKE_CXX_CPPCHECK
       "--verbose"
+      # actually exit when it finds something wrong
       "--error-exitcode=1"
+      # excluding the tests that require includes because cppcheck has a hard time finding system includes and reports false messages when it does
       "--enable=warning,style,performance,portability"
+      # allow inline suppression of warnings in the code
       "--inline-suppr"
       # exclude 3rd party headers from being scanned
       "--suppress=*:${autoxtime_INSTALL_PREFIX}/*"

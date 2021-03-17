@@ -15,7 +15,7 @@ class FarmtekCodec : public QObject
   Q_OBJECT
 
  public:
-  FarmtekCodec(ITransport* pTransport, QObject* pParent = nullptr);
+  explicit FarmtekCodec(ITransport* pTransport, QObject* pParent = nullptr);
 
  public slots:
   void handleDataRead(const QByteArray& data);
