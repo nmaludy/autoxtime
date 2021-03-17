@@ -45,7 +45,7 @@ jobs:
       - name: Compile External
         run: |
           cmake --build build/external --parallel
-  
+
   compile:
     name: '${{ matrix.test_type }} - ${{ matrix.test_name_pretty }}'
     needs: build_external
@@ -120,7 +120,7 @@ jobs:
             os: ubuntu-latest
             qt_version: '5.15.2'
             apt_packages: 'mesa-common-dev libglu1-mesa-dev clang-tools'
-            cmd_prefix: 'scan-build'
+            cmd_prefix: 'scan-build --status-bugs --exclude build/install-prefix'
             compiler_c: clang
             compiler_cpp: clang++
     env:
@@ -163,6 +163,6 @@ jobs:
       - name: CMake Setup
         run: |
           ${{ matrix.cmd_prefix }} cmake -S . -B build ${{ matrix.cmake_args }}
-      - name: Compile 
+      - name: Compile
         run: |
           ${{ matrix.cmd_prefix }} cmake --build build

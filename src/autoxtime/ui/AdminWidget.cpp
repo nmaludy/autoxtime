@@ -74,7 +74,7 @@ void AdminWidget::rebuildTree()
   for (const autoxtime::db::OrganizationModel::ProtoPtr& p_org : mOrganizations)
   {
     QTreeWidgetItem* p_org_item =
-        new QTreeWidgetItem(mpTree, QStringList(QString::fromStdString(p_org->name())));
+        new QTreeWidgetItem(QStringList(QString::fromStdString(p_org->name())));
 
     for (const autoxtime::db::EventModel::ProtoPtr& p_event : mEvents)
     {
@@ -86,6 +86,7 @@ void AdminWidget::rebuildTree()
         new QTreeWidgetItem(p_org_item, cols);
       }
     }
+    mpTree->addTopLevelItem(p_org_item);
   }
 }
 
