@@ -13,7 +13,7 @@ class ITransport : public QObject
   Q_OBJECT
 
  public:
-  ITransport(QObject* pParent);
+  explicit ITransport(QObject* pParent = nullptr);
 
  signals:
   void dataRead(const QByteArray& data);

@@ -17,7 +17,7 @@ class AdminWidget : public QWidget
   Q_OBJECT
 
  public:
-  AdminWidget(QWidget* pParent = nullptr);
+  explicit AdminWidget(QWidget* pParent = nullptr);
 
  public slots:
   void setOrganizations(const autoxtime::db::OrganizationModel::ProtoPtrVec& orgs);

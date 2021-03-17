@@ -10,7 +10,7 @@ class MotorSportsRegReader : public ITransport
 {
   Q_OBJECT
  public:
-  MotorSportsRegReader(QObject* pParent = nullptr);
+  explicit MotorSportsRegReader(QObject* pParent = nullptr);
 
   void readFile(const QString& fileName);
 };

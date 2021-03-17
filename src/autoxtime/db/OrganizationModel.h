@@ -22,7 +22,7 @@ class OrganizationModel : public BaseModel
   typedef std::shared_ptr<Proto> ProtoPtr;
   typedef std::vector<ProtoPtr> ProtoPtrVec;
 
-  OrganizationModel(QObject* pParent = nullptr);
+  explicit OrganizationModel(QObject* pParent = nullptr);
   OrganizationModel(std::shared_ptr<DbConnection> pConnection,
                     QObject* pParent = nullptr);
 

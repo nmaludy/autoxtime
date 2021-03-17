@@ -11,6 +11,7 @@
 
 AUTOXTIME_UI_NAMESPACE_BEG
 
+
 AdminWidget::AdminWidget(QWidget* pParent)
     : QWidget(pParent),
       mpTree(new QTreeWidget(this)),
@@ -38,6 +39,14 @@ AdminWidget::AdminWidget(QWidget* pParent)
   mpEventModel->listAsync();
   mpOrganizationModel->listAsync();
 }
+
+void foo(int x)
+{
+    int buf[10];
+    if (x == 1000)
+        buf[x] = 0; // <- ERROR
+}
+
 
 void AdminWidget::setOrganizations(const autoxtime::db::OrganizationModel::ProtoPtrVec& orgs)
 {

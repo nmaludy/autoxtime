@@ -14,7 +14,7 @@ class MainWindow : public QMainWindow
   Q_OBJECT
 
  public:
-  MainWindow(QWidget* pParent = nullptr);
+  explicit MainWindow(QWidget* pParent = nullptr);
 
  private:
   RegistrationWidget* mpRegistrationWidget;

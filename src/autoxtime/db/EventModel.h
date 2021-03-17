@@ -22,7 +22,7 @@ class EventModel : public BaseModel
   typedef std::shared_ptr<Proto> ProtoPtr;
   typedef std::vector<ProtoPtr> ProtoPtrVec;
 
-  EventModel(QObject* pParent = nullptr);
+  explicit EventModel(QObject* pParent = nullptr);
   EventModel(std::shared_ptr<DbConnection> pConnection,
                     QObject* pParent = nullptr);
 

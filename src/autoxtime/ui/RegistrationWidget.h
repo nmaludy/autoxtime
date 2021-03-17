@@ -11,7 +11,7 @@ class RegistrationWidget : public QWidget
   Q_OBJECT
 
  public:
-  RegistrationWidget(QWidget* pParent = nullptr);
+  explicit RegistrationWidget(QWidget* pParent = nullptr);
 };
 
 AUTOXTIME_UI_NAMESPACE_END
