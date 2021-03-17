@@ -12,8 +12,9 @@ BaseModel::BaseModel(const std::string& table,
                      const std::string& primaryKey,
                      const google::protobuf::Descriptor* pDescriptor,
                      const google::protobuf::Reflection* pReflection,
-                     std::shared_ptr<DbConnection> pConnection)
-    : QObject(),
+                     std::shared_ptr<DbConnection> pConnection,
+                     QObject* pParent)
+    : QObject(pParent),
       mTable(table),
       mTableQ(QString::fromStdString(table)),
       mPrimaryKey(primaryKey),
@@ -21,7 +22,7 @@ BaseModel::BaseModel(const std::string& table,
       mpDescriptor(pDescriptor),
       mpReflection(pReflection),
       mpPrototype(pReflection->GetMessageFactory()->GetPrototype(mpDescriptor)),
-      mpConnection(pConnection ? pConnection : std::make_shared<DbConnection>()),
+      mpConnection(pConnection ? pConnection : std::make_shared<DbConnection>(this)),
       mFieldNames(),
       mFieldNamesToFds()
 {
@@ -64,13 +65,13 @@ int BaseModel::createOrUpdateMessage(const google::protobuf::Message* pMessage, 
   const google::protobuf::FieldDescriptor* p_fd_pk = nullptr;
   for (const google::protobuf::FieldDescriptor* p_fd : mFieldDescriptors)
   {
-    // skip the primary key field 
+    // skip the primary key field
     if (p_fd->name() == primaryKey())
     {
       p_fd_pk = p_fd;
       continue;
     }
-    
+
     if (mpReflection->HasField(*pMessage, p_fd))
     {
       fields << QString::fromStdString(p_fd->name());
@@ -109,7 +110,7 @@ int BaseModel::createOrUpdateMessage(const google::protobuf::Message* pMessage, 
   }
 
   qDebug().nospace() << "BaseMode::createOrUpdate() executing query: " << query.lastQuery();
-  
+
   // execute query and check for success
   if (!query.exec())
   {
@@ -157,7 +158,7 @@ std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
   query.prepare(query_str);
   qDebug().nospace() << "BaseMode::findMessage() executing query: " << query.lastQuery();
 
-  std::vector<std::shared_ptr<google::protobuf::Message> > results; 
+  std::vector<std::shared_ptr<google::protobuf::Message> > results;
   if (query.exec())
   {
     results = parseQueryResults(query);
@@ -180,8 +181,8 @@ std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
                 + " WHERE " + pkey + " = :" + pkey);
   query.bindValue(":" + pkey, id);
   qDebug().nospace() << "BaseMode::findById() executing query: " << query.lastQuery();
-  
-  std::vector<std::shared_ptr<google::protobuf::Message> > results; 
+
+  std::vector<std::shared_ptr<google::protobuf::Message> > results;
   if (query.exec())
   {
     results = parseQueryResults(query);
@@ -321,7 +322,7 @@ QString BaseModel::wherePrototype(const google::protobuf::Message& message)
 {
   QStringList where_parts;
   for (const google::protobuf::FieldDescriptor* p_fd : mFieldDescriptors)
-  {    
+  {
     if (mpReflection->HasField(message, p_fd))
     {
       QString qfield = QString::fromStdString(p_fd->name());
@@ -379,7 +380,7 @@ QString BaseModel::wherePrototype(const google::protobuf::Message& message)
                                 << "' "
                                 << "message types are not yet supported for parsing";
           break;
-      }      
+      }
     }
   }
   return where_parts.join(" AND ");

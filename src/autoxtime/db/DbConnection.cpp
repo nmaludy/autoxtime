@@ -8,14 +8,27 @@
 
 AUTOXTIME_DB_NAMESPACE_BEG
 
+DbConnection::DbConnection(QObject* pParent)
+    : DbConnection(QString(), pParent)
+{}
+
 DbConnection::DbConnection(const QString& name,
                            QObject* pParent)
     : QObject(pParent),
       mState(DbConnectionState::INITIALIZE),
-      mName(!name.isEmpty() ? name : QString("autoxtime::thread_") + (intptr_t)QThread::currentThreadId()),
+      mName(!name.isEmpty() ? name : QString("autoxtime::thread_") + QString::number((intptr_t)QThread::currentThreadId())),
       mDatabase(),
       mTimer()
 {
+  qInfo().nospace() << "DbConnection() - Creating db connection" << mName;
+
+  // TODO  - how should we cleanup  the database connection?
+  // problems:
+  //  - currently connections are per-thread, so multiple models share the same connection
+  //  - should we make each model per-thread a unique connection name so we can create / destroy
+  //    connections properly?
+  //  - shuold we create a thread-safe connection pool?
+  //  - should we just have one connection per thread and don't worry about it
   if (QSqlDatabase::contains(mName))
   {
     mDatabase = QSqlDatabase::database(mName);
@@ -28,7 +41,7 @@ DbConnection::DbConnection(const QString& name,
     mDatabase.setPassword(ConfigStore::valueCast("db/password", QString()));
     mDatabase.setHostName(ConfigStore::valueCast("db/host", QString("localhost")));
     mDatabase.setPort(ConfigStore::valueCast<int>("db/port", 5432));
-  }    
+  }
 
   connect(&mTimer, &QTimer::timeout,
           this,    &DbConnection::tryConnect);
@@ -43,7 +56,7 @@ void DbConnection::tryConnect()
   {
     if (mDatabase.open())
     {
-      mState = DbConnectionState::CONNECTED; 
+      mState = DbConnectionState::CONNECTED;
       emit connected(this);
     }
     else

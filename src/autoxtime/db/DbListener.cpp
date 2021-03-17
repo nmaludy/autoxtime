@@ -26,7 +26,7 @@ void DbListener::notification(const QString& name,
                               QSqlDriver::NotificationSource source,
                               const QVariant& payload)
 {
-  qInfo().nospace() << "Notification name=" << name 
+  qInfo().nospace() << "Notification name=" << name
                     << " payload=" << payload.toString();
 }
 

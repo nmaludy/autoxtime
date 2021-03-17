@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
   QApplication::setOrganizationDomain(AUTOXTIME_ORG_DOMAIN);
   QApplication::setApplicationName("autoxtime");
   QApplication::setApplicationVersion(AUTOXTIME_VERSION_STR);
-  
+
   // Process the actual command line arguments given by the user
   QCommandLineParser parser;
   initCliParser(parser);
@@ -36,10 +36,10 @@ int main(int argc, char *argv[])
   // and get what they are after
   autoxtime::ConfigStore::init(parser.value("config"), &parser);
 
-  autoxtime::MainWindow w;
+  autoxtime::ui::MainWindow w;
   w.show();
 
   //autoxtime::MotorSportsRegReader reader;
   // reader.readFile("");
-  return app.exec();  
+  return app.exec();
 }

@@ -10,12 +10,18 @@ AUTOXTIME_DB_NAMESPACE_BEG
 const std::string DriverModel::TABLE = "driver";
 const std::string DriverModel::PRIMARY_KEY = "driver_id";
 
-DriverModel::DriverModel(std::shared_ptr<DbConnection> pConnection)
+DriverModel::DriverModel(QObject* pParent)
+    : DriverModel(std::shared_ptr<DbConnection>(), pParent)
+{}
+
+DriverModel::DriverModel(std::shared_ptr<DbConnection> pConnection,
+                         QObject* pParent)
     : BaseModel(DriverModel::TABLE,
                 DriverModel::PRIMARY_KEY,
                 autoxtime::proto::Driver::GetDescriptor(),
                 autoxtime::proto::Driver::GetReflection(),
-                pConnection)
+                pConnection,
+                pParent)
 {}
 
 std::vector<std::shared_ptr<autoxtime::proto::Driver> > DriverModel::list()

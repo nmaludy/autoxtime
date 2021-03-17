@@ -23,12 +23,13 @@ class BaseModel : public QObject
 {
   Q_OBJECT;
 
- public:  
+ public:
   BaseModel(const std::string& table,
             const std::string& primaryKey,
             const google::protobuf::Descriptor* pDescriptor,
             const google::protobuf::Reflection* pReflection,
-            std::shared_ptr<DbConnection> pConnection = std::shared_ptr<DbConnection>());
+            std::shared_ptr<DbConnection> pConnection = std::shared_ptr<DbConnection>(),
+            QObject* pParent = nullptr);
   virtual ~BaseModel() = default;
 
   // pure virtual, required to be implemented by sub-classes
@@ -39,7 +40,7 @@ class BaseModel : public QObject
 
   //////////////////// list
   virtual std::vector<std::shared_ptr<google::protobuf::Message> > listMessage();
-  
+
   template <typename T>
   inline std::vector<std::shared_ptr<T> > listT();
 
@@ -48,7 +49,7 @@ class BaseModel : public QObject
 
   template <typename T>
   inline int createT(const T* pMessage);
-  
+
   template <typename T>
   inline int createT(const T& pMessage);
 
@@ -57,7 +58,7 @@ class BaseModel : public QObject
 
   template <typename T>
   inline int updateT(const T* pMessage);
-  
+
   template <typename T>
   inline int updateT(const T& pMessage);
 
@@ -65,17 +66,17 @@ class BaseModel : public QObject
   virtual int destroyById(int id);
 
   //////////////////// find
-  // TODO - should combined list() and find() ? 
+  // TODO - should combined list() and find() ?
   virtual std::vector<std::shared_ptr<google::protobuf::Message> > findMessage(const google::protobuf::Message& prototype);
-  
+
   template <typename T>
   inline std::vector<std::shared_ptr<T> > findT(const T& prototype);
-  
+
   virtual std::vector<std::shared_ptr<google::protobuf::Message> > findMessageById(int id);
 
   template <typename T>
   inline std::vector<std::shared_ptr<T> > findByIdT(int id);
-  
+
 
   //////////////////// behind the scenes stuff
   QVariant getFieldVariant(const google::protobuf::Message& message,
@@ -85,7 +86,7 @@ class BaseModel : public QObject
                        const QVariant& var);
   QString wherePrototype(const google::protobuf::Message& message);
   std::vector<std::shared_ptr<google::protobuf::Message> > parseQueryResults(QSqlQuery& query);
-  
+
   template <typename T>
   inline std::vector<std::shared_ptr<T> > messagesToT(std::vector<std::shared_ptr<google::protobuf::Message> >& messages);
 
