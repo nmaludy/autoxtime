@@ -23,8 +23,8 @@ class EventModel : public BaseModel
   typedef std::vector<ProtoPtr> ProtoPtrVec;
 
   explicit EventModel(QObject* pParent = nullptr);
-  EventModel(std::shared_ptr<DbConnection> pConnection,
-                    QObject* pParent = nullptr);
+  explicit EventModel(std::shared_ptr<DbConnection> pConnection,
+                      QObject* pParent = nullptr);
 
   ProtoPtrVec list();
   QFuture<ProtoPtrVec> listAsync();

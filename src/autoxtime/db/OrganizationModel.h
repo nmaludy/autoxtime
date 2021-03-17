@@ -23,8 +23,8 @@ class OrganizationModel : public BaseModel
   typedef std::vector<ProtoPtr> ProtoPtrVec;
 
   explicit OrganizationModel(QObject* pParent = nullptr);
-  OrganizationModel(std::shared_ptr<DbConnection> pConnection,
-                    QObject* pParent = nullptr);
+  explicit OrganizationModel(std::shared_ptr<DbConnection> pConnection,
+                             QObject* pParent = nullptr);
 
   ProtoPtrVec list();
   QFuture<ProtoPtrVec> listAsync();

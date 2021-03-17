@@ -135,10 +135,11 @@ inline std::vector<std::shared_ptr<T> > BaseModel
 {
   std::vector<std::shared_ptr<T> > results;
   results.reserve(messages.size());
-  for (std::shared_ptr<google::protobuf::Message>& msg : messages)
-  {
-    results.push_back(std::dynamic_pointer_cast<T>(msg));
-  }
+  std::transform(messages.begin(), messages.end(), std::back_inserter(results),
+                 [] (std::shared_ptr<google::protobuf::Message>& msg)
+                 {
+                   return std::dynamic_pointer_cast<T>(msg);
+                 });
   return results;
 }
 
