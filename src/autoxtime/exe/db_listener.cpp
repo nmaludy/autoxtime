@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 
   // autoxtime::db::DbListener db("driver");
 
-  // autoxtime::db::DriverModel driver;
+  autoxtime::db::DriverModel driver;
 
   // create tests
   // {
