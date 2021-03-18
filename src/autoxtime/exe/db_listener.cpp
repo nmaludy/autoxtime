@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
   QCoreApplication::setOrganizationDomain(AUTOXTIME_ORG_DOMAIN);
   QCoreApplication::setApplicationName("autoxtime_db_listener");
   QCoreApplication::setApplicationVersion(AUTOXTIME_VERSION_STR);
-  
+
   // Process the actual command line arguments given by the user
   QCommandLineParser parser;
   initCliParser(parser);
@@ -42,9 +42,9 @@ int main(int argc, char *argv[])
   // and get what they are after
   autoxtime::ConfigStore::init(parser.value("config"), &parser);
 
-  // autoxtime::db::DbListener db("autoxtime");
+  autoxtime::db::DbListener db("driver");
 
-  autoxtime::db::DriverModel driver;
+  // autoxtime::db::DriverModel driver;
 
   // create tests
   // {
@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
   //   d.set_phone_number("555-123-4567");
   //   d.set_msr_id(2);
   //   d.set_scca_id(2);
-    
+
   //   qDebug().nospace() << "num drivers update: " << driver.update(d);;
   // }
 
@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
     d.set_email("nick@test.com");
     d.set_phone_number("555-123-4567");
     d.set_msr_id(2);
-    d.set_scca_id(2);    
+    d.set_scca_id(2);
     std::vector<std::shared_ptr<autoxtime::proto::Driver> > drivers = driver.find(d);
     google::protobuf::util::JsonPrintOptions opts;
     opts.add_whitespace = true;
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
       qDebug().nospace().noquote() << "Driver from database: " << QString::fromStdString(out);
     }
   }
-  
+
   // find by ID
   {
     qDebug().nospace() << "###################### FIND BY ID";
@@ -122,5 +122,5 @@ int main(int argc, char *argv[])
     }
   }
 
-  return app.exec();  
+  return app.exec();
 }
