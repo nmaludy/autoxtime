@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
   // and get what they are after
   autoxtime::ConfigStore::init(parser.value("config"), &parser);
 
-  autoxtime::db::DbListener db("driver");
+  // autoxtime::db::DbListener db("driver");
 
   // autoxtime::db::DriverModel driver;
 
