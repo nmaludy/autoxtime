@@ -1,5 +1,7 @@
 CREATE DATABASE autoxtime;
 
+-- Tables
+
 CREATE TABLE organization(
   organization_id INT GENERATED ALWAYS AS IDENTITY,
   name TEXT NOT NULL,
@@ -66,16 +68,31 @@ CREATE TABLE car(
       REFERENCES organization(organization_id)
 );
 
-CREATE TABLE event(
-  event_id INT GENERATED ALWAYS AS IDENTITY,
+CREATE TABLE season(
+  season_id INT GENERATED ALWAYS AS IDENTITY,
   name TEXT NOT NULL,
-  date date NOT NULL,
   organization_id INT NOT NULL,
-  PRIMARY KEY(event_id),
+  PRIMARY KEY(season_id),
   CONSTRAINT fk_organization
     FOREIGN KEY(organization_id)
       REFERENCES organization(organization_id)
 );
+
+CREATE TABLE event(
+  event_id INT GENERATED ALWAYS AS IDENTITY,
+  name TEXT NOT NULL,
+  date date NOT NULL,
+  season_id INT NOT NULL,
+  organization_id INT NOT NULL,
+  PRIMARY KEY(event_id),
+  CONSTRAINT fk_organization
+    FOREIGN KEY(organization_id)
+      REFERENCES organization(organization_id),
+  CONSTRAINT fk_season
+    FOREIGN KEY(season_id)
+      REFERENCES season(season_id)
+);
+
 
 CREATE TABLE event_payments(
   amount_paid money NOT NULL,
@@ -162,36 +179,192 @@ CREATE TABLE points(
       REFERENCES car(car_id)
 );
 
-CREATE TABLE users(
-  user_id INT GENERATED ALWAYS AS IDENTITY,
-  username TEXT NOT NULL,
-  password TEXT NOT NULL,
-  driver_id INT,
-  active INT NOT NULL,
-  PRIMARY KEY(user_id),
-  CONSTRAINT fk_driver
-    FOREIGN KEY(driver_id)
-      REFERENCES driver(driver_id)
+-- Functions
+-- https://www.postgresql.org/docs/9.1/sql-createfunction.html
+
+-- https://www.postgresql.org/docs/9.1/plpgsql-trigger.html
+-- https://gist.github.com/colophonemes/9701b906c5be572a40a84b08f4d2fa4e
+CREATE FUNCTION notify_trigger() RETURNS trigger AS $trigger$
+DECLARE
+  rec RECORD;
+  payload TEXT;
+  column_name TEXT;
+  column_value TEXT;
+  payload_items TEXT[];
+BEGIN
+  -- Set record row depending on operation
+  CASE TG_OP
+  WHEN 'INSERT', 'UPDATE' THEN
+     rec := NEW;
+  WHEN 'DELETE' THEN
+     rec := OLD;
+  ELSE
+     RAISE EXCEPTION 'Unknown TG_OP: "%". Should not occur!', TG_OP;
+  END CASE;
+
+  -- Get required fields
+  FOREACH column_name IN ARRAY TG_ARGV LOOP
+    EXECUTE format('SELECT $1.%I::TEXT', column_name)
+    INTO column_value
+    USING rec;
+    payload_items := array_append(payload_items, '"' || replace(column_name, '"', '\"') || '":"' || replace(column_value, '"', '\"') || '"');
+  END LOOP;
+
+  -- Build the payload
+  payload := ''
+              || '{'
+              || '"timestamp":"' || CURRENT_TIMESTAMP                    || '",'
+              || '"operation":"' || TG_OP                                || '",'
+              || '"data":{'      || array_to_string(payload_items, ',')  || '}'
+              || '}';
+
+  -- Notify the channel
+  PERFORM pg_notify(TG_TABLE_NAME, payload);
+
+  RETURN rec;
+END;
+$trigger$ LANGUAGE plpgsql;
+
+-- Triggers
+-- https://www.postgresql.org/docs/9.1/sql-createtrigger.html
+
+CREATE TRIGGER notify_organization
+  AFTER INSERT OR UPDATE OR DELETE
+  ON organization
+FOR EACH ROW EXECUTE PROCEDURE notify_trigger(
+  'organization_id',
+  'name'
 );
 
-CREATE TABLE role (
-  role_id INT GENERATED ALWAYS AS IDENTITY,
-  role TEXT NOT NULL,
-  PRIMARY KEY (role_id)
+CREATE TRIGGER notify_work_assignments
+  AFTER INSERT OR UPDATE OR DELETE
+  ON work_assignments
+FOR EACH ROW EXECUTE PROCEDURE notify_trigger(
+  'work_id',
+  'name'
 );
 
-CREATE TABLE user_role (
-  user_id INT,
-  role_id INT,
-  PRIMARY KEY (user_id, role_id),
-  CONSTRAINT fk_users
-    FOREIGN KEY(user_id)
-      REFERENCES users(user_id),
-  CONSTRAINT fk_role
-    FOREIGN KEY(role_id)
-      REFERENCES role(role_id)
+CREATE TRIGGER notify_driver
+  AFTER INSERT OR UPDATE OR DELETE
+  ON driver
+FOR EACH ROW EXECUTE PROCEDURE notify_trigger(
+  'driver_id',
+  'first_name',
+  'last_name',
+  'email',
+  'phone_number',
+  'msr_id',
+  'scca_id',
+  'work_req',
+  'work_skill'
 );
 
-INSERT INTO role (role) VALUES ('user_read');
-INSERT INTO role (role) VALUES ('user_write');
-INSERT INTO role (role) VALUES ('admin');
+CREATE TRIGGER notify_car_class
+  AFTER INSERT OR UPDATE OR DELETE
+  ON car_class
+FOR EACH ROW EXECUTE PROCEDURE notify_trigger(
+  'car_class_id',
+  'name',
+  'organization_id',
+  'pax_formula'
+);
+
+CREATE TRIGGER notify_car
+  AFTER INSERT OR UPDATE OR DELETE
+  ON car
+FOR EACH ROW EXECUTE PROCEDURE notify_trigger(
+  'car_id',
+  'car_number',
+  'year',
+  'make',
+  'model',
+  'color',
+  'sponsor',
+  'tire_brand',
+  'car_class_id',
+  'driver_id',
+  'organization_id'
+);
+
+CREATE TRIGGER notify_season
+  AFTER INSERT OR UPDATE OR DELETE
+  ON season
+FOR EACH ROW EXECUTE PROCEDURE notify_trigger(
+  'season_id',
+  'name',
+  'organization_id'
+);
+
+CREATE TRIGGER notify_event
+  AFTER INSERT OR UPDATE OR DELETE
+  ON event
+FOR EACH ROW EXECUTE PROCEDURE notify_trigger(
+  'event_id',
+  'name',
+  'date',
+  'season_id'
+  'organization_id'
+);
+
+CREATE TRIGGER notify_event_payments
+  AFTER INSERT OR UPDATE OR DELETE
+  ON event_payments
+FOR EACH ROW EXECUTE PROCEDURE notify_trigger(
+  'amount_paid',
+  'amount_due',
+  'membership_type',
+  'event_id',
+  'driver_id'
+);
+
+CREATE TRIGGER notify_run
+  AFTER INSERT OR UPDATE OR DELETE
+  ON run
+FOR EACH ROW EXECUTE PROCEDURE notify_trigger(
+  'run_id',
+  'start_time',
+  'sector1_time',
+  'sector2_time',
+  'end_time',
+  'pax_time',
+  'dnf',
+  'scored',
+  'event_id',
+  'driver_id',
+  'car_id'
+);
+
+CREATE TRIGGER notify_raw_times
+  AFTER INSERT OR UPDATE OR DELETE
+  ON raw_times
+FOR EACH ROW EXECUTE PROCEDURE notify_trigger(
+  'raw_id',
+  'start_time',
+  'sector1_time',
+  'sector2_time',
+  'end_time',
+  'run_id'
+);
+
+CREATE TRIGGER notify_penalties
+  AFTER INSERT OR UPDATE OR DELETE
+  ON penalties
+FOR EACH ROW EXECUTE PROCEDURE notify_trigger(
+  'penalty',
+  'raw_id',
+  'run_id'
+);
+
+CREATE TRIGGER notify_points
+  AFTER INSERT OR UPDATE OR DELETE
+  ON points
+FOR EACH ROW EXECUTE PROCEDURE notify_trigger(
+  'points_id',
+  'points',
+  'event_id',
+  'driver_id',
+  'car_id',
+  'organization_id'
+);
+
+
