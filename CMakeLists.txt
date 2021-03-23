@@ -40,8 +40,8 @@ option(BUILD_SHARED_LIBS "Build libraries as SHARED" ON)
 # set(CMAKE_EXE_LINKER_FLAGS "-static")
 
 # turn on debug builds
-# set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_BUILD_TYPE RelWithDebInfo)
+set(CMAKE_BUILD_TYPE Debug)
+# set(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 # output our executables in the build/ directory
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")

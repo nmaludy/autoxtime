@@ -58,6 +58,9 @@ int BaseModel::updateMessage(const google::protobuf::Message* pMessage)
 
 int BaseModel::createOrUpdateMessage(const google::protobuf::Message* pMessage, bool bCreate)
 {
+  QElapsedTimer timer;
+  timer.start();
+
   QSqlQuery query(connection()->database());
   QStringList fields;
   std::vector<const google::protobuf::FieldDescriptor*> set_fds;
@@ -119,11 +122,16 @@ int BaseModel::createOrUpdateMessage(const google::protobuf::Message* pMessage, 
                           << query.lastError().text();
     return -1;
   }
+  qDebug().nospace() << "BaseMode::createOrUpdate() done query: " << query.lastQuery()
+                     << " [" << timer.nsecsElapsed()/1.0e6 << "ms]";
   return query.numRowsAffected();
 }
 
 int BaseModel::destroyById(int id)
 {
+  QElapsedTimer timer;
+  timer.start();
+
   QSqlQuery query(connection()->database());
   const QString& pkey = primaryKeyQ();
   query.prepare("DELETE FROM " + tableQ() + " WHERE " + pkey + " = :" + pkey);
@@ -136,12 +144,17 @@ int BaseModel::destroyById(int id)
                           << "Error executing query " << query.lastQuery() << " - "
                           << query.lastError().text();
   }
+  qDebug().nospace() << "BaseMode::destroyById() done query: " << query.lastQuery()
+                     << " [" << timer.nsecsElapsed()/1.0e6 << "ms]";
   return query.numRowsAffected();
 }
 
 std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
 ::findMessage(const google::protobuf::Message& prototype)
 {
+  QElapsedTimer timer;
+  timer.start();
+
   // if we initialize the query with the query string, it will execute immediate and
   // we can't capture the error message
   QSqlQuery query(connection()->database());
@@ -169,12 +182,17 @@ std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
     qCritical().nospace() << "Error executing query '" << query.lastQuery() << "' - "
                           << query.lastError().text();
   }
+  qDebug().nospace() << "BaseMode::findMessage() done query: " << query.lastQuery()
+                     << " [" << timer.nsecsElapsed()/1.0e6 << "ms]";
   return results;
 }
 
 std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
 ::findMessageById(int id)
 {
+  QElapsedTimer timer;
+  timer.start();
+
   QSqlQuery query(connection()->database());
   const QString& pkey = primaryKeyQ();
   query.prepare("SELECT " + mFieldNames.join(", ") + " FROM " + tableQ()
@@ -193,6 +211,8 @@ std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
     qCritical().nospace() << "Error executing query '" << query.lastQuery() << "' - "
                           << query.lastError().text();
   }
+  qDebug().nospace() << "BaseMode::findMessageById() done query: " << query.lastQuery()
+                     << " [" << timer.nsecsElapsed()/1.0e6 << "ms]";
   return results;
 }
 
