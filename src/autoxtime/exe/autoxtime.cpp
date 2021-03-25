@@ -1,4 +1,5 @@
 #include <autoxtime/autoxtime.h>
+#include <autoxtime/log/Logger.h>
 #include <autoxtime/ui/MainWindow.h>
 #include <autoxtime/config/ConfigStore.h>
 #include <autoxtime/transport/MotorSportsRegReader.h>
@@ -31,10 +32,17 @@ int main(int argc, char *argv[])
   initCliParser(parser);
   parser.process(app);
 
+  // initialize our logger
+  autoxtime::Logger::init();
+
   // initialize our config with our parser and our map before initializing any other
   // classes, this way other classes can just call ConfigStore::instance().value()
   // and get what they are after
   autoxtime::ConfigStore::init(parser.value("config"), &parser);
+
+  // TODO read logging settings from config as an otpion
+  //      we'll initialize the logger first (so we can log to console at least)
+  //      then adjust after the config is initialized
 
   autoxtime::ui::MainWindow w;
   w.show();

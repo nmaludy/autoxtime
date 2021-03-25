@@ -2,6 +2,7 @@
 #define AUTOXTIME_CONFIG_CONFIGSTORE
 
 #include <autoxtime/autoxtime.h>
+#include <autoxtime/log/Log.h>
 
 // Qt
 #include <QDebug>
@@ -20,7 +21,7 @@ class ConfigStore : public QObject
 
  public:
   typedef QHash<QString, QStringList> ConfigCliOptsMap;
-  
+
   static ConfigStore& init(const QString& filePath = QString(),
                            QCommandLineParser* pParser = nullptr,
                            const ConfigCliOptsMap& configCliMap = ConfigCliOptsMap());
@@ -34,11 +35,11 @@ class ConfigStore : public QObject
   {
     QVariant data = value(key, defaultValue);
     T value_t = data.value<T>();
-    qInfo().nospace() << "  cast<T> value = " << value_t;
+    AXT_DEBUG << "  cast<T> value = " << value_t;
     return value_t;
   }
   static void setValue(const QString& key, const QVariant& value);
-      
+
  private:
   ConfigStore(const QString& filePath,
               QCommandLineParser* pParser,

@@ -29,8 +29,8 @@ class EventModel : public BaseModel
   ProtoPtrVec list();
   QFuture<ProtoPtrVec> listAsync();
 
-  int create(const Proto& event);
-  int update(const Proto& event);
+  ProtoPtrVec create(const Proto& event);
+  ProtoPtrVec update(const Proto& event);
 
   ProtoPtrVec find(const Proto& prototype);
   ProtoPtrVec findById(int id);

@@ -29,12 +29,14 @@ std::vector<std::shared_ptr<autoxtime::proto::Driver> > DriverModel::list()
   return BaseModel::listT<autoxtime::proto::Driver>();
 }
 
-int DriverModel::create(const autoxtime::proto::Driver& driver)
+std::vector<std::shared_ptr<autoxtime::proto::Driver> > DriverModel
+::create(const autoxtime::proto::Driver& driver)
 {
   return BaseModel::createT(driver);
 }
 
-int DriverModel::update(const autoxtime::proto::Driver& driver)
+std::vector<std::shared_ptr<autoxtime::proto::Driver> > DriverModel
+::update(const autoxtime::proto::Driver& driver)
 {
   return BaseModel::updateT(driver);
 }

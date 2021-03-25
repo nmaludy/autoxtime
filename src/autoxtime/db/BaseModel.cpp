@@ -46,17 +46,20 @@ std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel::listMessage(
   return findMessage(*mpPrototype);
 }
 
-int BaseModel::createMessage(const google::protobuf::Message* pMessage)
+std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
+::createMessage(const google::protobuf::Message* pMessage)
 {
   return createOrUpdateMessage(pMessage, true);
 }
 
-int BaseModel::updateMessage(const google::protobuf::Message* pMessage)
+std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
+::updateMessage(const google::protobuf::Message* pMessage)
 {
   return createOrUpdateMessage(pMessage, false);
 }
 
-int BaseModel::createOrUpdateMessage(const google::protobuf::Message* pMessage, bool bCreate)
+std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
+::createOrUpdateMessage(const google::protobuf::Message* pMessage, bool bCreate)
 {
   QElapsedTimer timer;
   timer.start();
@@ -88,14 +91,16 @@ int BaseModel::createOrUpdateMessage(const google::protobuf::Message* pMessage, 
   {
     // create our INSERT query with the data from the message as bindings
     query.prepare("INSERT INTO " + tableQ() + " (" + fields.join(", ") + ")"
-                  + " VALUES (:" + fields.join(", :") + ")");
+                  + " VALUES (:" + fields.join(", :") + ")"
+                  + " RETURNING " + primaryKeyQ());
   }
   else
   {
     // update is only different in the way it formats the query
     query.prepare("UPDATE " + tableQ() + " SET (" + fields.join(", ") + ")"
                   + " = (:" + fields.join(", :") + ")"
-                  + "WHERE " + primaryKeyQ() + " = :" + primaryKeyQ());
+                  + " WHERE " + primaryKeyQ() + " = :" + primaryKeyQ()
+                  + " RETURNING " + primaryKeyQ());
     // bind the primary key, only for updates
     if (p_fd_pk != nullptr)
     {
@@ -106,25 +111,37 @@ int BaseModel::createOrUpdateMessage(const google::protobuf::Message* pMessage, 
 
   // bind only the fields that are set
   // this must occur after we call prepare()
+  QString bound_values;
+  QTextStream stream(&bound_values);
   for (const google::protobuf::FieldDescriptor* p_fd : set_fds)
   {
-    query.bindValue(QString::fromStdString(":" + p_fd->name()),
-                    getFieldVariant(*pMessage, p_fd));
+    QString field = QString::fromStdString(":" + p_fd->name());
+    QVariant value = getFieldVariant(*pMessage, p_fd);
+    query.bindValue(field, value);
+    stream << "    " << field << " = " << value.toString() << "\n";
   }
 
-  qDebug().nospace() << "BaseMode::createOrUpdate() executing query: " << query.lastQuery();
+  qDebug().nospace().noquote()
+      << "BaseMode::createOrUpdate() executing query: " << query.lastQuery()
+      << "\n" << bound_values;
 
   // execute query and check for success
-  if (!query.exec())
+  std::vector<std::shared_ptr<google::protobuf::Message> > results;
+  if (query.exec())
+  {
+    results = parseQueryResults(query);
+  }
+  else
   {
     // TODO what in case of an error?
     qCritical().nospace() << "Error executing query '" << query.lastQuery() << "' - "
                           << query.lastError().text();
-    return -1;
   }
-  qDebug().nospace() << "BaseMode::createOrUpdate() done query: " << query.lastQuery()
-                     << " [" << timer.nsecsElapsed()/1.0e6 << "ms]";
-  return query.numRowsAffected();
+  qDebug().nospace().noquote()
+      << "BaseMode::createOrUpdate() done query: " << query.lastQuery()
+      << " [" << timer.nsecsElapsed()/1.0e6 << "ms]"
+      << "\n" << bound_values;
+  return results;
 }
 
 int BaseModel::destroyById(int id)
@@ -136,7 +153,8 @@ int BaseModel::destroyById(int id)
   const QString& pkey = primaryKeyQ();
   query.prepare("DELETE FROM " + tableQ() + " WHERE " + pkey + " = :" + pkey);
   query.bindValue(":" + pkey, id);
-  qDebug().nospace() << "BaseMode::destroyById() executing query: " << query.lastQuery();
+  qDebug().nospace() << "BaseMode::destroyById() executing query: " << query.lastQuery()
+                     << "\n" << ":" + pkey << "=" << id;
   bool res = query.exec();
   if (!res)
   {
@@ -161,6 +179,7 @@ std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
   QString query_str( "SELECT " + mFieldNames.join(", ") + " FROM " + tableQ());
 
   // create a where clause
+  // TODO should probably parameterize this
   QString where = wherePrototype(prototype);
   if (!where.isEmpty())
   {
@@ -198,7 +217,8 @@ std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
   query.prepare("SELECT " + mFieldNames.join(", ") + " FROM " + tableQ()
                 + " WHERE " + pkey + " = :" + pkey);
   query.bindValue(":" + pkey, id);
-  qDebug().nospace() << "BaseMode::findById() executing query: " << query.lastQuery();
+  qDebug().nospace() << "BaseMode::findById() executing query: " << query.lastQuery()
+                     << "\n" << ":" + pkey << "=" << id;
 
   std::vector<std::shared_ptr<google::protobuf::Message> > results;
   if (query.exec())

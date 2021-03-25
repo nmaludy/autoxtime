@@ -46,12 +46,12 @@ QFuture<EventModel::ProtoPtrVec> EventModel::listAsync()
   });
 }
 
-int EventModel::create(const EventModel::Proto& event)
+EventModel::ProtoPtrVec EventModel::create(const EventModel::Proto& event)
 {
   return BaseModel::createT(event);
 }
 
-int EventModel::update(const EventModel::Proto& event)
+EventModel::ProtoPtrVec EventModel::update(const EventModel::Proto& event)
 {
   return BaseModel::updateT(event);
 }

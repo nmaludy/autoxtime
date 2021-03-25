@@ -46,12 +46,14 @@ QFuture<OrganizationModel::ProtoPtrVec> OrganizationModel::listAsync()
   });
 }
 
-int OrganizationModel::create(const OrganizationModel::Proto& organization)
+OrganizationModel::ProtoPtrVec OrganizationModel
+::create(const OrganizationModel::Proto& organization)
 {
   return BaseModel::createT(organization);
 }
 
-int OrganizationModel::update(const OrganizationModel::Proto& organization)
+OrganizationModel::ProtoPtrVec OrganizationModel
+::update(const OrganizationModel::Proto& organization)
 {
   return BaseModel::updateT(organization);
 }

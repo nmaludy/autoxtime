@@ -38,7 +38,8 @@ QVariant ConfigStore::value(const QString& key,
 
   ConfigCliOptsMap::const_iterator iter = configCliMap.find(key);
   QVariant value;
-  if (iter != configCliMap.end()) {
+  if (iter != configCliMap.end())
+  {
     const QStringList& cli_opt_names = *iter;
 
     // compare the CLI option map names to the options passed in on the command line
@@ -52,22 +53,22 @@ QVariant ConfigStore::value(const QString& key,
       const QString& cli_opt = *c_iter;
       value = QVariant(pParser->value(cli_opt));
       QString cli_opt_pretty = (cli_opt.size() == 1) ? "-" + cli_opt : "--" + cli_opt;
-      qInfo().nospace() << "config[" << key << "] cli override ("
-                        << cli_opt_pretty
-                        << ") = " << value;
+      AXT_INFO << "config[" << key << "] cli override ("
+               << cli_opt_pretty
+               << ") = " << value;
       return value;
     }
   }
 
   value = ConfigStore::init().mSettings.value(key, defaultValue);
-  qInfo().nospace() << "config[" << key << "] read = " << value;
+  AXT_INFO << "config[" << key << "] read = " << value;
   return value;
 }
 
 void ConfigStore::setValue(const QString& key,
                            const QVariant& value)
 {
-  qInfo().nospace() << "config[" << key << "] write = " << value;
+  AXT_INFO << "config[" << key << "] write = " << value;
   ConfigStore::init().mSettings.setValue(key, value);
   ConfigStore::init().mSettings.sync(); // save changes to disk
 }

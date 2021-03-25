@@ -23,8 +23,8 @@ class DriverModel : public BaseModel
               QObject* pParent = nullptr);
 
   std::vector<std::shared_ptr<autoxtime::proto::Driver> > list();
-  int create(const autoxtime::proto::Driver& driver);
-  int update(const autoxtime::proto::Driver& driver);
+  std::vector<std::shared_ptr<autoxtime::proto::Driver> > create(const autoxtime::proto::Driver& driver);
+  std::vector<std::shared_ptr<autoxtime::proto::Driver> > update(const autoxtime::proto::Driver& driver);
 
   std::vector<std::shared_ptr<autoxtime::proto::Driver> > find(const autoxtime::proto::Driver& prototype);
   std::vector<std::shared_ptr<autoxtime::proto::Driver> > findById(int id);

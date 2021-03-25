@@ -29,8 +29,8 @@ class OrganizationModel : public BaseModel
   ProtoPtrVec list();
   QFuture<ProtoPtrVec> listAsync();
 
-  int create(const Proto& organization);
-  int update(const Proto& organization);
+  ProtoPtrVec create(const Proto& organization);
+  ProtoPtrVec update(const Proto& organization);
 
   ProtoPtrVec find(const Proto& prototype);
   ProtoPtrVec findById(int id);

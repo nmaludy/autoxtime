@@ -108,12 +108,14 @@ AdminWidget::AdminWidget(QWidget* pParent)
 
 void AdminWidget::setOrganizations(const autoxtime::db::OrganizationModel::ProtoPtrVec& orgs)
 {
+  // TODO store these in a better way
   mOrganizations = orgs;
   rebuildTree();
 }
 
 void AdminWidget::setEvents(const autoxtime::db::EventModel::ProtoPtrVec& events)
 {
+  // TODO store these in a better way
   mEvents = events;
   rebuildTree();
 }
@@ -317,33 +319,54 @@ void AdminWidget::eventSaveClicked(bool checked)
   autoxtime::proto::Event event;
   event.set_name(mpEventNameLineEdit->text().toStdString());
   event.set_date(mpEventDateEdit->date().toString(Qt::ISODate).toStdString());
-  QTreeWidgetItem* p_item = mpTree->currentItem();
-  if (p_item == nullptr)
+  QTreeWidgetItem* p_event_item = mpTree->currentItem();
+  if (p_event_item == nullptr)
   {
     return;
   }
   // set the organization from the parent item
-  QTreeWidgetItem* p_org_item = p_item->parent();
+  QTreeWidgetItem* p_org_item = p_event_item->parent();
   event.set_organization_id(p_org_item->data(TREE_COLUMN_ID, TREE_ROLE_ID).toInt());
 
   if (mpAddItem)
   {
     // discard old thing we were adding (this removes it from the tree)
-    delete mpAddItem;
+    // this will reappear when we get an event about it
     mpAddItem = nullptr;
 
-    mpEventModel->create(event);
+    // create the event, receive back the message that contains the ID of the newly
+    // created even
+    autoxtime::db::EventModel::ProtoPtrVec events = mpEventModel->create(event);
+    if (events.size() > 1)
+    {
+      // set the newly created event ID on our item
+      int event_id = events[0]->event_id();
+      p_event_item->setData(TREE_COLUMN_ID, TREE_ROLE_ID, QVariant::fromValue(event_id));
+
+      // add our event to our collections
+      mEvents.push_back(events[0]);
+      mEventTreeItems[event_id] = p_event_item;
+    }
   }
   else
   {
     // get the ID in the item so we can set it here, only need this for updates
-    event.set_event_id(p_item->data(TREE_COLUMN_ID, TREE_ROLE_ID).toInt());
+    event.set_event_id(p_event_item->data(TREE_COLUMN_ID, TREE_ROLE_ID).toInt());
     mpEventModel->update(event);
   }
 
+  // update the tree item with the current info from the form
+  p_event_item->setText(TREE_COLUMN_NAME, QString::fromStdString(event.name()));
+  p_event_item->setText(TREE_COLUMN_DATE, QString::fromStdString(event.date()));
+  p_event_item->setData(TREE_COLUMN_ID, TREE_ROLE_ID, QVariant::fromValue(event.event_id()));
+
   // re-enable the tree since we're done editing
   mpTree->setEnabled(true);
+  mpTree->setCurrentItem(p_event_item);
 
+  // re-enable the add/delete buttons
+  mpAddButton->setEnabled(true);
+  mpDeleteButton->setEnabled(true);
 }
 
 void AdminWidget::eventCancelClicked(bool checked)
