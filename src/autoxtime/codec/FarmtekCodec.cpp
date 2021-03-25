@@ -1,8 +1,6 @@
 #include <autoxtime/codec/FarmtekCodec.h>
 #include <autoxtime/transport/ITransport.h>
-
-// Qt
-#include <QDebug>
+#include <autoxtime/log/Log.h>
 
 AUTOXTIME_NAMESPACE_BEG
 
@@ -29,13 +27,13 @@ FarmtekCodec::FarmtekCodec(ITransport* pTransport, QObject* pParent)
 void FarmtekCodec::handleDataRead(const QByteArray& data)
 {
   // for (int i = 0; i < read_data.size(); ++i) {
-  //    qInfo().nospace() << "handleReadyRead(): read data[" << i << "]: " << (int)read_data[i];
+  //    AXT_INFO << "handleReadyRead(): read data[" << i << "]: " << (int)read_data[i];
   // }
   mDataBuffer.append(data);
-  
+
   // yes, only search the newest line added so we don't have to scan the entire buffer
   // for stuff we already know doesn't have a newline
-    
+
   // TODO make this more efficient so we're not scanning multiple times
   // TODO should we split up the data here or should we just pass it on to the codec "raw"
   //     then let the codec buffer and figure it out?
@@ -46,14 +44,14 @@ void FarmtekCodec::handleDataRead(const QByteArray& data)
     for (const QByteArray& line : lines) {
       if (line.size() != FARMTEK_MSG_EXPECTED_SIZE)
       {
-        qWarning().nospace()
+        AXT_WARNING
             << "Received Farmtek data that is not the correct size. "
             << "Expected=" << FARMTEK_MSG_EXPECTED_SIZE
             << " Received=" << line.size()
             << " Data=" << line;
         continue;
       }
-      qInfo().nospace() << "Received a Farmtek string of correct size: " << line;
+      AXT_INFO << "Received a Farmtek string of correct size: " << line;
 
       // byte  0 = msg type, either "B" for break or "R" for reset
       char msg_type = line[0];
@@ -63,15 +61,15 @@ void FarmtekCodec::handleDataRead(const QByteArray& data)
       QString timestamp_str = line.mid(2, 10);
       double timestamp_125us = timestamp_str.toDouble();
       double timestamp_s = timestamp_125us / 8000.0;
-      
-      qInfo().nospace()
+
+      AXT_INFO
           << "msg_type=" << msg_type
           << " eye=" << eye
           << " timestamp_str=" << timestamp_str
           << " timestamp_s=" << timestamp_s;
     }
   }
-    
+
 }
 
 AUTOXTIME_NAMESPACE_END

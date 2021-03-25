@@ -1,9 +1,8 @@
 #include <autoxtime/db/DbConnection.h>
 #include <autoxtime/config/ConfigStore.h>
+#include <autoxtime/log/Log.h>
 
 #include <iostream>
-
-#include <QDebug>
 #include <QTimer>
 
 AUTOXTIME_DB_NAMESPACE_BEG
@@ -20,7 +19,7 @@ DbConnection::DbConnection(const QString& name,
       mDatabase(),
       mTimer()
 {
-  qInfo().nospace() << "DbConnection() - Creating db connection" << mName;
+  AXT_INFO << "DbConnection() - Creating db connection" << mName;
 
   // TODO  - how should we cleanup  the database connection?
   // problems:
@@ -67,7 +66,7 @@ void DbConnection::tryConnect()
         mState = DbConnectionState::DISCONNECTED;
         emit disconnected(this);
       }
-      qWarning().nospace() << "Failed to open database: " + mDatabase.lastError().text();
+      AXT_WARNING << "Failed to open database: " + mDatabase.lastError().text();
     }
   }
 }

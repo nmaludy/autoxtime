@@ -1,5 +1,6 @@
 #include <autoxtime/autoxtime.h>
 #include <autoxtime/config/ConfigStore.h>
+#include <autoxtime/log/Log.h>
 #include <autoxtime/db/DbListener.h>
 #include <autoxtime/db/DriverModel.h>
 #include <autoxtime/proto/driver.pb.h>
@@ -58,7 +59,7 @@ int main(int argc, char *argv[])
   //   driver.create(d);
   // }
   // delete tests
-  // qDebug().nospace() << "num drivers deleted: " << driver.destroyById(8);
+  // AXT_DEBUG << "num drivers deleted: " << driver.destroyById(8);
 
   // update test
   // {
@@ -71,12 +72,12 @@ int main(int argc, char *argv[])
   //   d.set_msr_id(2);
   //   d.set_scca_id(2);
 
-  //   qDebug().nospace() << "num drivers update: " << driver.update(d);;
+  //   AXT_DEBUG << "num drivers update: " << driver.update(d);;
   // }
 
   // find test
   {
-    qDebug().nospace() << "###################### FIND";
+    AXT_DEBUG << "###################### FIND";
     autoxtime::proto::Driver d;
     d.set_driver_id(9);
     d.set_first_name("junk");
@@ -92,13 +93,13 @@ int main(int argc, char *argv[])
     for (const std::shared_ptr<autoxtime::proto::Driver>& d : drivers)
     {
       google::protobuf::util::MessageToJsonString(*(d.get()), &out, opts);
-      qDebug().nospace().noquote() << "Driver from database: " << QString::fromStdString(out);
+      AXT_DEBUG << "Driver from database: " << QString::fromStdString(out);
     }
   }
 
   // find by ID
   {
-    qDebug().nospace() << "###################### FIND BY ID";
+    AXT_DEBUG << "###################### FIND BY ID";
     std::vector<std::shared_ptr<autoxtime::proto::Driver> > drivers = driver.findById(2);
     google::protobuf::util::JsonPrintOptions opts;
     opts.add_whitespace = true;
@@ -106,19 +107,19 @@ int main(int argc, char *argv[])
     for (const std::shared_ptr<autoxtime::proto::Driver>& d : drivers)
     {
       google::protobuf::util::MessageToJsonString(*(d.get()), &out, opts);
-      qDebug().nospace().noquote() << "Driver from database: " << QString::fromStdString(out);
+      AXT_DEBUG << "Driver from database: " << QString::fromStdString(out);
     }
   }
 
   // list test
   {
-    qDebug().nospace() << "###################### LIST";
+    AXT_DEBUG << "###################### LIST";
     std::vector<std::shared_ptr<autoxtime::proto::Driver> > drivers = driver.list();
     for (const std::shared_ptr<autoxtime::proto::Driver>& d : drivers)
     {
       std::string out;
       google::protobuf::util::MessageToJsonString(*(d.get()), &out);
-      qDebug().nospace() << "Driver from database: " << QString::fromStdString(out);
+      AXT_DEBUG << "Driver from database: " << QString::fromStdString(out);
     }
   }
 

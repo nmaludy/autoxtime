@@ -1,8 +1,11 @@
 #include <autoxtime/ui/AdminWidget.h>
 
+// autoxtime
+#include <autoxtime/log/Log.h>
 #include <autoxtime/proto/organization.pb.h>
 #include <autoxtime/proto/event.pb.h>
 
+// Qt
 #include <QDateEdit>
 #include <QGridLayout>
 #include <QLabel>
@@ -211,7 +214,7 @@ void AdminWidget::rebuildTreeEvent(const autoxtime::db::EventModel::ProtoPtr& pE
 
 void AdminWidget::treeSelectionChanged(QTreeWidgetItem* pCurrent, QTreeWidgetItem* pPrevious)
 {
-  qInfo().nospace() << "Selected: " << pCurrent;
+  AXT_INFO << "Selected: " << pCurrent;
   bool b_event_item = pCurrent && pCurrent->type() == TREE_ITEM_TYPE_EVENT;
   if (b_event_item)
   {
@@ -261,11 +264,11 @@ void AdminWidget::addClicked(bool checked)
   switch (p_item->type())
   {
     case TREE_ITEM_TYPE_ORGANIZATION:
-      qInfo().nospace() << "Clicked on org";
+      AXT_INFO << "Clicked on org";
       p_org_item = p_item;
       break;
     case TREE_ITEM_TYPE_EVENT:
-      qInfo().nospace() << "Clicked on event";
+      AXT_INFO << "Clicked on event";
       p_org_item = p_item->parent();
       break;
     default:
@@ -299,11 +302,11 @@ void AdminWidget::deleteClicked(bool checked)
   switch (p_item->type())
   {
     case TREE_ITEM_TYPE_ORGANIZATION:
-      qInfo().nospace() << "Delete org: " << id;
+      AXT_INFO << "Delete org: " << id;
       mpOrganizationModel->destroyById(id);
       break;
     case TREE_ITEM_TYPE_EVENT:
-      qInfo().nospace() << "Delete event: " << id;
+      AXT_INFO << "Delete event: " << id;
       mpEventModel->destroyById(id);
       break;
     default:

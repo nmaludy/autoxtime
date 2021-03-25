@@ -5,7 +5,6 @@
 #include <autoxtime/log/Log.h>
 
 // Qt
-#include <QDebug>
 #include <QHash>
 #include <QObject>
 #include <QSettings>

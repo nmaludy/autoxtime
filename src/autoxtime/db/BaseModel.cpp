@@ -1,10 +1,13 @@
 #include <autoxtime/db/BaseModel.h>
 
+// autoxtime
 #include <autoxtime/db/DbConnection.h>
+#include <autoxtime/log/Log.h>
+
+// protobuf
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/message.h>
 
-#include <QtDebug>
 
 AUTOXTIME_DB_NAMESPACE_BEG
 
@@ -121,7 +124,7 @@ std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
     stream << "    " << field << " = " << value.toString() << "\n";
   }
 
-  qDebug().nospace().noquote()
+  AXT_DEBUG
       << "BaseMode::createOrUpdate() executing query: " << query.lastQuery()
       << "\n" << bound_values;
 
@@ -134,10 +137,10 @@ std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
   else
   {
     // TODO what in case of an error?
-    qCritical().nospace() << "Error executing query '" << query.lastQuery() << "' - "
-                          << query.lastError().text();
+    AXT_ERROR << "Error executing query '" << query.lastQuery() << "' - "
+              << query.lastError().text();
   }
-  qDebug().nospace().noquote()
+  AXT_DEBUG
       << "BaseMode::createOrUpdate() done query: " << query.lastQuery()
       << " [" << timer.nsecsElapsed()/1.0e6 << "ms]"
       << "\n" << bound_values;
@@ -153,17 +156,17 @@ int BaseModel::destroyById(int id)
   const QString& pkey = primaryKeyQ();
   query.prepare("DELETE FROM " + tableQ() + " WHERE " + pkey + " = :" + pkey);
   query.bindValue(":" + pkey, id);
-  qDebug().nospace() << "BaseMode::destroyById() executing query: " << query.lastQuery()
-                     << "\n" << ":" + pkey << "=" << id;
+  AXT_DEBUG << "BaseMode::destroyById() executing query: " << query.lastQuery()
+            << "\n" << ":" + pkey << "=" << id;
   bool res = query.exec();
   if (!res)
   {
-    qCritical().nospace() << "BaseModel::destroyById() - "
-                          << "Error executing query " << query.lastQuery() << " - "
-                          << query.lastError().text();
+    AXT_ERROR << "BaseModel::destroyById() - "
+              << "Error executing query " << query.lastQuery() << " - "
+              << query.lastError().text();
   }
-  qDebug().nospace() << "BaseMode::destroyById() done query: " << query.lastQuery()
-                     << " [" << timer.nsecsElapsed()/1.0e6 << "ms]";
+  AXT_DEBUG << "BaseMode::destroyById() done query: " << query.lastQuery()
+            << " [" << timer.nsecsElapsed()/1.0e6 << "ms]";
   return query.numRowsAffected();
 }
 
@@ -188,7 +191,7 @@ std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
 
   // prepare our query
   query.prepare(query_str);
-  qDebug().nospace() << "BaseMode::findMessage() executing query: " << query.lastQuery();
+  AXT_DEBUG << "BaseMode::findMessage() executing query: " << query.lastQuery();
 
   std::vector<std::shared_ptr<google::protobuf::Message> > results;
   if (query.exec())
@@ -198,11 +201,11 @@ std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
   else
   {
     // TODO what in case of an error?
-    qCritical().nospace() << "Error executing query '" << query.lastQuery() << "' - "
-                          << query.lastError().text();
+    AXT_ERROR << "Error executing query '" << query.lastQuery() << "' - "
+              << query.lastError().text();
   }
-  qDebug().nospace() << "BaseMode::findMessage() done query: " << query.lastQuery()
-                     << " [" << timer.nsecsElapsed()/1.0e6 << "ms]";
+  AXT_DEBUG << "BaseMode::findMessage() done query: " << query.lastQuery()
+            << " [" << timer.nsecsElapsed()/1.0e6 << "ms]";
   return results;
 }
 
@@ -217,8 +220,8 @@ std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
   query.prepare("SELECT " + mFieldNames.join(", ") + " FROM " + tableQ()
                 + " WHERE " + pkey + " = :" + pkey);
   query.bindValue(":" + pkey, id);
-  qDebug().nospace() << "BaseMode::findById() executing query: " << query.lastQuery()
-                     << "\n" << ":" + pkey << "=" << id;
+  AXT_DEBUG << "BaseMode::findById() executing query: " << query.lastQuery()
+            << "\n" << ":" + pkey << "=" << id;
 
   std::vector<std::shared_ptr<google::protobuf::Message> > results;
   if (query.exec())
@@ -228,11 +231,11 @@ std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
   else
   {
     // TODO what in case of an error?
-    qCritical().nospace() << "Error executing query '" << query.lastQuery() << "' - "
-                          << query.lastError().text();
+    AXT_ERROR << "Error executing query '" << query.lastQuery() << "' - "
+              << query.lastError().text();
   }
-  qDebug().nospace() << "BaseMode::findMessageById() done query: " << query.lastQuery()
-                     << " [" << timer.nsecsElapsed()/1.0e6 << "ms]";
+  AXT_DEBUG << "BaseMode::findMessageById() done query: " << query.lastQuery()
+            << " [" << timer.nsecsElapsed()/1.0e6 << "ms]";
   return results;
 }
 
@@ -303,10 +306,10 @@ QVariant BaseModel::getFieldVariant(const google::protobuf::Message& message,
       return QVariant(QString::fromStdString(mpReflection->GetString(message, pField)));
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_MESSAGE:
-      qCritical().nospace() << "Error getting field '"
-                            << QString::fromStdString(pField->full_name())
-                            << "' "
-                            << "message types are not yet supported for parsing";
+      AXT_ERROR << "Error getting field '"
+                << QString::fromStdString(pField->full_name())
+                << "' "
+                << "message types are not yet supported for parsing";
       break;
   }
   return QVariant();
@@ -348,10 +351,10 @@ bool BaseModel::setFieldVariant(google::protobuf::Message* pMessage,
       mpReflection->SetString(pMessage, pField, var.toString().toStdString());
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_MESSAGE:
-      qCritical().nospace() << "Error setting field '"
-                            << QString::fromStdString(pField->full_name())
-                            << "' "
-                            << "message types are not yet supported for parsing";
+      AXT_ERROR << "Error setting field '"
+                << QString::fromStdString(pField->full_name())
+                << "' "
+                << "message types are not yet supported for parsing";
       return false;
       break;
   }
@@ -415,10 +418,10 @@ QString BaseModel::wherePrototype(const google::protobuf::Message& message)
                           + "'");
           break;
         case google::protobuf::FieldDescriptor::CPPTYPE_MESSAGE:
-          qCritical().nospace() << "Error getting field '"
-                                << QString::fromStdString(p_fd->full_name())
-                                << "' "
-                                << "message types are not yet supported for parsing";
+          AXT_ERROR << "Error getting field '"
+                    << QString::fromStdString(p_fd->full_name())
+                    << "' "
+                    << "message types are not yet supported for parsing";
           break;
       }
     }

@@ -2,7 +2,6 @@
 
 // Qt
 #include <QCommandLineParser>
-#include <QDebug>
 
 AUTOXTIME_NAMESPACE_BEG
 

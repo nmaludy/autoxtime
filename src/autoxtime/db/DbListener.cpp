@@ -1,9 +1,8 @@
 #include <autoxtime/db/DbListener.h>
 #include <autoxtime/db/DbConnection.h>
+#include <autoxtime/log/Log.h>
 
 #include <iostream>
-
-#include <QDebug>
 
 AUTOXTIME_DB_NAMESPACE_BEG
 
@@ -30,8 +29,8 @@ void DbListener::notification(const QString& name,
   QJsonObject payload_json = payload_doc.object();
   QJsonObject payload_data = payload_json.value("data").toObject();
 
-  qInfo().nospace() << "Notification name=" << name
-                    << " payload=" << payload.toString();
+  AXT_DEBUG << "Notification name=" << name
+            << " payload=" << payload.toString();
 }
 
 AUTOXTIME_DB_NAMESPACE_END

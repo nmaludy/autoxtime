@@ -6,6 +6,7 @@
 
 #define AXT_INFO qInfo().nospace().noquote()
 #define AXT_WARN qWarning().nospace().noquote()
+#define AXT_WARNING qWarning().nospace().noquote()
 #define AXT_ERROR qCritical().nospace().noquote()
 #define AXT_DEBUG qDebug().nospace().noquote()
 #define AXT_FATAL QDebug(QtFatalMsg).nospace().noquote()
