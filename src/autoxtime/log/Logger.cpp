@@ -1,6 +1,8 @@
 #include <autoxtime/log/Logger.h>
+#include <autoxtime/config/ConfigStore.h>
 
 // Qt
+#include <QDate>
 #include <QDebug>
 #include <QtCore/QDir>
 
@@ -9,12 +11,18 @@
 
 AUTOXTIME_NAMESPACE_BEG
 
+const QString Logger::DEFAULT_PATH = "log/autoxtime-%{date}.log";
+
 // only print file:line in ERROR and FATAL messages, otherwise it's just noise
 const QString Logger::DEFAULT_MESSAGE_PATTERN = "[%{time}] %{if-debug}DEBUG%{endif}%{if-info}INFO%{endif}%{if-warning}WARNING%{endif}%{if-critical}ERROR - %{file}:%{line}%{endif}%{if-fatal}FATAL - %{file}:%{line}%{endif} - %{message}";
 
+// tokens that can be used within the path
+const QString Logger::PATH_TOKEN_DATE = "%{date}";
+
+
 Logger::Logger(QObject* pParent)
     : QObject(pParent),
-      mLogFilePath("log/autoxtime.log"),
+      mLogFilePath(DEFAULT_PATH),
       mpLogFile()
 {
   qSetMessagePattern(DEFAULT_MESSAGE_PATTERN);
@@ -31,13 +39,22 @@ Logger& Logger::init(QObject* pParent)
 void Logger::openFile()
 {
   // Create the path to our output file
-  QFileInfo info(mLogFilePath);
+  QString log_path =
+      mLogFilePath.replace(PATH_TOKEN_DATE, QDate::currentDate().toString(Qt::ISODate));
+  QFileInfo info(log_path);
   if (!QDir::root().mkpath(info.absolutePath()))
   {
-    throw std::runtime_error("Unable to create path to log file \"" + mLogFilePath.toStdString()
+    throw std::runtime_error("Unable to create path to log file \"" + info.absolutePath().toStdString()
                              + "\"");
   }
 
+  // close file if it's currently open
+  if (mpLogFile && mpLogFile->isOpen())
+  {
+    mpLogFile->close();
+  }
+
+  // replace log file with new one
   mpLogFile = std::make_unique<QFile>(info.absoluteFilePath());
   if (!mpLogFile->open(QFile::WriteOnly))
   {
@@ -45,6 +62,18 @@ void Logger::openFile()
                              info.absoluteFilePath().toStdString() +
                              "\" for writing");
   }
+}
+
+void Logger::config()
+{
+  // wait to read from config until after this class is initialized
+  QString pattern =
+      ConfigStore::value("log/message_pattern", DEFAULT_MESSAGE_PATTERN).toString();
+  qSetMessagePattern(pattern);
+
+  // wait to read from config until after this class is initialized
+  mLogFilePath = ConfigStore::value("log/path", DEFAULT_PATH).toString();
+  openFile();
 }
 
 void Logger::write(QtMsgType type, const QMessageLogContext& context, const QString& msg)

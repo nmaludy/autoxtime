@@ -6,6 +6,8 @@ file(GLOB_RECURSE PROJECT_SRC  "${CMAKE_CURRENT_LIST_DIR}/*.cpp" )
 # filter out executables
 list(FILTER PROJECT_SRC EXCLUDE REGEX "exe/.*")
 list(FILTER PROJECT_SRC EXCLUDE REGEX "server/.*")
+# one exception and that is AppCommon, should we move this to a different folder?
+list(APPEND PROJECT_SRC "exe/AppCommon.cpp")
 
 # Find Qt
 find_package(Qt5 COMPONENTS Core SerialPort Sql Widgets REQUIRED)

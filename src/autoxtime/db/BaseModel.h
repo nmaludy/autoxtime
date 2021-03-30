@@ -81,11 +81,11 @@ class BaseModel : public QObject
 
 
   //////////////////// behind the scenes stuff
-  QVariant getFieldVariant(const google::protobuf::Message& message,
-                           const google::protobuf::FieldDescriptor* pField);
-  bool setFieldVariant(google::protobuf::Message* pMessage,
-                       const google::protobuf::FieldDescriptor* pField,
-                       const QVariant& var);
+  static QVariant getFieldVariant(const google::protobuf::Message& message,
+                                  const google::protobuf::FieldDescriptor* pField);
+  static bool setFieldVariant(google::protobuf::Message* pMessage,
+                              const google::protobuf::FieldDescriptor* pField,
+                              const QVariant& var);
   QString wherePrototype(const google::protobuf::Message& message);
   std::vector<std::shared_ptr<google::protobuf::Message> > parseQueryResults(QSqlQuery& query);
 
@@ -97,7 +97,7 @@ class BaseModel : public QObject
 
   inline std::shared_ptr<DbConnection>& connection();
 
- private:
+ protected:
   std::vector<std::shared_ptr<google::protobuf::Message> > createOrUpdateMessage(const google::protobuf::Message* pMessage, bool bCreate);
 
   const std::string mTable;

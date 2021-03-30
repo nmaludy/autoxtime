@@ -258,6 +258,7 @@ std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
   // iterate over every row the query returned
   while (query.next())
   {
+    AXT_DEBUG << "GOT QUERY RESULT";
     // create a new protobuf (generically, from our prototype)
     std::shared_ptr<google::protobuf::Message> p_msg(mpPrototype->New());
     // set fields on the message for each column returned in the query
@@ -265,8 +266,11 @@ std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
     for (int c = 0; c < column_count; ++c)
     {
       const std::string& col_name = col_names.at(c);
+      AXT_DEBUG << "GOT QUERY RESULT - column = " << col_name;
       const google::protobuf::FieldDescriptor* p_fd = mFieldNamesToFds[col_name];
-      setFieldVariant(p_msg.get(), p_fd, query.value(c));
+      const QVariant& value = query.value(c);
+      AXT_DEBUG << "GOT QUERY RESULT - value = " << value.toString();
+      setFieldVariant(p_msg.get(), p_fd, value);
     }
     results.push_back(p_msg);
   }
@@ -276,34 +280,35 @@ std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
 QVariant BaseModel::getFieldVariant(const google::protobuf::Message& message,
                                     const google::protobuf::FieldDescriptor* pField)
 {
+  const google::protobuf::Reflection* p_reflection = message.GetReflection();
   switch (pField->cpp_type())
   {
     case google::protobuf::FieldDescriptor::CPPTYPE_INT32:
-      return QVariant(mpReflection->GetInt32(message, pField));
+      return QVariant(p_reflection->GetInt32(message, pField));
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_INT64:
-      return QVariant::fromValue<std::int64_t>(mpReflection->GetInt64(message, pField));
+      return QVariant::fromValue<std::int64_t>(p_reflection->GetInt64(message, pField));
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_UINT32:
-      return QVariant(mpReflection->GetUInt32(message, pField));
+      return QVariant(p_reflection->GetUInt32(message, pField));
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_UINT64:
-      return QVariant::fromValue<std::uint64_t>(mpReflection->GetUInt64(message, pField));
+      return QVariant::fromValue<std::uint64_t>(p_reflection->GetUInt64(message, pField));
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_DOUBLE:
-      return QVariant(mpReflection->GetDouble(message, pField));
+      return QVariant(p_reflection->GetDouble(message, pField));
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_FLOAT:
-      return QVariant(mpReflection->GetFloat(message, pField));
+      return QVariant(p_reflection->GetFloat(message, pField));
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_BOOL:
-      return QVariant(mpReflection->GetBool(message, pField));
+      return QVariant(p_reflection->GetBool(message, pField));
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_ENUM:
-      return QVariant(mpReflection->GetEnumValue(message, pField));
+      return QVariant(p_reflection->GetEnumValue(message, pField));
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_STRING:
-      return QVariant(QString::fromStdString(mpReflection->GetString(message, pField)));
+      return QVariant(QString::fromStdString(p_reflection->GetString(message, pField)));
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_MESSAGE:
       AXT_ERROR << "Error getting field '"
@@ -320,35 +325,36 @@ bool BaseModel::setFieldVariant(google::protobuf::Message* pMessage,
                                 const google::protobuf::FieldDescriptor* pField,
                                 const QVariant& var)
 {
+  const google::protobuf::Reflection* p_reflection = pMessage->GetReflection();
   switch (pField->cpp_type())
   {
     // for the int types, use the width based type names because its less confusing
     case google::protobuf::FieldDescriptor::CPPTYPE_INT32:
-      mpReflection->SetInt32(pMessage, pField, var.value<std::int32_t>());
+      p_reflection->SetInt32(pMessage, pField, var.value<std::int32_t>());
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_INT64:
-      mpReflection->SetInt64(pMessage, pField, var.value<std::int64_t>());
+      p_reflection->SetInt64(pMessage, pField, var.value<std::int64_t>());
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_UINT32:
-      mpReflection->SetUInt32(pMessage, pField, var.value<std::uint32_t>());
+      p_reflection->SetUInt32(pMessage, pField, var.value<std::uint32_t>());
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_UINT64:
-      mpReflection->SetUInt64(pMessage, pField, var.value<std::uint64_t>());
+      p_reflection->SetUInt64(pMessage, pField, var.value<std::uint64_t>());
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_DOUBLE:
-      mpReflection->SetDouble(pMessage, pField, var.toFloat());
+      p_reflection->SetDouble(pMessage, pField, var.toFloat());
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_FLOAT:
-      mpReflection->SetFloat(pMessage, pField, var.toFloat());
+      p_reflection->SetFloat(pMessage, pField, var.toFloat());
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_BOOL:
-      mpReflection->SetBool(pMessage, pField, var.toBool());
+      p_reflection->SetBool(pMessage, pField, var.toBool());
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_ENUM:
-      mpReflection->SetEnumValue(pMessage, pField, var.toInt());
+      p_reflection->SetEnumValue(pMessage, pField, var.toInt());
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_STRING:
-      mpReflection->SetString(pMessage, pField, var.toString().toStdString());
+      p_reflection->SetString(pMessage, pField, var.toString().toStdString());
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_MESSAGE:
       AXT_ERROR << "Error setting field '"
@@ -363,10 +369,11 @@ bool BaseModel::setFieldVariant(google::protobuf::Message* pMessage,
 
 QString BaseModel::wherePrototype(const google::protobuf::Message& message)
 {
+  const google::protobuf::Reflection* p_reflection = message.GetReflection();
   QStringList where_parts;
   for (const google::protobuf::FieldDescriptor* p_fd : mFieldDescriptors)
   {
-    if (mpReflection->HasField(message, p_fd))
+    if (p_reflection->HasField(message, p_fd))
     {
       QString qfield = QString::fromStdString(p_fd->name());
       switch (p_fd->cpp_type())
@@ -374,47 +381,47 @@ QString BaseModel::wherePrototype(const google::protobuf::Message& message)
         case google::protobuf::FieldDescriptor::CPPTYPE_INT32:
           where_parts << (qfield
                           + " = "
-                          + QString("%1").arg(mpReflection->GetInt32(message, p_fd)));
+                          + QString("%1").arg(p_reflection->GetInt32(message, p_fd)));
           break;
         case google::protobuf::FieldDescriptor::CPPTYPE_INT64:
           where_parts << (qfield
                           + " = "
-                          + QString("%1").arg(mpReflection->GetInt64(message, p_fd)));
+                          + QString("%1").arg(p_reflection->GetInt64(message, p_fd)));
           break;
         case google::protobuf::FieldDescriptor::CPPTYPE_UINT32:
           where_parts << (qfield
                           + " = "
-                          + QString("%1").arg(mpReflection->GetUInt32(message, p_fd)));
+                          + QString("%1").arg(p_reflection->GetUInt32(message, p_fd)));
           break;
         case google::protobuf::FieldDescriptor::CPPTYPE_UINT64:
           where_parts << (qfield
                           + " = "
-                          + QString("%1").arg(mpReflection->GetUInt64(message, p_fd)));
+                          + QString("%1").arg(p_reflection->GetUInt64(message, p_fd)));
           break;
         case google::protobuf::FieldDescriptor::CPPTYPE_DOUBLE:
           where_parts << (qfield
                           + " = "
-                          + QString("%1").arg(mpReflection->GetDouble(message, p_fd)));
+                          + QString("%1").arg(p_reflection->GetDouble(message, p_fd)));
           break;
         case google::protobuf::FieldDescriptor::CPPTYPE_FLOAT:
           where_parts << (qfield
                           + " = "
-                          + QString("%1").arg(mpReflection->GetFloat(message, p_fd)));
+                          + QString("%1").arg(p_reflection->GetFloat(message, p_fd)));
           break;
         case google::protobuf::FieldDescriptor::CPPTYPE_BOOL:
           where_parts << (qfield
                           + " = "
-                          + QString("%1").arg(mpReflection->GetBool(message, p_fd)));
+                          + QString("%1").arg(p_reflection->GetBool(message, p_fd)));
           break;
         case google::protobuf::FieldDescriptor::CPPTYPE_ENUM:
           where_parts << (qfield
                           + " = "
-                          + QString("%1").arg(mpReflection->GetEnumValue(message, p_fd)));
+                          + QString("%1").arg(p_reflection->GetEnumValue(message, p_fd)));
           break;
         case google::protobuf::FieldDescriptor::CPPTYPE_STRING:
           where_parts << (qfield
                           + " ILIKE '"
-                          + QString::fromStdString(mpReflection->GetString(message, p_fd))
+                          + QString::fromStdString(p_reflection->GetString(message, p_fd))
                           + "'");
           break;
         case google::protobuf::FieldDescriptor::CPPTYPE_MESSAGE:

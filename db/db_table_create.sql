@@ -2,26 +2,26 @@ CREATE DATABASE autoxtime;
 
 -- Tables
 
-CREATE TABLE organization(
+CREATE TABLE IF NOT EXISTS organization(
   organization_id INT GENERATED ALWAYS AS IDENTITY,
   name TEXT NOT NULL,
   PRIMARY KEY(organization_id)
 );
 
-CREATE TABLE work_assignments(
+CREATE TABLE IF NOT EXISTS  work_assignments(
   work_id INT GENERATED ALWAYS AS IDENTITY,
   name TEXT NOT NULL,
   PRIMARY KEY(work_id)
 );
 
-CREATE TABLE driver(
+CREATE TABLE IF NOT EXISTS  driver(
   driver_id INT GENERATED ALWAYS AS IDENTITY,
   first_name TEXT NOT NULL,
   last_name TEXT NOT NULL,
-  email TEXT NOT NULL,
-  phone_number TEXT NOT NULL,
-  msr_id INT NOT NULL,
-  scca_id INT NOT NULL,
+  email TEXT,
+  phone_number TEXT,
+  msr_id INT,
+  scca_id INT,
   work_req INT,
   work_skill INT,
   PRIMARY KEY(driver_id),
@@ -33,9 +33,10 @@ CREATE TABLE driver(
       REFERENCES work_assignments(work_id)
 );
 
-CREATE TABLE car_class(
+CREATE TABLE IF NOT EXISTS car_class(
   car_class_id INT GENERATED ALWAYS AS IDENTITY,
   name TEXT NOT NULL,
+  subclass_name TEXT,
   organization_id INT NOT NULL,
   pax_formula TEXT,
   PRIMARY KEY(car_class_id),
@@ -44,15 +45,15 @@ CREATE TABLE car_class(
       REFERENCES organization(organization_id)
 );
 
-CREATE TABLE car(
+CREATE TABLE IF NOT EXISTS car(
   car_id INT GENERATED ALWAYS AS IDENTITY,
   car_number INT NOT NULL,
-  year INT NOT NULL,
-  make TEXT NOT NULL,
-  model TEXT NOT NULL,
-  color TEXT NOT NULL,
-  sponsor TEXT NOT NULL,
-  tire_brand TEXT NOT NULL,
+  year INT,
+  make TEXT,
+  model TEXT,
+  color TEXT,
+  sponsor TEXT,
+  tire_brand TEXT,
   car_class_id INT NOT NULL,
   driver_id INT NOT NULL,
   organization_id INT NOT NULL,
@@ -68,7 +69,7 @@ CREATE TABLE car(
       REFERENCES organization(organization_id)
 );
 
-CREATE TABLE season(
+CREATE TABLE IF NOT EXISTS season(
   season_id INT GENERATED ALWAYS AS IDENTITY,
   name TEXT NOT NULL,
   organization_id INT NOT NULL,
@@ -78,7 +79,7 @@ CREATE TABLE season(
       REFERENCES organization(organization_id)
 );
 
-CREATE TABLE event(
+CREATE TABLE IF NOT EXISTS event(
   event_id INT GENERATED ALWAYS AS IDENTITY,
   name TEXT NOT NULL,
   date date NOT NULL,
@@ -94,12 +95,14 @@ CREATE TABLE event(
 );
 
 
-CREATE TABLE event_payments(
-  amount_paid money NOT NULL,
-  amount_due money NOT NULL,
-  membership_type TEXT NOT NULL,
+CREATE TABLE IF NOT EXISTS event_registration(
+  event_registration_id INT GENERATED ALWAYS AS IDENTITY,
+  amount_paid money,
+  amount_due money,
+  membership_type TEXT,
   event_id INT NOT NULL,
   driver_id INT NOT NULL,
+  PRIMARY KEY(event_registration_id),
   CONSTRAINT fk_event
     FOREIGN KEY(event_id)
       REFERENCES event(event_id),
@@ -108,7 +111,7 @@ CREATE TABLE event_payments(
       REFERENCES driver(driver_id)
 );
 
-CREATE TABLE run(
+CREATE TABLE IF NOT EXISTS run(
   run_id INT GENERATED ALWAYS AS IDENTITY,
   start_time NUMERIC,
   sector1_time NUMERIC,
@@ -132,7 +135,7 @@ CREATE TABLE run(
       REFERENCES car(car_id)
 );
 
-CREATE TABLE raw_times(
+CREATE TABLE IF NOT EXISTS raw_times(
   raw_id INT GENERATED ALWAYS AS IDENTITY,
   start_time TEXT,
   sector1_time TEXT,
@@ -145,7 +148,7 @@ CREATE TABLE raw_times(
       REFERENCES run(run_id)
 );
 
-CREATE TABLE penalties(
+CREATE TABLE IF NOT EXISTS penalties(
   penalty INT,
   raw_id INT,
   run_id INT,
@@ -157,7 +160,7 @@ CREATE TABLE penalties(
       REFERENCES run(run_id)
 );
 
-CREATE TABLE points(
+CREATE TABLE IF NOT EXISTS points(
   points_id INT GENERATED ALWAYS AS IDENTITY,
   points NUMERIC,
   event_id INT NOT NULL,
@@ -184,7 +187,7 @@ CREATE TABLE points(
 
 -- https://www.postgresql.org/docs/9.1/plpgsql-trigger.html
 -- https://gist.github.com/colophonemes/9701b906c5be572a40a84b08f4d2fa4e
-CREATE FUNCTION notify_trigger() RETURNS trigger AS $trigger$
+CREATE OR REPLACE FUNCTION notify_trigger() RETURNS trigger AS $trigger$
 DECLARE
   rec RECORD;
   payload TEXT;
@@ -302,14 +305,15 @@ FOR EACH ROW EXECUTE PROCEDURE notify_trigger(
   'event_id',
   'name',
   'date',
-  'season_id'
+  'season_id',
   'organization_id'
 );
 
-CREATE TRIGGER notify_event_payments
+CREATE TRIGGER notify_event_registration
   AFTER INSERT OR UPDATE OR DELETE
-  ON event_payments
+  ON event_registration
 FOR EACH ROW EXECUTE PROCEDURE notify_trigger(
+  'event_registration_id',
   'amount_paid',
   'amount_due',
   'membership_type',
@@ -367,4 +371,6 @@ FOR EACH ROW EXECUTE PROCEDURE notify_trigger(
   'organization_id'
 );
 
-
+GRANT ALL PRIVILEGES ON DATABASE autoxtime TO autoxtime;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO autoxtime;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO autoxtime;

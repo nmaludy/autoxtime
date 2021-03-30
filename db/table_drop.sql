@@ -1,6 +1,6 @@
 DROP TABLE IF EXISTS penalties CASCADE;
 DROP TABLE IF EXISTS points CASCADE;
-DROP TABLE IF EXISTS event_payments CASCADE;
+DROP TABLE IF EXISTS event_registration CASCADE;
 DROP TABLE IF EXISTS raw_times CASCADE;
 DROP TABLE IF EXISTS run CASCADE;
 DROP TABLE IF EXISTS car CASCADE;
@@ -15,4 +15,5 @@ DROP TABLE IF EXISTS role CASCADE;
 DROP TABLE IF EXISTS region CASCADE;
 DROP TABLE IF EXISTS season CASCADE;
 
+-- also drops all of the notify_* triggers because they rely on this function
 DROP FUNCTION notify_trigger() CASCADE;

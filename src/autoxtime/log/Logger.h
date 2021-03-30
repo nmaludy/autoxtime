@@ -18,7 +18,9 @@ class Logger : public QObject
   Q_OBJECT
 
  public:
+  static const QString DEFAULT_PATH;
   static const QString DEFAULT_MESSAGE_PATTERN;
+  static const QString PATH_TOKEN_DATE;
 
   static Logger& init(QObject* pParent = nullptr);
   static void messageHandler(QtMsgType type,
@@ -27,6 +29,7 @@ class Logger : public QObject
   void write(QtMsgType type,
              const QMessageLogContext& context,
              const QString& msg);
+  void config();
 
  private:
   explicit Logger(QObject* pParent = nullptr);
