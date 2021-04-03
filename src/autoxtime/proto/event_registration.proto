@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package autoxtime.proto;
+
+message EventRegistration {
+  optional int64 event_registration_id = 1;
+  optional double amount_paid = 2;
+  optional double amount_due = 3;
+  // maybe rename to member yes/no to compute weekend fee
+  optional string membership_type = 4;
+  // primary key 1a
+  optional int64 event_id = 5;
+  // primary key 1b
+  optional int64 driver_id = 6;
+}

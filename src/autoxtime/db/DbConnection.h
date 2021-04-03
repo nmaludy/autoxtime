@@ -19,9 +19,8 @@ class DbConnection : public QObject
   Q_OBJECT
 
  public:
-  
-  DbConnection(const QString& name = QString(),
-               QObject* pParent = nullptr);
+  explicit DbConnection(QObject* pParent = nullptr);
+  explicit DbConnection(const QString& name, QObject* pParent = nullptr);
 
   QSqlDatabase& database()
   {
@@ -39,7 +38,7 @@ class DbConnection : public QObject
 
  public slots:
   void tryConnect();
-  
+
  private:
   QString mName;
   DbConnectionState mState;

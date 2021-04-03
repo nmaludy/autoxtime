@@ -38,14 +38,15 @@ jobs:
         with:
           path: |
             build/external
+            build/install-prefix
           key: ${{ runner.os }}-external-${{ matrix.compiler_c }}-${{ hashFiles('external/cmake/*.cmake') }}
       - name: CMake Setup External
         run: |
           cmake -S external -B build/external
       - name: Compile External
         run: |
-          cmake --build build/external --parallel
-  
+          cmake --build build/external
+
   compile:
     name: '${{ matrix.test_type }} - ${{ matrix.test_name_pretty }}'
     needs: build_external
@@ -83,17 +84,19 @@ jobs:
             cmake_args: '-DTEST_NAME=cppcheck'
             compiler_c: gcc
             compiler_cpp: g++
-          - test_type: 'static analysis'
-            test_name_pretty: "clang tidy"
-            os: ubuntu-latest
-            qt_version: '5.15.2'
-            apt_packages:  >-
-             mesa-common-dev libglu1-mesa-dev
-             uwsgi uuid-dev libcap-dev libzmq3-dev libpwquality-dev libmemcached-dev libjemalloc-dev
-             clang-tools
-            cmake_args: '-DTEST_NAME=clang-tidy'
-            compiler_c: clang
-            compiler_cpp: clang++
+          # Disabling clang-tidy because there is no way for us to exclude MOC and Protobuf
+          # auto-generated files... annoying
+          # - test_type: 'static analysis'
+          #   test_name_pretty: "clang tidy"
+          #   os: ubuntu-latest
+          #   qt_version: '5.15.2'
+          #   apt_packages:  >-
+          #    mesa-common-dev libglu1-mesa-dev
+          #    uwsgi uuid-dev libcap-dev libzmq3-dev libpwquality-dev libmemcached-dev libjemalloc-dev
+          #    clang-tidy
+          #   cmake_args: '-DTEST_NAME=clang-tidy'
+          #   compiler_c: clang
+          #   compiler_cpp: clang++
           - test_type: 'static analysis'
             test_name_pretty: "include what you use"
             os: ubuntu-latest
@@ -120,7 +123,7 @@ jobs:
             os: ubuntu-latest
             qt_version: '5.15.2'
             apt_packages: 'mesa-common-dev libglu1-mesa-dev clang-tools'
-            cmd_prefix: 'scan-build'
+            cmd_prefix: 'scan-build --status-bugs --exclude build/install-prefix'
             compiler_c: clang
             compiler_cpp: clang++
     env:
@@ -142,6 +145,7 @@ jobs:
         with:
           path: |
             build/external
+            build/install-prefix
           key: ${{ runner.os }}-external-${{ matrix.compiler_c }}-${{ hashFiles('external/cmake/*.cmake') }}
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
@@ -154,15 +158,9 @@ jobs:
         if: ${{ matrix.apt_packages }}
         run: |
           sudo apt-get -y install ${{ matrix.apt_packages }}
-      - name: CMake Setup External
-        run: |
-          cmake -S external -B build/external
-      - name: Compile External
-        run: |
-          cmake --build build/external --parallel
       - name: CMake Setup
         run: |
           ${{ matrix.cmd_prefix }} cmake -S . -B build ${{ matrix.cmake_args }}
-      - name: Compile 
+      - name: Compile
         run: |
           ${{ matrix.cmd_prefix }} cmake --build build

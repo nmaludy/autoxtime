@@ -1,19 +1,26 @@
 #ifndef AUTOXTIME_UI_MAINWINDOW
 #define AUTOXTIME_UI_MAINWINDOW
 
-#include <autoxtime/autoxtime.h>
+#include <autoxtime/ui/ui.h>
 #include <QMainWindow>
 
-AUTOXTIME_NAMESPACE_BEG
+AUTOXTIME_UI_NAMESPACE_BEG
+
+class AdminWidget;
+class RegistrationWidget;
 
 class MainWindow : public QMainWindow
 {
   Q_OBJECT
 
  public:
-  MainWindow(QWidget* pParent = nullptr);
+  explicit MainWindow(QWidget* pParent = nullptr);
+
+ private:
+  RegistrationWidget* mpRegistrationWidget;
+  AdminWidget* mpAdminWidget;
 };
 
-AUTOXTIME_NAMESPACE_END
+AUTOXTIME_UI_NAMESPACE_END
 
 #endif // AUTOXTIME_UI_MAINWINDOW

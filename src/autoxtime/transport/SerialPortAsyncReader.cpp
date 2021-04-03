@@ -2,11 +2,12 @@
 
 // autoxtime
 #include <autoxtime/config/ConfigStore.h>
+#include <autoxtime/log/Log.h>
 
 // other
+#include <algorithm>
 #include <iostream>
 #include <QMetaEnum>
-#include <QDebug>
 
 AUTOXTIME_NAMESPACE_BEG
 
@@ -37,37 +38,41 @@ SerialPortAsyncReader::SerialPortAsyncReader(const QString& portName,
 }
 
 QSerialPortInfo SerialPortAsyncReader::findPortInfo(const QString& portName)
-{  
-  QSerialPortInfo found_port;
-  for (const QSerialPortInfo& serialPortInfo: QSerialPortInfo::availablePorts())
-  {
-    if (portName == serialPortInfo.portName())
-    {
-      found_port = serialPortInfo;
-      qInfo().nospace() << "Found port: " << serialPortInfo.portName();
-      break;
-    }
-  }
+{
+  QList<QSerialPortInfo> available_ports = QSerialPortInfo::availablePorts();
+  QList<QSerialPortInfo>::iterator iter = std::find_if(
+      available_ports.begin(),
+      available_ports.end(),
+      [=](const QSerialPortInfo& serial_port_info) {
+        return serial_port_info.portName() == portName;
+      });
 
-  if (found_port.isNull()) {
-    qInfo().nospace() << "Couldn't find port with name: " << portName << "\n"
-                      <<  "Available ports are: \n";
-    for (const QSerialPortInfo& serialPortInfo: QSerialPortInfo::availablePorts())
+  QSerialPortInfo found_port;
+  if (iter != available_ports.end())
+  {
+    found_port = *iter;
+    AXT_INFO << "Found port: " << found_port.portName();
+  }
+  else
+  {
+    AXT_INFO << "Couldn't find port with name: " << portName << "\n"
+             <<  "Available ports are: \n";
+    for (const QSerialPortInfo& serialPortInfo: available_ports)
     {
       const QString& description = serialPortInfo.description();
       const QString& manufacturer = serialPortInfo.manufacturer();
       const QString& serialNumber = serialPortInfo.serialNumber();
-      qInfo().nospace() << "  Port name: " << serialPortInfo.portName()
-                        << "\n    Location: " << serialPortInfo.systemLocation()
-                        << "\n    Description: " << (!description.isEmpty() ? description : "N/A")
-                        << "\n    Manufacturer: " << (!manufacturer.isEmpty() ? manufacturer : "N/A")
-                        << "\n    Serial number: " << (!serialNumber.isEmpty() ? serialNumber : "N/A")
-                        << "\n    Vendor Identifier: " << (serialPortInfo.hasVendorIdentifier()
-                                                           ? QByteArray::number(serialPortInfo.vendorIdentifier(), 16)
-                                                           : "N/A")
-                        << "\n    Product Identifier: " << (serialPortInfo.hasProductIdentifier()
-                                                            ? QByteArray::number(serialPortInfo.productIdentifier(), 16)
-                                                            : "N/A");
+      AXT_INFO << "  Port name: " << serialPortInfo.portName()
+               << "\n    Location: " << serialPortInfo.systemLocation()
+               << "\n    Description: " << (!description.isEmpty() ? description : "N/A")
+               << "\n    Manufacturer: " << (!manufacturer.isEmpty() ? manufacturer : "N/A")
+               << "\n    Serial number: " << (!serialNumber.isEmpty() ? serialNumber : "N/A")
+               << "\n    Vendor Identifier: " << (serialPortInfo.hasVendorIdentifier()
+                                                  ? QByteArray::number(serialPortInfo.vendorIdentifier(), 16)
+                                                  : "N/A")
+               << "\n    Product Identifier: " << (serialPortInfo.hasProductIdentifier()
+                                                   ? QByteArray::number(serialPortInfo.productIdentifier(), 16)
+                                                   : "N/A");
     }
   }
   return found_port;
@@ -75,12 +80,12 @@ QSerialPortInfo SerialPortAsyncReader::findPortInfo(const QString& portName)
 
 bool SerialPortAsyncReader::tryConnect()
 {
-  qInfo().nospace() << "Trying connect " << mPortName;
+  AXT_INFO << "Trying connect " << mPortName;
   resetError();
 
   if (!mSerialPort.isOpen())
   {
-    qInfo().nospace() << "Trying to find port with name port " << mPortName;
+    AXT_INFO << "Trying to find port with name port " << mPortName;
     QSerialPortInfo found_port_info = findPortInfo(mPortName);
     if (found_port_info.isNull())
     {
@@ -88,18 +93,18 @@ bool SerialPortAsyncReader::tryConnect()
     }
 
     mSerialPort.setPort(found_port_info);
-    qInfo().nospace() << "Trying to open port " << mPortName;
+    AXT_INFO << "Trying to open port " << mPortName;
     if (!mSerialPort.open(QIODevice::ReadOnly))
     {
-      qInfo().nospace() << "Failed to open port " << mPortName
-                        << " , error: %2" << mSerialPort.errorString();
+      AXT_ERROR << "Failed to open port " << mPortName
+                << " , error: %2" << mSerialPort.errorString();
       mSerialPort.clearError();
       return false;
     }
   }
   else
-  {  
-    qInfo().nospace() << "Port is open: " << mPortName;
+  {
+    AXT_INFO << "Port is open: " << mPortName;
   }
   return true;
 }
@@ -108,11 +113,11 @@ void SerialPortAsyncReader::resetError()
 {
   if (mSerialPort.error() != QSerialPort::NoError)
   {
-    qWarning().nospace() << "Error present at time of connection on the port " << mPortName
-                         << " , error: %2" << mSerialPort.errorString()
-                         << "\n"
-                         << "Clearing error and trying again";
-    
+    AXT_ERROR << "Error present at time of connection on the port " << mPortName
+              << " , error: %2" << mSerialPort.errorString()
+              << "\n"
+              << "Clearing error and trying again";
+
     if (mSerialPort.isOpen()) {
       mSerialPort.close();
     }
@@ -120,7 +125,7 @@ void SerialPortAsyncReader::resetError()
   }
   else
   {
-    qInfo().nospace() << "No error on port " << mPortName;
+    AXT_INFO << "No error on port " << mPortName;
   }
 }
 
@@ -133,7 +138,7 @@ void SerialPortAsyncReader::handleReadyRead()
   }
   else
   {
-    qInfo().nospace() << "handleReadyRead(): line isn't ready yet";
+    AXT_INFO << "handleReadyRead(): line isn't ready yet";
   }
 }
 
@@ -148,10 +153,10 @@ void SerialPortAsyncReader::handleError(QSerialPort::SerialPortError serialPortE
   if (serialPortError != QSerialPort::NoError) {
     QString error_name =
         QMetaEnum::fromType<QSerialPort::SerialPortError>().valueToKey(serialPortError);
-    qWarning().nospace() << "An " << error_name << " error occurred on port "
-                         << mSerialPort.portName()
-                         << ", error: "
-                         << mSerialPort.errorString();
+    AXT_ERROR << "An " << error_name << " error occurred on port "
+              << mSerialPort.portName()
+              << ", error: "
+              << mSerialPort.errorString();
     resetError();
   }
 }

@@ -23,12 +23,13 @@ class BaseModel : public QObject
 {
   Q_OBJECT;
 
- public:  
+ public:
   BaseModel(const std::string& table,
             const std::string& primaryKey,
             const google::protobuf::Descriptor* pDescriptor,
             const google::protobuf::Reflection* pReflection,
-            std::shared_ptr<DbConnection> pConnection = std::shared_ptr<DbConnection>());
+            std::shared_ptr<DbConnection> pConnection = std::shared_ptr<DbConnection>(),
+            QObject* pParent = nullptr);
   virtual ~BaseModel() = default;
 
   // pure virtual, required to be implemented by sub-classes
@@ -39,60 +40,65 @@ class BaseModel : public QObject
 
   //////////////////// list
   virtual std::vector<std::shared_ptr<google::protobuf::Message> > listMessage();
-  
+
   template <typename T>
   inline std::vector<std::shared_ptr<T> > listT();
 
   //////////////////// create
-  virtual int createMessage(const google::protobuf::Message* pMessage);
+  // returns a list of messages with the primary key field set to the newly created ID
+  virtual std::vector<std::shared_ptr<google::protobuf::Message> > createMessage(const google::protobuf::Message* pMessage);
+
+  // returns a list of messages with the primary key field set to the newly created ID
+  template <typename T>
+  inline std::vector<std::shared_ptr<T> > createT(const T* pMessage);
 
   template <typename T>
-  inline int createT(const T* pMessage);
-  
-  template <typename T>
-  inline int createT(const T& pMessage);
+  inline std::vector<std::shared_ptr<T> > createT(const T& pMessage);
 
   //////////////////// update
-  virtual int updateMessage(const google::protobuf::Message* pMessage);
+  virtual std::vector<std::shared_ptr<google::protobuf::Message> > updateMessage(const google::protobuf::Message* pMessage);
 
   template <typename T>
-  inline int updateT(const T* pMessage);
-  
+  inline std::vector<std::shared_ptr<T> > updateT(const T* pMessage);
+
   template <typename T>
-  inline int updateT(const T& pMessage);
+  inline std::vector<std::shared_ptr<T> > updateT(const T& pMessage);
 
   //////////////////// destroy
   virtual int destroyById(int id);
 
   //////////////////// find
-  // TODO - should combined list() and find() ? 
+  // TODO - should combined list() and find() ?
   virtual std::vector<std::shared_ptr<google::protobuf::Message> > findMessage(const google::protobuf::Message& prototype);
-  
+
   template <typename T>
   inline std::vector<std::shared_ptr<T> > findT(const T& prototype);
-  
+
   virtual std::vector<std::shared_ptr<google::protobuf::Message> > findMessageById(int id);
 
   template <typename T>
   inline std::vector<std::shared_ptr<T> > findByIdT(int id);
-  
+
 
   //////////////////// behind the scenes stuff
-  QVariant getFieldVariant(const google::protobuf::Message& message,
-                           const google::protobuf::FieldDescriptor* pField);
-  bool setFieldVariant(google::protobuf::Message* pMessage,
-                       const google::protobuf::FieldDescriptor* pField,
-                       const QVariant& var);
+  static QVariant getFieldVariant(const google::protobuf::Message& message,
+                                  const google::protobuf::FieldDescriptor* pField);
+  static bool setFieldVariant(google::protobuf::Message* pMessage,
+                              const google::protobuf::FieldDescriptor* pField,
+                              const QVariant& var);
   QString wherePrototype(const google::protobuf::Message& message);
   std::vector<std::shared_ptr<google::protobuf::Message> > parseQueryResults(QSqlQuery& query);
-  
+
   template <typename T>
-  inline std::vector<std::shared_ptr<T> > messagesToT(std::vector<std::shared_ptr<google::protobuf::Message> >& messages);
+  static std::shared_ptr<T> messageToT(std::shared_ptr<google::protobuf::Message>& message);
+
+  template <typename T>
+  static std::vector<std::shared_ptr<T> > messagesToT(std::vector<std::shared_ptr<google::protobuf::Message> >& messages);
 
   inline std::shared_ptr<DbConnection>& connection();
 
- private:
-  int createOrUpdateMessage(const google::protobuf::Message* pMessage, bool bCreate);
+ protected:
+  std::vector<std::shared_ptr<google::protobuf::Message> > createOrUpdateMessage(const google::protobuf::Message* pMessage, bool bCreate);
 
   const std::string mTable;
   const QString mTableQ;
@@ -129,15 +135,20 @@ inline const QString& BaseModel::primaryKeyQ() const
 }
 
 template <typename T>
-inline std::vector<std::shared_ptr<T> > BaseModel
+std::shared_ptr<T> BaseModel
+::messageToT(std::shared_ptr<google::protobuf::Message>& msg)
+{
+  return std::dynamic_pointer_cast<T>(msg);
+}
+
+template <typename T>
+std::vector<std::shared_ptr<T> > BaseModel
 ::messagesToT(std::vector<std::shared_ptr<google::protobuf::Message> >& messages)
 {
   std::vector<std::shared_ptr<T> > results;
   results.reserve(messages.size());
-  for (std::shared_ptr<google::protobuf::Message>& msg : messages)
-  {
-    results.push_back(std::dynamic_pointer_cast<T>(msg));
-  }
+  std::transform(messages.begin(), messages.end(), std::back_inserter(results),
+                 BaseModel::messageToT<T>);
   return results;
 }
 
@@ -163,25 +174,31 @@ inline std::vector<std::shared_ptr<T> > BaseModel::findByIdT(int id)
 }
 
 template <typename T>
-inline int BaseModel::createT(const T* pMessage)
+inline std::vector<std::shared_ptr<T> > BaseModel::createT(const T* pMessage)
 {
-  return createMessage(dynamic_cast<const google::protobuf::Message*>(pMessage));
+  const google::protobuf::Message* p_proto =
+      dynamic_cast<const google::protobuf::Message*>(pMessage);
+  std::vector<std::shared_ptr<google::protobuf::Message> > msgs = createMessage(p_proto);
+  return messagesToT<T>(msgs);
 }
 
 template <typename T>
-inline int BaseModel::createT(const T& message)
+inline std::vector<std::shared_ptr<T> > BaseModel::createT(const T& message)
 {
   return createT(&message);
 }
 
 template <typename T>
-inline int BaseModel::updateT(const T* pMessage)
+inline std::vector<std::shared_ptr<T> > BaseModel::updateT(const T* pMessage)
 {
-  return updateMessage(dynamic_cast<const google::protobuf::Message*>(pMessage));
+  const google::protobuf::Message* p_proto =
+      dynamic_cast<const google::protobuf::Message*>(pMessage);
+  std::vector<std::shared_ptr<google::protobuf::Message> > msgs = updateMessage(p_proto);
+  return messagesToT<T>(msgs);
 }
 
 template <typename T>
-inline int BaseModel::updateT(const T& message)
+inline std::vector<std::shared_ptr<T> > BaseModel::updateT(const T& message)
 {
   return updateT(&message);
 }

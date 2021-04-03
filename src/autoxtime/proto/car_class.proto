@@ -4,7 +4,10 @@ package autoxtime.proto;
 
 message CarClass {
   optional int64 car_class_id = 1;
+  // primary key 1a
   optional string name = 2;
-  optional int64 organization_id = 3;
-  optional string pax_formula = 4;
+  // primary key 1b
+  optional string subclass_name = 3;
+  optional int64 organization_id = 4;
+  optional string pax_formula = 5;
 }

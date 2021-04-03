@@ -40,8 +40,8 @@ option(BUILD_SHARED_LIBS "Build libraries as SHARED" ON)
 # set(CMAKE_EXE_LINKER_FLAGS "-static")
 
 # turn on debug builds
-# set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_BUILD_TYPE RelWithDebInfo)
+set(CMAKE_BUILD_TYPE Debug)
+# set(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 # output our executables in the build/ directory
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
@@ -88,15 +88,34 @@ set(autoxtime_DEFAULT_ARGS
 
 ###########
 # Testing
-if(${TEST_NAME})
-  if(${TEST_NAME} EQUAL "clang-tidy")
+message(STATUS "TEST_NAME=${TEST_NAME}")
+if(TEST_NAME)
+  message(STATUS "Running test: ${TEST_NAME}")
+  if("${TEST_NAME}" STREQUAL "clang-tidy")
     set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-header-filter=src;-checks=*;-warnings-as-errors=*;")
-  elseif(${TEST_NAME} EQUAL "cppcheck")
+    message(STATUS "CMAKE_CXX_CLANG_TIDY=${CMAKE_CXX_CLANG_TIDY}")
+  elseif("${TEST_NAME}" STREQUAL "cppcheck")
     set(CMAKE_CXX_CPPCHECK "cppcheck")
-  elseif(${TEST_NAME} EQUAL "include-what-you-use")
+    list(APPEND CMAKE_CXX_CPPCHECK
+      "--verbose"
+      # actually exit when it finds something wrong
+      "--error-exitcode=1"
+      # excluding the tests that require includes because cppcheck has a hard time finding system includes and reports false messages when it does
+      "--enable=warning,style,performance,portability"
+      # allow inline suppression of warnings in the code
+      "--inline-suppr"
+      # exclude 3rd party headers from being scanned
+      "--suppress=*:${autoxtime_INSTALL_PREFIX}/*"
+      # exclude Qt moc generated sources
+      "--suppress=*:${autoxtime_BINARY_DIR}/src/autoxtime/autoxtime_autogen/*"
+      )
+    message(STATUS "CMAKE_CXX_CPPCHECK=${CMAKE_CXX_CPPCHECK}")
+  elseif("${TEST_NAME}" STREQUAL "include-what-you-use")
     set(CMAKE_CXX_INCLUDE_WHAT_YOU_USE "iwyu")
-  elseif(${TEST_NAME} EQUAL "link-what-you-use")
-    set(CMAKE_LINK_WHAT_YOU_USE cd ..TRUE)
+    message(STATUS "CMAKE_CXX_INCLUDE_WHAT_YOU_USE=${CMAKE_CXX_INCLUDE_WHAT_YOU_USE}")
+  elseif("${TEST_NAME}" STREQUAL "link-what-you-use")
+    set(CMAKE_LINK_WHAT_YOU_USE TRUE)
+    message(STATUS "CMAKE_LINK_WHAT_YOU_USE=${CMAKE_LINK_WHAT_YOU_USE}")
   else()
     message(FATAL_ERROR "TEST_NAME was defined to an unknown value: ${TEST_NAME}")
   endif()

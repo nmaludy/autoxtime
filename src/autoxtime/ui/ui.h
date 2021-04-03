@@ -1,0 +1,9 @@
+#ifndef AUTOXTIME_UI_H
+#define AUTOXTIME_UI_H
+
+#include <autoxtime/autoxtime.h>
+
+#define AUTOXTIME_UI_NAMESPACE_BEG AUTOXTIME_NAMESPACE_BEG namespace ui {
+#define AUTOXTIME_UI_NAMESPACE_END AUTOXTIME_NAMESPACE_END }
+
+#endif // AUTOXTIME_UI_H
