@@ -38,6 +38,7 @@ jobs:
         with:
           path: |
             build/external
+            build/install-prefix
           key: ${{ runner.os }}-external-${{ matrix.compiler_c }}-${{ hashFiles('external/cmake/*.cmake') }}
       - name: CMake Setup External
         run: |
@@ -144,6 +145,7 @@ jobs:
         with:
           path: |
             build/external
+            build/install-prefix
           key: ${{ runner.os }}-external-${{ matrix.compiler_c }}-${{ hashFiles('external/cmake/*.cmake') }}
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
