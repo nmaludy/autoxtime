@@ -16,6 +16,8 @@ class QPushButton;
 
 AUTOXTIME_UI_NAMESPACE_BEG
 
+class EventWidget;
+
 class AdminWidget : public QWidget
 {
   Q_OBJECT
@@ -29,8 +31,10 @@ class AdminWidget : public QWidget
   void treeSelectionChanged(QTreeWidgetItem* pCurrent, QTreeWidgetItem* pPrevious);
   void addClicked(bool checked = false);
   void deleteClicked(bool checked = false);
-  void eventSaveClicked(bool checked = false);
-  void eventCancelClicked(bool checked = false);
+
+  void eventSaved(const autoxtime::proto::Event& event);
+  void eventCancelled();
+
 
  private:
   enum State
@@ -62,11 +66,7 @@ class AdminWidget : public QWidget
   QTreeWidget* mpTree;
   QPushButton* mpAddButton;
   QPushButton* mpDeleteButton;
-  QFrame* mpEventFrame;
-  QLineEdit* mpEventNameLineEdit;
-  QDateEdit* mpEventDateEdit;
-  QPushButton* mpEventSaveButton;
-  QPushButton* mpEventCancelButton;
+  EventWidget* mpEventWidget;
 
   QTreeWidgetItem* mpAddItem;
 

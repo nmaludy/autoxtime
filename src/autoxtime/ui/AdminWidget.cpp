@@ -4,6 +4,7 @@
 #include <autoxtime/log/Log.h>
 #include <autoxtime/proto/organization.pb.h>
 #include <autoxtime/proto/event.pb.h>
+#include <autoxtime/ui/EventWidget.h>
 
 // Qt
 #include <QDateEdit>
@@ -19,13 +20,9 @@ AdminWidget::AdminWidget(QWidget* pParent)
     : QWidget(pParent),
       mState(AdminWidget::STATE_DEFAULT),
       mpTree(new QTreeWidget(this)),
-      mpAddButton(new QPushButton("add", this)),
-      mpDeleteButton(new QPushButton("delete", this)),
-      mpEventFrame(new QFrame(this)),
-      mpEventNameLineEdit(new QLineEdit(this)),
-      mpEventDateEdit(new QDateEdit(this)),
-      mpEventSaveButton(new QPushButton("save", this)),
-      mpEventCancelButton(new QPushButton("cancel", this)),
+      mpAddButton(new QPushButton("Add", this)),
+      mpDeleteButton(new QPushButton("Delete", this)),
+      mpEventWidget(new EventWidget(this)),
       mpAddItem(nullptr),
       mpOrganizationModel(new autoxtime::db::OrganizationModel(this)),
       mOrganizations(),
@@ -67,33 +64,14 @@ AdminWidget::AdminWidget(QWidget* pParent)
 
   // Event frame
   {
-    mpEventDateEdit->setCalendarPopup(true);
-    mpEventDateEdit->setDate(QDate::currentDate());
-
-    QGridLayout* p_evemt_layout = new QGridLayout(mpEventFrame);
-    p_evemt_layout->addWidget(new QLabel("Name", this), 0, 0);
-    p_evemt_layout->addWidget(mpEventNameLineEdit, 0, 1, 1, -1);
-    p_evemt_layout->addWidget(new QLabel("Date", this), 1, 0);
-    p_evemt_layout->addWidget(mpEventDateEdit, 1, 1, 1, -1);
-    p_evemt_layout->addWidget(mpEventSaveButton, 3, 0);
-    p_evemt_layout->addWidget(mpEventCancelButton, 3, 1, 1, -1);
-    p_evemt_layout->setRowStretch(2, 1);
-
     // add event editor to main layout
-    p_layout->addWidget(mpEventFrame, 0, 1);
-
-    // disable until we click on an event
-    mpEventFrame->setEnabled(false);
-    mpEventNameLineEdit->setEnabled(false);
-    mpEventDateEdit->setEnabled(false);
-    mpEventSaveButton->setEnabled(false);
-    mpEventCancelButton->setEnabled(false);
+    p_layout->addWidget(mpEventWidget, 0, 1);
 
     // capture save/cancel events
-    connect(mpEventSaveButton, &QPushButton::clicked,
-            this,              &AdminWidget::eventSaveClicked);
-    connect(mpEventCancelButton, &QPushButton::clicked,
-            this,                &AdminWidget::eventCancelClicked);
+    connect(mpEventWidget, &EventWidget::eventSaved,
+            this,          &AdminWidget::eventSaved);
+    connect(mpEventWidget, &EventWidget::eventCancelled,
+            this,          &AdminWidget::eventCancelled);
   }
 
   // connect our signals/ slots
@@ -218,24 +196,22 @@ void AdminWidget::treeSelectionChanged(QTreeWidgetItem* pCurrent, QTreeWidgetIte
   bool b_event_item = pCurrent && pCurrent->type() == TREE_ITEM_TYPE_EVENT;
   if (b_event_item)
   {
-    // don't put the fake name in the text box
-    if (pCurrent == mpAddItem)
-    {
-      mpEventNameLineEdit->clear();
-    }
-    else
-    {
-      mpEventNameLineEdit->setText(pCurrent->text(TREE_COLUMN_NAME));
-    }
-    QDate d = QDate::fromString(pCurrent->text(TREE_COLUMN_DATE), Qt::ISODate);
-    mpEventDateEdit->setDate(d);
-  }
+    std::shared_ptr<autoxtime::proto::Event> p_event =
+        std::make_shared<autoxtime::proto::Event>();
+    p_event->set_event_id(pCurrent->data(TREE_COLUMN_ID, TREE_ROLE_ID).toInt());
 
-  mpEventFrame->setEnabled(b_event_item);
-  mpEventNameLineEdit->setEnabled(b_event_item);
-  mpEventDateEdit->setEnabled(b_event_item);
-  mpEventSaveButton->setEnabled(b_event_item);
-  mpEventCancelButton->setEnabled(b_event_item);
+    // don't put the fake name in the text box
+    if (pCurrent != mpAddItem)
+    {
+      p_event->set_name(pCurrent->text(TREE_COLUMN_NAME).toStdString());
+    }
+    p_event->set_date(pCurrent->text(TREE_COLUMN_DATE).toStdString());
+    mpEventWidget->setEvent(p_event);
+  }
+  else
+  {
+    mpEventWidget->clearEvent();
+  }
 
   // don't want to have add/delete buttons enabled if we're currently adding
   bool b_buttons_enabled = pCurrent != nullptr && pCurrent != mpAddItem;
@@ -317,11 +293,10 @@ void AdminWidget::deleteClicked(bool checked)
   delete p_item;
 }
 
-void AdminWidget::eventSaveClicked(bool checked)
+void AdminWidget::eventSaved(const autoxtime::proto::Event& savedEvent)
 {
-  autoxtime::proto::Event event;
-  event.set_name(mpEventNameLineEdit->text().toStdString());
-  event.set_date(mpEventDateEdit->date().toString(Qt::ISODate).toStdString());
+  // copy
+  autoxtime::proto::Event event = savedEvent;
   QTreeWidgetItem* p_event_item = mpTree->currentItem();
   if (p_event_item == nullptr)
   {
@@ -372,7 +347,7 @@ void AdminWidget::eventSaveClicked(bool checked)
   mpDeleteButton->setEnabled(true);
 }
 
-void AdminWidget::eventCancelClicked(bool checked)
+void AdminWidget::eventCancelled()
 {
   // remove the currently adding item, this should select a new item
   if (mpAddItem != nullptr)
@@ -384,10 +359,6 @@ void AdminWidget::eventCancelClicked(bool checked)
 
   // remove selection
   mpTree->setCurrentItem(nullptr);
-  // reset name edit
-  mpEventNameLineEdit->clear();
-  // reset date edit
-  mpEventDateEdit->setDate(QDate::currentDate());
 
   // re-enable the tree since we're done editing
   mpTree->setEnabled(true);

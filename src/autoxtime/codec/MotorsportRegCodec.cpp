@@ -1,4 +1,4 @@
-#include <autoxtime/codec/MotorSportsRegCodec.h>
+#include <autoxtime/codec/MotorsportRegCodec.h>
 
 // autoxtime
 #include <autoxtime/config/ConfigStore.h>
@@ -14,7 +14,7 @@
 
 AUTOXTIME_NAMESPACE_BEG
 
-const std::unordered_map<std::string, MotorSportsRegCodec::Mapping> MotorSportsRegCodec::COLUMN_MAP = {
+const std::unordered_map<std::string, MotorsportRegCodec::Mapping> MotorsportRegCodec::COLUMN_MAP = {
   // TODO split this by following
   // format: class-subclass
   { "Class", { MOTORSPORTSREG_PROTO_CAR_CLASS, "name"} },
@@ -42,7 +42,7 @@ const std::unordered_map<std::string, MotorSportsRegCodec::Mapping> MotorSportsR
 
 ////////////////////////////////////////////
 
-MotorSportsRegEntry::MotorSportsRegEntry()
+MotorsportRegEntry::MotorsportRegEntry()
     : mpDriver(std::make_unique<autoxtime::proto::Driver>()),
       mpCar(std::make_unique<autoxtime::proto::Car>()),
       mpCarClass(std::make_unique<autoxtime::proto::CarClass>()),
@@ -51,7 +51,7 @@ MotorSportsRegEntry::MotorSportsRegEntry()
 
 ////////////////////////////////////////////
 
-MotorSportsRegCodec::Mapping::Mapping(MotorSportsRegCodec::Proto proto,
+MotorsportRegCodec::Mapping::Mapping(MotorsportRegCodec::Proto proto,
                                       const std::string& fieldName)
     : mProto{proto},
       mpField{nullptr}
@@ -77,14 +77,14 @@ MotorSportsRegCodec::Mapping::Mapping(MotorSportsRegCodec::Proto proto,
 
 ////////////////////////////////////////////
 
-MotorSportsRegCodec::MotorSportsRegCodec(QObject* pParent)
+MotorsportRegCodec::MotorsportRegCodec(QObject* pParent)
     : QObject(pParent)
 {}
 
-std::vector<std::shared_ptr<MotorSportsRegEntry>> MotorSportsRegCodec
+std::vector<std::shared_ptr<MotorsportRegEntry>> MotorsportRegCodec
 ::readFile(const QString& fileName)
 {
-  std::vector<std::shared_ptr<MotorSportsRegEntry>> results;
+  std::vector<std::shared_ptr<MotorsportRegEntry>> results;
 
   rapidcsv::Document doc(fileName.toStdString());
   std::cout << "Read " << doc.GetRowCount() << " values." << std::endl;
@@ -95,19 +95,18 @@ std::vector<std::shared_ptr<MotorSportsRegEntry>> MotorSportsRegCodec
     std::cout << "  - " << column << std::endl;
   }
 
-  std::cout << "Read " << doc.GetRowCount() << " values." << std::endl;
   const std::size_t row_count = doc.GetRowCount();
   const std::size_t col_count = column_names.size();
   for (std::size_t row_idx = 0; row_idx < row_count; ++row_idx)
   {
     std::vector<std::string> row = doc.GetRow<std::string>(row_idx);
-    std::shared_ptr<MotorSportsRegEntry> entry = std::make_shared<MotorSportsRegEntry>();
+    std::shared_ptr<MotorsportRegEntry> entry = std::make_shared<MotorsportRegEntry>();
     for (std::size_t col_idx = 0; col_idx < col_count; ++col_idx)
     {
       const std::string& col_name = column_names[col_idx];
       // TODO setup a mapping based on column indexes for this file, rather than finding
       //      the mapping every time
-      std::unordered_map<std::string, MotorSportsRegCodec::Mapping>::const_iterator iter =
+      std::unordered_map<std::string, MotorsportRegCodec::Mapping>::const_iterator iter =
           COLUMN_MAP.find(col_name);
       if (iter == COLUMN_MAP.end())
       {

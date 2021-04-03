@@ -44,7 +44,7 @@ jobs:
           cmake -S external -B build/external
       - name: Compile External
         run: |
-          cmake --build build/external --parallel
+          cmake --build build/external
 
   compile:
     name: '${{ matrix.test_type }} - ${{ matrix.test_name_pretty }}'
@@ -156,12 +156,6 @@ jobs:
         if: ${{ matrix.apt_packages }}
         run: |
           sudo apt-get -y install ${{ matrix.apt_packages }}
-      - name: CMake Setup External
-        run: |
-          cmake -S external -B build/external
-      - name: Compile External
-        run: |
-          cmake --build build/external --parallel
       - name: CMake Setup
         run: |
           ${{ matrix.cmd_prefix }} cmake -S . -B build ${{ matrix.cmake_args }}

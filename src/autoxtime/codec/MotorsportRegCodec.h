@@ -15,10 +15,10 @@ namespace google::protobuf { class FieldDescriptor; }
 
 AUTOXTIME_NAMESPACE_BEG
 
-class MotorSportsRegEntry
+class MotorsportRegEntry
 {
  public:
-  MotorSportsRegEntry();
+  MotorsportRegEntry();
 
   std::unique_ptr<autoxtime::proto::Driver> mpDriver;
   std::unique_ptr<autoxtime::proto::Car> mpCar;
@@ -26,14 +26,14 @@ class MotorSportsRegEntry
   std::unique_ptr<autoxtime::proto::EventRegistration> mpEventRegistration;
 };
 
-class MotorSportsRegCodec : public QObject
+class MotorsportRegCodec : public QObject
 {
   Q_OBJECT
 
  public:
-  explicit MotorSportsRegCodec(QObject* pParent = nullptr);
+  explicit MotorsportRegCodec(QObject* pParent = nullptr);
 
-  std::vector<std::shared_ptr<MotorSportsRegEntry>> readFile(const QString& fileName);
+  std::vector<std::shared_ptr<MotorsportRegEntry>> readFile(const QString& fileName);
 
  private:
   enum Proto
@@ -47,10 +47,10 @@ class MotorSportsRegCodec : public QObject
   class Mapping
   {
    public:
-    Mapping(MotorSportsRegCodec::Proto proto,
+    Mapping(MotorsportRegCodec::Proto proto,
             const std::string& fieldName);
 
-    MotorSportsRegCodec::Proto mProto;
+    MotorsportRegCodec::Proto mProto;
     const google::protobuf::FieldDescriptor* mpField;
   };
 
