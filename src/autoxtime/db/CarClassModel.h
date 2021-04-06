@@ -25,7 +25,7 @@ class CarClassModel : public BaseModel
   std::vector<std::shared_ptr<autoxtime::proto::CarClass> > update(const autoxtime::proto::CarClass& carClass);
 
   std::vector<std::shared_ptr<autoxtime::proto::CarClass> > find(const autoxtime::proto::CarClass& prototype);
-  std::vector<std::shared_ptr<autoxtime::proto::CarClass> > findById(int id);
+  std::vector<std::shared_ptr<autoxtime::proto::CarClass> > findById(std::int64_t id);
 
   // creates CarClass if doesn't exist, order of lookup is:
   // - name + subclass_name

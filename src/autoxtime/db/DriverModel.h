@@ -25,7 +25,7 @@ class DriverModel : public BaseModel
   std::vector<std::shared_ptr<autoxtime::proto::Driver> > update(const autoxtime::proto::Driver& driver);
 
   std::vector<std::shared_ptr<autoxtime::proto::Driver> > find(const autoxtime::proto::Driver& prototype);
-  std::vector<std::shared_ptr<autoxtime::proto::Driver> > findById(int id);
+  std::vector<std::shared_ptr<autoxtime::proto::Driver> > findById(std::int64_t id);
 
   // creates driver if doesn't exist, order of lookup is:
   // - scca_id

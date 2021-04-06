@@ -22,7 +22,7 @@ class DbListener : public QObject
   void notification(const QString& name,
                     QSqlDriver::NotificationSource source,
                     const QVariant& payload);
-  
+
  private:
   QString mChannel;
   std::unique_ptr<DbConnection> mpConnection;

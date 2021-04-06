@@ -48,7 +48,7 @@ std::vector<std::shared_ptr<autoxtime::proto::Driver> > DriverModel
 }
 
 std::vector<std::shared_ptr<autoxtime::proto::Driver> > DriverModel
-::findById(int id)
+::findById(std::int64_t id)
 {
   return BaseModel::findByIdT<autoxtime::proto::Driver>(id);
 }

@@ -48,7 +48,7 @@ std::vector<std::shared_ptr<autoxtime::proto::EventRegistration> > EventRegistra
 }
 
 std::vector<std::shared_ptr<autoxtime::proto::EventRegistration> > EventRegistrationModel
-::findById(int id)
+::findById(std::int64_t id)
 {
   return BaseModel::findByIdT<autoxtime::proto::EventRegistration>(id);
 }

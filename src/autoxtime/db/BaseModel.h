@@ -65,7 +65,7 @@ class BaseModel : public QObject
   inline std::vector<std::shared_ptr<T> > updateT(const T& pMessage);
 
   //////////////////// destroy
-  virtual int destroyById(int id);
+  virtual std::int64_t destroyById(std::int64_t id);
 
   //////////////////// find
   // TODO - should combined list() and find() ?
@@ -74,10 +74,10 @@ class BaseModel : public QObject
   template <typename T>
   inline std::vector<std::shared_ptr<T> > findT(const T& prototype);
 
-  virtual std::vector<std::shared_ptr<google::protobuf::Message> > findMessageById(int id);
+  virtual std::vector<std::shared_ptr<google::protobuf::Message> > findMessageById(std::int64_t id);
 
   template <typename T>
-  inline std::vector<std::shared_ptr<T> > findByIdT(int id);
+  inline std::vector<std::shared_ptr<T> > findByIdT(std::int64_t id);
 
 
   //////////////////// behind the scenes stuff
@@ -167,7 +167,7 @@ inline std::vector<std::shared_ptr<T> > BaseModel::findT(const T& prototype)
 }
 
 template <typename T>
-inline std::vector<std::shared_ptr<T> > BaseModel::findByIdT(int id)
+inline std::vector<std::shared_ptr<T> > BaseModel::findByIdT(std::int64_t id)
 {
   std::vector<std::shared_ptr<google::protobuf::Message> > msgs = findMessageById(id);
   return messagesToT<T>(msgs);

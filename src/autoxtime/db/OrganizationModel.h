@@ -33,7 +33,7 @@ class OrganizationModel : public BaseModel
   ProtoPtrVec update(const Proto& organization);
 
   ProtoPtrVec find(const Proto& prototype);
-  ProtoPtrVec findById(int id);
+  ProtoPtrVec findById(std::int64_t id);
 
  signals:
   // need the full namespace here so it matches the Q_DECLARE_METATYPE below

@@ -128,7 +128,7 @@ void EventWidget::importClicked(bool checked)
 {
   if (mpEvent)
   {
-    EventImportDialog dialog(mpEvent->event_id(), this);
+    EventImportDialog dialog(mpEvent, this);
     dialog.exec();
   }
 }

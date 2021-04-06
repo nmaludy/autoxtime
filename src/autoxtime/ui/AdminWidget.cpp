@@ -117,8 +117,8 @@ void AdminWidget::rebuildTree()
 void AdminWidget::rebuildTreeOrganization(const autoxtime::db::OrganizationModel::ProtoPtr& pOrg)
 {
   // do we know about this organization yet or not?
-  std::int32_t org_id = pOrg->organization_id();
-  std::unordered_map<std::int32_t, QTreeWidgetItem*>::iterator iter =
+  std::int64_t org_id = pOrg->organization_id();
+  std::unordered_map<std::int64_t, QTreeWidgetItem*>::iterator iter =
       mOrganizationTreeItems.find(org_id);
 
   // if we already have it, use existing
@@ -146,8 +146,8 @@ void AdminWidget::rebuildTreeOrganization(const autoxtime::db::OrganizationModel
 void AdminWidget::rebuildTreeEvent(const autoxtime::db::EventModel::ProtoPtr& pEvent)
 {
   // do we know about this event yet or not?
-  std::int32_t event_id = pEvent->event_id();
-  std::unordered_map<std::int32_t, QTreeWidgetItem*>::iterator event_iter =
+  std::int64_t event_id = pEvent->event_id();
+  std::unordered_map<std::int64_t, QTreeWidgetItem*>::iterator event_iter =
       mEventTreeItems.find(event_id);
 
   QTreeWidgetItem* p_event_item = nullptr;
@@ -159,8 +159,8 @@ void AdminWidget::rebuildTreeEvent(const autoxtime::db::EventModel::ProtoPtr& pE
   else
   {
     // create new, first we need to find the org for this event
-    std::int32_t org_id = pEvent->organization_id();
-    std::unordered_map<std::int32_t, QTreeWidgetItem*>::iterator org_iter =
+    std::int64_t org_id = pEvent->organization_id();
+    std::unordered_map<std::int64_t, QTreeWidgetItem*>::iterator org_iter =
         mOrganizationTreeItems.find(org_id);
 
     // if we already have it, use existing
@@ -198,7 +198,7 @@ void AdminWidget::treeSelectionChanged(QTreeWidgetItem* pCurrent, QTreeWidgetIte
   {
     std::shared_ptr<autoxtime::proto::Event> p_event =
         std::make_shared<autoxtime::proto::Event>();
-    p_event->set_event_id(pCurrent->data(TREE_COLUMN_ID, TREE_ROLE_ID).toInt());
+    p_event->set_event_id(pCurrent->data(TREE_COLUMN_ID, TREE_ROLE_ID).toLongLong());
 
     // don't put the fake name in the text box
     if (pCurrent != mpAddItem)
@@ -273,7 +273,7 @@ void AdminWidget::deleteClicked(bool checked)
   }
 
   // get ID of the current item
-  int id = p_item->data(TREE_COLUMN_ID, TREE_ROLE_ID).toInt();
+  std::int64_t id = p_item->data(TREE_COLUMN_ID, TREE_ROLE_ID).toLongLong();
   // delete from the correct table depending on what is selected
   switch (p_item->type())
   {
@@ -304,7 +304,7 @@ void AdminWidget::eventSaved(const autoxtime::proto::Event& savedEvent)
   }
   // set the organization from the parent item
   QTreeWidgetItem* p_org_item = p_event_item->parent();
-  event.set_organization_id(p_org_item->data(TREE_COLUMN_ID, TREE_ROLE_ID).toInt());
+  event.set_organization_id(p_org_item->data(TREE_COLUMN_ID, TREE_ROLE_ID).toLongLong());
 
   if (mpAddItem)
   {
@@ -318,7 +318,7 @@ void AdminWidget::eventSaved(const autoxtime::proto::Event& savedEvent)
     if (events.size() > 1)
     {
       // set the newly created event ID on our item
-      int event_id = events[0]->event_id();
+      std::int64_t event_id = events[0]->event_id();
       p_event_item->setData(TREE_COLUMN_ID, TREE_ROLE_ID, QVariant::fromValue(event_id));
 
       // add our event to our collections
@@ -329,7 +329,7 @@ void AdminWidget::eventSaved(const autoxtime::proto::Event& savedEvent)
   else
   {
     // get the ID in the item so we can set it here, only need this for updates
-    event.set_event_id(p_event_item->data(TREE_COLUMN_ID, TREE_ROLE_ID).toInt());
+    event.set_event_id(p_event_item->data(TREE_COLUMN_ID, TREE_ROLE_ID).toLongLong());
     mpEventModel->update(event);
   }
 

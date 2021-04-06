@@ -3,9 +3,13 @@
 
 // autoxtime
 #include <autoxtime/ui/ui.h>
+#include <autoxtime/proto/event.pb.h>
 
 // Qt
 #include <QDialog>
+
+// std
+#include <memory>
 
 class QComboBox;
 class QDateEdit;
@@ -19,7 +23,7 @@ class EventImportDialog : public QDialog
   Q_OBJECT
 
  public:
-  explicit EventImportDialog(std::int64_t eventId,
+  explicit EventImportDialog(const std::shared_ptr<autoxtime::proto::Event>& pEvent,
                              QWidget* pParent = nullptr);
 
  public slots:
@@ -27,7 +31,7 @@ class EventImportDialog : public QDialog
   void saveClicked(bool checked = false);
 
  private:
-  const std::int64_t mEventId;
+  const std::shared_ptr<autoxtime::proto::Event> mpEvent;
 
   QComboBox* mpFormatComboBox;
 

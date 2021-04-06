@@ -147,7 +147,7 @@ std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
   return results;
 }
 
-int BaseModel::destroyById(int id)
+std::int64_t BaseModel::destroyById(std::int64_t id)
 {
   QElapsedTimer timer;
   timer.start();
@@ -155,7 +155,7 @@ int BaseModel::destroyById(int id)
   QSqlQuery query(connection()->database());
   const QString& pkey = primaryKeyQ();
   query.prepare("DELETE FROM " + tableQ() + " WHERE " + pkey + " = :" + pkey);
-  query.bindValue(":" + pkey, id);
+  query.bindValue(":" + pkey, QVariant::fromValue(id));
   AXT_DEBUG << "BaseMode::destroyById() executing query: " << query.lastQuery()
             << "\n" << ":" + pkey << "=" << id;
   bool res = query.exec();
@@ -210,7 +210,7 @@ std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
 }
 
 std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
-::findMessageById(int id)
+::findMessageById(std::int64_t id)
 {
   QElapsedTimer timer;
   timer.start();
@@ -219,7 +219,7 @@ std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
   const QString& pkey = primaryKeyQ();
   query.prepare("SELECT " + mFieldNames.join(", ") + " FROM " + tableQ()
                 + " WHERE " + pkey + " = :" + pkey);
-  query.bindValue(":" + pkey, id);
+  query.bindValue(":" + pkey, QVariant::fromValue(id));
   AXT_DEBUG << "BaseMode::findById() executing query: " << query.lastQuery()
             << "\n" << ":" + pkey << "=" << id;
 

@@ -48,7 +48,7 @@ std::vector<std::shared_ptr<autoxtime::proto::Car> > CarModel
 }
 
 std::vector<std::shared_ptr<autoxtime::proto::Car> > CarModel
-::findById(int id)
+::findById(std::int64_t id)
 {
   return BaseModel::findByIdT<autoxtime::proto::Car>(id);
 }

@@ -63,7 +63,7 @@ OrganizationModel::ProtoPtrVec OrganizationModel::find(const OrganizationModel::
   return BaseModel::findT<OrganizationModel::Proto>(prototype);
 }
 
-OrganizationModel::ProtoPtrVec OrganizationModel::findById(int id)
+OrganizationModel::ProtoPtrVec OrganizationModel::findById(std::int64_t id)
 {
   return BaseModel::findByIdT<OrganizationModel::Proto>(id);
 }

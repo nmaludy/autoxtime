@@ -61,7 +61,7 @@ EventModel::ProtoPtrVec EventModel::find(const EventModel::Proto& prototype)
   return BaseModel::findT<EventModel::Proto>(prototype);
 }
 
-EventModel::ProtoPtrVec EventModel::findById(int id)
+EventModel::ProtoPtrVec EventModel::findById(std::int64_t id)
 {
   return BaseModel::findByIdT<EventModel::Proto>(id);
 }

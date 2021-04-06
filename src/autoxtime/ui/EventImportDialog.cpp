@@ -20,10 +20,10 @@
 
 AUTOXTIME_UI_NAMESPACE_BEG
 
-EventImportDialog::EventImportDialog(std::int64_t eventId,
+EventImportDialog::EventImportDialog(const std::shared_ptr<autoxtime::proto::Event>& pEvent,
                                      QWidget* pParent)
     : QDialog(pParent),
-      mEventId(eventId),
+      mpEvent(pEvent),
       mpFormatComboBox(new QComboBox(this)),
       mpFileLineEdit(new QLineEdit(this)),
       mpFileBrowseButton(new QPushButton("Browse", this)),
@@ -129,15 +129,14 @@ void EventImportDialog::browseClicked(bool checked)
     }
 
     // order of creation
-    // organization (need to look this up)
-    int org_id = 1;
-    int event_id = 1;
-    int season_id = 1;
+    // TODO: organization (need to look these up)
+    std::int64_t org_id = mpEvent->organization_id();
+    std::int64_t event_id = mpEvent->event_id();
 
-    int driver_id = -1;
-    int car_class_id = -1;
-    int car_id = -1;
-    int event_registration_id = -1;
+    std::int64_t driver_id = -1;
+    std::int64_t car_class_id = -1;
+    std::int64_t car_id = -1;
+    std::int64_t event_registration_id = -1;
 
     // driver
     {

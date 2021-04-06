@@ -25,7 +25,7 @@ class EventRegistrationModel : public BaseModel
   std::vector<std::shared_ptr<autoxtime::proto::EventRegistration> > update(const autoxtime::proto::EventRegistration& eventRegistration);
 
   std::vector<std::shared_ptr<autoxtime::proto::EventRegistration> > find(const autoxtime::proto::EventRegistration& prototype);
-  std::vector<std::shared_ptr<autoxtime::proto::EventRegistration> > findById(int id);
+  std::vector<std::shared_ptr<autoxtime::proto::EventRegistration> > findById(std::int64_t id);
 
   // creates EventRegistration if doesn't exist, order of lookup is:
   // - event_id + driver_id + car_id

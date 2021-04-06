@@ -73,14 +73,14 @@ class AdminWidget : public QWidget
   autoxtime::db::OrganizationModel* mpOrganizationModel;
   autoxtime::db::OrganizationModel::ProtoPtrVec mOrganizations;
   // map from organization id -> tree item
-  std::unordered_map<std::int32_t, QTreeWidgetItem*> mOrganizationTreeItems;
+  std::unordered_map<std::int64_t, QTreeWidgetItem*> mOrganizationTreeItems;
 
   autoxtime::db::EventModel* mpEventModel;
   autoxtime::db::EventModel::ProtoPtrVec mEvents;
   // map from event id -> tree item
   // we could store this in some sort of nested map, but we don't need that level
   // of complexity yet, just care if we know about this event or not
-  std::unordered_map<std::int32_t, QTreeWidgetItem*> mEventTreeItems;
+  std::unordered_map<std::int64_t, QTreeWidgetItem*> mEventTreeItems;
 };
 
 AUTOXTIME_UI_NAMESPACE_END

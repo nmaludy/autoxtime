@@ -12,6 +12,9 @@
 #include <string>
 #include <vector>
 
+// Qt
+#include <QFile>
+
 AUTOXTIME_NAMESPACE_BEG
 
 const std::unordered_map<std::string, MotorsportRegCodec::Mapping> MotorsportRegCodec::COLUMN_MAP = {
@@ -85,15 +88,25 @@ std::vector<std::shared_ptr<MotorsportRegEntry>> MotorsportRegCodec
 ::readFile(const QString& fileName,
            std::shared_ptr<std::vector<QString>> pErrors)
 {
+  // read in the file, just for debugging, yes i'm anal
+  QFile f(fileName);
+  if (f.open(QFile::ReadOnly | QFile::Text))
+  {
+    QTextStream in(&f);
+    AXT_DEBUG << "Parsing MotorsportsReg CSV file:\n"
+              << in.readAll();
+  }
+
   std::vector<std::shared_ptr<MotorsportRegEntry>> results;
 
+  // read in CSV data
   rapidcsv::Document doc(fileName.toStdString());
-  std::cout << "Read " << doc.GetRowCount() << " values." << std::endl;
+  AXT_DEBUG << "Read rows: " << doc.GetRowCount();
   std::vector<std::string> column_names = doc.GetColumnNames();
-  std::cout << "column names:" << std::endl;
+  AXT_DEBUG << "Column names: ";
   for (const std::string& column : column_names)
   {
-    std::cout << "  - " << column << std::endl;
+    AXT_DEBUG << " - " << column;
   }
 
   const std::size_t row_count = doc.GetRowCount();
