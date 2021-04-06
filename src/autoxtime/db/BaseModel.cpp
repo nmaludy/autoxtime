@@ -326,35 +326,37 @@ bool BaseModel::setFieldVariant(google::protobuf::Message* pMessage,
                                 const QVariant& var)
 {
   const google::protobuf::Reflection* p_reflection = pMessage->GetReflection();
+  bool b_ok = false;
   switch (pField->cpp_type())
   {
-    // for the int types, use the width based type names because its less confusing
     case google::protobuf::FieldDescriptor::CPPTYPE_INT32:
-      p_reflection->SetInt32(pMessage, pField, var.value<std::int32_t>());
+      p_reflection->SetInt32(pMessage, pField, var.toInt(&b_ok));
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_INT64:
-      p_reflection->SetInt64(pMessage, pField, var.value<std::int64_t>());
+      p_reflection->SetInt64(pMessage, pField, var.toLongLong(&b_ok));
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_UINT32:
-      p_reflection->SetUInt32(pMessage, pField, var.value<std::uint32_t>());
+      p_reflection->SetUInt32(pMessage, pField, var.toUInt(&b_ok));
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_UINT64:
-      p_reflection->SetUInt64(pMessage, pField, var.value<std::uint64_t>());
+      p_reflection->SetUInt64(pMessage, pField, var.toULongLong(&b_ok));
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_DOUBLE:
-      p_reflection->SetDouble(pMessage, pField, var.toFloat());
+      p_reflection->SetDouble(pMessage, pField, var.toFloat(&b_ok));
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_FLOAT:
-      p_reflection->SetFloat(pMessage, pField, var.toFloat());
+      p_reflection->SetFloat(pMessage, pField, var.toFloat(&b_ok));
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_BOOL:
       p_reflection->SetBool(pMessage, pField, var.toBool());
+      b_ok = true;
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_ENUM:
-      p_reflection->SetEnumValue(pMessage, pField, var.toInt());
+      p_reflection->SetEnumValue(pMessage, pField, var.toInt(&b_ok));
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_STRING:
       p_reflection->SetString(pMessage, pField, var.toString().toStdString());
+      b_ok = true;
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_MESSAGE:
       AXT_ERROR << "Error setting field '"
@@ -364,7 +366,18 @@ bool BaseModel::setFieldVariant(google::protobuf::Message* pMessage,
       return false;
       break;
   }
-  return true;
+
+  if (!b_ok)
+  {
+    AXT_ERROR << "Error converting field '"
+              << QString::fromStdString(pField->full_name())
+              << "' from QVariant(string) to protobuf("
+              << pField->type_name()
+              << ") / c++("
+              << pField->cpp_type_name()
+              << ")  value = '" << var.toString().toStdString() << "'";
+  }
+  return b_ok;
 }
 
 QString BaseModel::wherePrototype(const google::protobuf::Message& message)

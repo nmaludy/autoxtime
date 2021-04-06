@@ -72,13 +72,15 @@ std::vector<std::shared_ptr<autoxtime::proto::EventRegistration> > EventRegistra
     }
   }
 
-  // event_id + driver_id
+  // event_id + driver_id + car_id
   if (eventRegistration.has_event_id() &&
-      eventRegistration.has_driver_id())
+      eventRegistration.has_driver_id() &&
+      eventRegistration.has_car_id())
   {
     autoxtime::proto::EventRegistration proto;
     proto.set_event_id(eventRegistration.event_id());
     proto.set_driver_id(eventRegistration.driver_id());
+    proto.set_car_id(eventRegistration.car_id());
 
     results = find(proto);
     if (!results.empty())

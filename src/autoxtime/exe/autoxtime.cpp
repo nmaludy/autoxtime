@@ -18,6 +18,4 @@ int main(int argc, char* argv[])
   autoxtime::ui::MainWindow w;
   w.show();
   return app.exec();
-
-  return 0;
 }

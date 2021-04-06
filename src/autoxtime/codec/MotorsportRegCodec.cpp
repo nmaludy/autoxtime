@@ -82,7 +82,8 @@ MotorsportRegCodec::MotorsportRegCodec(QObject* pParent)
 {}
 
 std::vector<std::shared_ptr<MotorsportRegEntry>> MotorsportRegCodec
-::readFile(const QString& fileName)
+::readFile(const QString& fileName,
+           std::shared_ptr<std::vector<QString>> pErrors)
 {
   std::vector<std::shared_ptr<MotorsportRegEntry>> results;
 
@@ -161,9 +162,17 @@ std::vector<std::shared_ptr<MotorsportRegEntry>> MotorsportRegCodec
 
       if (p_msg && !b_parsed && !value.empty())
       {
-        autoxtime::db::BaseModel::setFieldVariant(p_msg,
-                                                  mapping.mpField,
-                                                  QVariant(QString::fromStdString(value)));
+        bool b_ok = autoxtime::db::BaseModel::setFieldVariant(p_msg,
+                                                              mapping.mpField,
+                                                              QVariant(QString::fromStdString(value)));
+        if (!b_ok)
+        {
+          // TODO return errors back to user
+          if (pErrors)
+          {
+            pErrors->push_back("Bad row");
+          }
+        }
       }
     }
 

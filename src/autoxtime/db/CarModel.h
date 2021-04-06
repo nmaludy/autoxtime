@@ -28,7 +28,7 @@ class CarModel : public BaseModel
   std::vector<std::shared_ptr<autoxtime::proto::Car> > findById(int id);
 
   // creates Car if doesn't exist, order of lookup is:
-  // - model + color + class_id + driver_id
+  // - model + class_id + driver_id + color (optional)
   std::vector<std::shared_ptr<autoxtime::proto::Car> > createIfNotExists(const autoxtime::proto::Car& car);
 };
 

@@ -20,8 +20,8 @@ CREATE TABLE IF NOT EXISTS  driver(
   last_name TEXT NOT NULL,
   email TEXT,
   phone_number TEXT,
-  msr_id INT,
-  scca_id INT,
+  msr_id TEXT,
+  scca_id TEXT,
   work_req INT,
   work_skill INT,
   PRIMARY KEY(driver_id),
@@ -97,18 +97,22 @@ CREATE TABLE IF NOT EXISTS event(
 
 CREATE TABLE IF NOT EXISTS event_registration(
   event_registration_id INT GENERATED ALWAYS AS IDENTITY,
-  amount_paid money,
-  amount_due money,
+  amount_paid numeric,
+  amount_due numeric,
   membership_type TEXT,
   event_id INT NOT NULL,
   driver_id INT NOT NULL,
+  car_id INT NOT NULL,
   PRIMARY KEY(event_registration_id),
   CONSTRAINT fk_event
     FOREIGN KEY(event_id)
       REFERENCES event(event_id),
   CONSTRAINT fk_driver
     FOREIGN KEY(driver_id)
-      REFERENCES driver(driver_id)
+      REFERENCES driver(driver_id),
+  CONSTRAINT fk_car
+    FOREIGN KEY(car_id)
+      REFERENCES car(car_id)
 );
 
 CREATE TABLE IF NOT EXISTS run(
@@ -318,7 +322,8 @@ FOR EACH ROW EXECUTE PROCEDURE notify_trigger(
   'amount_due',
   'membership_type',
   'event_id',
-  'driver_id'
+  'driver_id',
+  'car_id'
 );
 
 CREATE TRIGGER notify_run

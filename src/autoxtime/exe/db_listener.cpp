@@ -62,8 +62,8 @@ int main(int argc, char *argv[])
     d.set_last_name("44dsfds");
     d.set_email("nick@test.com");
     d.set_phone_number("555-123-4567");
-    d.set_msr_id(2);
-    d.set_scca_id(2);
+    d.set_msr_id("2");
+    d.set_scca_id("2");
     std::vector<std::shared_ptr<autoxtime::proto::Driver> > drivers = driver.find(d);
     google::protobuf::util::JsonPrintOptions opts;
     opts.add_whitespace = true;

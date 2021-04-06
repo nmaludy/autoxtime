@@ -72,17 +72,20 @@ std::vector<std::shared_ptr<autoxtime::proto::Car> > CarModel
     }
   }
 
-  // model + color + class_id + driver_id
+  // model + class_id + driver_id + color (optional)
   if (car.has_model() &&
-      car.has_color() &&
       car.has_car_class_id() &&
       car.has_driver_id())
   {
     autoxtime::proto::Car proto;
     proto.set_model(car.model());
-    proto.set_color(car.color());
     proto.set_car_class_id(car.car_class_id());
     proto.set_driver_id(car.driver_id());
+    // color is optional
+    if (car.has_color())
+    {
+      proto.set_color(car.color());
+    }
 
     results = find(proto);
     if (!results.empty())

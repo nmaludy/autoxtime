@@ -33,7 +33,8 @@ class MotorsportRegCodec : public QObject
  public:
   explicit MotorsportRegCodec(QObject* pParent = nullptr);
 
-  std::vector<std::shared_ptr<MotorsportRegEntry>> readFile(const QString& fileName);
+  std::vector<std::shared_ptr<MotorsportRegEntry>> readFile(const QString& fileName,
+                                                            std::shared_ptr<std::vector<QString>> pErrors = nullptr);
 
  private:
   enum Proto

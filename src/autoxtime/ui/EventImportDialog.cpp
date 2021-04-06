@@ -185,6 +185,7 @@ void EventImportDialog::browseClicked(bool checked)
       autoxtime::db::EventRegistrationModel model;
       r->mpEventRegistration->set_event_id(event_id);
       r->mpEventRegistration->set_driver_id(driver_id);
+      r->mpEventRegistration->set_car_id(car_id);
 
       std::vector<std::shared_ptr<autoxtime::proto::EventRegistration> > created =
           model.createIfNotExists(*(r->mpEventRegistration));

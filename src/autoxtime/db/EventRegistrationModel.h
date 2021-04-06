@@ -28,7 +28,7 @@ class EventRegistrationModel : public BaseModel
   std::vector<std::shared_ptr<autoxtime::proto::EventRegistration> > findById(int id);
 
   // creates EventRegistration if doesn't exist, order of lookup is:
-  // - event_id + driver_id
+  // - event_id + driver_id + car_id
   std::vector<std::shared_ptr<autoxtime::proto::EventRegistration> > createIfNotExists(const autoxtime::proto::EventRegistration& eventRegistration);
 };
 
