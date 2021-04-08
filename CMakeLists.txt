@@ -27,10 +27,10 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 # common string here, then assigned to targets later
 if (MSVC)
   # warning level 4 and all warnings as errors
-  set(autoxtime_COMPILER_OPTIONS /W4 /WX)
+  set(autoxtime_COMPILE_OPTIONS /W4 /WX)
 else()
   # lots of warnings and all warnings as errors
-  set(autoxtime_COMPILER_OPTIONS -Wall -Wextra -pedantic -Werror)
+  set(autoxtime_COMPILE_OPTIONS -Wall -pedantic -Werror)
 endif()
 
 # As moc files are generated in the binary dir, tell CMake
