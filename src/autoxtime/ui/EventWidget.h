@@ -3,7 +3,6 @@
 
 // autoxtime
 #include <autoxtime/ui/ui.h>
-#include <autoxtime/db/EventModel.h>
 
 // Qt
 #include <QWidget>
@@ -11,6 +10,8 @@
 class QDateEdit;
 class QLineEdit;
 class QPushButton;
+
+namespace autoxtime { namespace proto { class Event; } }
 
 AUTOXTIME_UI_NAMESPACE_BEG
 
@@ -30,7 +31,7 @@ class EventWidget : public QWidget
   void setDateStr(const std::string& date);
 
  public slots:
-  void setEvent(autoxtime::db::EventModel::ProtoPtr pEvent);
+  void setEvent(std::shared_ptr<autoxtime::proto::Event> pEvent);
   void setEvent(const QString& name,
                 const QString& date);
   void clearEvent();
@@ -43,7 +44,7 @@ class EventWidget : public QWidget
   void eventCancelled();
 
  private:
-  autoxtime::db::EventModel::ProtoPtr mpEvent;
+  std::shared_ptr<autoxtime::proto::Event> mpEvent;
 
   QLineEdit* mpEventNameLineEdit;
   QDateEdit* mpEventDateEdit;

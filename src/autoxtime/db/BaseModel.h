@@ -8,12 +8,10 @@
 #include <QString>
 #include <QtSql>
 
-namespace google::protobuf {
-class Descriptor;
-class FieldDescriptor;
-class Message;
-class Reflection;
-} // end namespace google::protobuf
+namespace google { namespace protobuf { class Descriptor; } }
+namespace google { namespace protobuf { class FieldDescriptor; } }
+namespace google { namespace protobuf { class Message; } }
+namespace google { namespace protobuf { class Reflection; } }
 
 AUTOXTIME_DB_NAMESPACE_BEG
 
@@ -21,7 +19,7 @@ class DbConnection;
 
 class BaseModel : public QObject
 {
-  Q_OBJECT;
+  Q_OBJECT
 
  public:
   BaseModel(const std::string& table,
@@ -80,6 +78,14 @@ class BaseModel : public QObject
   inline std::vector<std::shared_ptr<T> > findByIdT(std::int64_t id);
 
 
+  virtual std::vector<std::shared_ptr<google::protobuf::Message> > findMessageCustom(const QString& custom,
+                                                                                    const std::unordered_map<QString, QVariant>& bindings = std::unordered_map<QString, QVariant>());
+
+  template <typename T>
+  inline std::vector<std::shared_ptr<T> > findCustomT(const QString& custom,
+                                                      const std::unordered_map<QString, QVariant>& bindings = std::unordered_map<QString, QVariant>());
+
+
   //////////////////// behind the scenes stuff
   static QVariant getFieldVariant(const google::protobuf::Message& message,
                                   const google::protobuf::FieldDescriptor* pField);
@@ -99,6 +105,9 @@ class BaseModel : public QObject
 
  protected:
   std::vector<std::shared_ptr<google::protobuf::Message> > createOrUpdateMessage(const google::protobuf::Message* pMessage, bool bCreate);
+  static QStringList fieldNames(const google::protobuf::Descriptor* pDescriptor);
+  static std::vector<const google::protobuf::FieldDescriptor*> fieldDescriptors(const google::protobuf::Descriptor* pDescriptor);
+  static std::unordered_map<std::string, const google::protobuf::FieldDescriptor*> fieldNamesToFds(const google::protobuf::Descriptor* pDescriptor);
 
   const std::string mTable;
   const QString mTableQ;
@@ -108,9 +117,9 @@ class BaseModel : public QObject
   const google::protobuf::Reflection* mpReflection;
   const google::protobuf::Message* mpPrototype;
   std::shared_ptr<DbConnection> mpConnection;
-  QStringList mFieldNames;
-  std::vector<const google::protobuf::FieldDescriptor*> mFieldDescriptors;
-  std::unordered_map<std::string, const google::protobuf::FieldDescriptor*> mFieldNamesToFds;
+  const QStringList mFieldNames;
+  const std::vector<const google::protobuf::FieldDescriptor*> mFieldDescriptors;
+  const std::unordered_map<std::string, const google::protobuf::FieldDescriptor*> mFieldNamesToFds;
 };
 
 
@@ -170,6 +179,14 @@ template <typename T>
 inline std::vector<std::shared_ptr<T> > BaseModel::findByIdT(std::int64_t id)
 {
   std::vector<std::shared_ptr<google::protobuf::Message> > msgs = findMessageById(id);
+  return messagesToT<T>(msgs);
+}
+
+template <typename T>
+inline std::vector<std::shared_ptr<T> > BaseModel::findCustomT(const QString& custom,
+                                                              const std::unordered_map<QString, QVariant>& bindings)
+{
+  std::vector<std::shared_ptr<google::protobuf::Message> > msgs = findMessageCustom(custom, bindings);
   return messagesToT<T>(msgs);
 }
 

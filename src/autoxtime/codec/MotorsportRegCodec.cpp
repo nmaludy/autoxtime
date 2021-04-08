@@ -3,6 +3,11 @@
 // autoxtime
 #include <autoxtime/config/ConfigStore.h>
 #include <autoxtime/db/BaseModel.h>
+#include <autoxtime/proto/driver.pb.h>
+#include <autoxtime/proto/car.pb.h>
+#include <autoxtime/proto/car_class.pb.h>
+#include <autoxtime/proto/event_registration.pb.h>
+
 
 // etc
 #include <rapidcsv.h>

@@ -14,8 +14,8 @@ DbConnection::DbConnection(QObject* pParent)
 DbConnection::DbConnection(const QString& name,
                            QObject* pParent)
     : QObject(pParent),
-      mState(DbConnectionState::INITIALIZE),
       mName(!name.isEmpty() ? name : QString("autoxtime::thread_") + QString::number((intptr_t)QThread::currentThreadId())),
+      mState(DbConnectionState::INITIALIZE),
       mDatabase(),
       mTimer()
 {

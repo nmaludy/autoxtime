@@ -1,6 +1,7 @@
 #include <autoxtime/ui/EventWidget.h>
 
 // autoxtime
+#include <autoxtime/db/EventModel.h>
 #include <autoxtime/log/Log.h>
 #include <autoxtime/proto/event.pb.h>
 #include <autoxtime/ui/EventImportDialog.h>

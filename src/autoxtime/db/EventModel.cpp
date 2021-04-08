@@ -35,12 +35,9 @@ EventModel::ProtoPtrVec EventModel::list()
 QFuture<EventModel::ProtoPtrVec> EventModel::listAsync()
 {
   return QtConcurrent::run([=]() {
-    // Code in this block will run in another thread
-
-    // TODO, can we avoid createing new models for each query?
-    // right now we are doing this for thread safety, probably for the better (honestly)
-    std::unique_ptr<EventModel> p_model = std::make_unique<EventModel>();
-    EventModel::ProtoPtrVec results = p_model->list();
+    // create a new model so we have connection for this thread (required)
+    EventModel model;
+    EventModel::ProtoPtrVec results = model.list();
     emit listResult(results);
     return results;
   });
@@ -51,9 +48,35 @@ EventModel::ProtoPtrVec EventModel::create(const EventModel::Proto& event)
   return BaseModel::createT(event);
 }
 
+QFuture<EventModel::ProtoPtrVec> EventModel::createAsync(const EventModel::Proto& event)
+{
+  // copy before transitioning to thread so we don't have dual memory access
+  EventModel::Proto event_copy(event);
+  return QtConcurrent::run([=]() {
+    // create a new model so we have connection for this thread (required)
+    EventModel model;
+    EventModel::ProtoPtrVec results = model.create(event_copy);
+    emit createResult(results);
+    return results;
+  });
+}
+
 EventModel::ProtoPtrVec EventModel::update(const EventModel::Proto& event)
 {
   return BaseModel::updateT(event);
+}
+
+QFuture<EventModel::ProtoPtrVec> EventModel::updateAsync(const EventModel::Proto& event)
+{
+  // copy before transitioning to thread so we don't have dual memory access
+  EventModel::Proto event_copy(event);
+  return QtConcurrent::run([=]() {
+    // create a new model so we have connection for this thread (required)
+    EventModel model;
+    EventModel::ProtoPtrVec results = model.update(event_copy);
+    emit updateResult(results);
+    return results;
+  });
 }
 
 EventModel::ProtoPtrVec EventModel::find(const EventModel::Proto& prototype)
@@ -64,6 +87,19 @@ EventModel::ProtoPtrVec EventModel::find(const EventModel::Proto& prototype)
 EventModel::ProtoPtrVec EventModel::findById(std::int64_t id)
 {
   return BaseModel::findByIdT<EventModel::Proto>(id);
+}
+
+QFuture<EventModel::ProtoPtrVec> EventModel::findAsync(const EventModel::Proto& event)
+{
+  // copy before transitioning to thread so we don't have dual memory access
+  EventModel::Proto event_copy(event);
+  return QtConcurrent::run([=]() {
+    // create a new model so we have connection for this thread (required)
+    EventModel model;
+    EventModel::ProtoPtrVec results = model.find(event_copy);
+    emit findResult(results);
+    return results;
+  });
 }
 
 AUTOXTIME_DB_NAMESPACE_END

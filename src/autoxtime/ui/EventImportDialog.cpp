@@ -6,7 +6,14 @@
 #include <autoxtime/db/DriverModel.h>
 #include <autoxtime/db/CarClassModel.h>
 #include <autoxtime/db/CarModel.h>
+#include <autoxtime/db/EventModel.h>
 #include <autoxtime/db/EventRegistrationModel.h>
+#include <autoxtime/proto/event.pb.h>
+#include <autoxtime/proto/driver.pb.h>
+#include <autoxtime/proto/car.pb.h>
+#include <autoxtime/proto/car_class.pb.h>
+#include <autoxtime/proto/event_registration.pb.h>
+
 
 // protobuf
 #include <google/protobuf/util/json_util.h>
@@ -129,8 +136,8 @@ void EventImportDialog::browseClicked(bool checked)
     }
 
     // order of creation
-    // TODO: organization (need to look these up)
     std::int64_t org_id = mpEvent->organization_id();
+    // std::int64_t season_id = mpEvent->season_id();
     std::int64_t event_id = mpEvent->event_id();
 
     std::int64_t driver_id = -1;

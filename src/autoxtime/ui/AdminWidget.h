@@ -5,14 +5,18 @@
 #include <QWidget>
 #include <QTreeWidgetItem>
 
-#include <autoxtime/db/EventModel.h>
-#include <autoxtime/db/OrganizationModel.h>
-
 class QDateEdit;
 class QFrame;
 class QLabel;
 class QLineEdit;
 class QPushButton;
+
+namespace autoxtime { namespace proto { class Organization; } }
+namespace autoxtime { namespace proto { class Season; } }
+namespace autoxtime { namespace proto { class Event; } }
+namespace autoxtime { namespace db { class OrganizationModel; } }
+namespace autoxtime { namespace db { class SeasonModel; } }
+namespace autoxtime { namespace db { class EventModel; } }
 
 AUTOXTIME_UI_NAMESPACE_BEG
 
@@ -26,8 +30,9 @@ class AdminWidget : public QWidget
   explicit AdminWidget(QWidget* pParent = nullptr);
 
  public slots:
-  void setOrganizations(const autoxtime::db::OrganizationModel::ProtoPtrVec& orgs);
-  void setEvents(const autoxtime::db::EventModel::ProtoPtrVec& events);
+  void setOrganizations(const std::vector<std::shared_ptr<autoxtime::proto::Organization>>& orgs);
+  void setSeasons(const std::vector<std::shared_ptr<autoxtime::proto::Season>>& seasons);
+  void setEvents(const std::vector<std::shared_ptr<autoxtime::proto::Event>>& events);
   void treeSelectionChanged(QTreeWidgetItem* pCurrent, QTreeWidgetItem* pPrevious);
   void addClicked(bool checked = false);
   void deleteClicked(bool checked = false);
@@ -45,7 +50,8 @@ class AdminWidget : public QWidget
   enum TreeItemType
   {
     TREE_ITEM_TYPE_ORGANIZATION = QTreeWidgetItem::UserType + 1,
-    TREE_ITEM_TYPE_EVENT        = QTreeWidgetItem::UserType + 2
+    TREE_ITEM_TYPE_SEASON       = QTreeWidgetItem::UserType + 2,
+    TREE_ITEM_TYPE_EVENT        = QTreeWidgetItem::UserType + 3
   };
   enum TreeColumn
   {
@@ -59,8 +65,9 @@ class AdminWidget : public QWidget
   };
 
   void rebuildTree();
-  void rebuildTreeOrganization(const autoxtime::db::OrganizationModel::ProtoPtr& pOrg);
-  void rebuildTreeEvent(const autoxtime::db::EventModel::ProtoPtr& pEvent);
+  void rebuildTreeOrganization(const std::shared_ptr<autoxtime::proto::Organization>& pOrg);
+  void rebuildTreeSeason(const std::shared_ptr<autoxtime::proto::Season>& pSeason);
+  void rebuildTreeEvent(const std::shared_ptr<autoxtime::proto::Event>& pEvent);
 
   AdminWidget::State mState;
   QTreeWidget* mpTree;
@@ -71,12 +78,17 @@ class AdminWidget : public QWidget
   QTreeWidgetItem* mpAddItem;
 
   autoxtime::db::OrganizationModel* mpOrganizationModel;
-  autoxtime::db::OrganizationModel::ProtoPtrVec mOrganizations;
+  std::vector<std::shared_ptr<autoxtime::proto::Organization>> mOrganizations;
   // map from organization id -> tree item
   std::unordered_map<std::int64_t, QTreeWidgetItem*> mOrganizationTreeItems;
 
+  autoxtime::db::SeasonModel* mpSeasonModel;
+  std::vector<std::shared_ptr<autoxtime::proto::Season>> mSeasons;
+  // map from  id -> tree item
+  std::unordered_map<std::int64_t, QTreeWidgetItem*> mSeasonTreeItems;
+
   autoxtime::db::EventModel* mpEventModel;
-  autoxtime::db::EventModel::ProtoPtrVec mEvents;
+  std::vector<std::shared_ptr<autoxtime::proto::Event>> mEvents;
   // map from event id -> tree item
   // we could store this in some sort of nested map, but we don't need that level
   // of complexity yet, just care if we know about this event or not

@@ -4,13 +4,13 @@
 #include <autoxtime/db/db.h>
 #include <autoxtime/db/BaseModel.h>
 
-namespace autoxtime::proto { class Car; }
+namespace autoxtime { namespace proto { class Car; } }
 
 AUTOXTIME_DB_NAMESPACE_BEG
 
 class CarModel : public BaseModel
 {
-  Q_OBJECT;
+  Q_OBJECT
 
  public:
   static const std::string TABLE;
@@ -18,7 +18,7 @@ class CarModel : public BaseModel
 
   CarModel(QObject* pParent = nullptr);
   CarModel(std::shared_ptr<DbConnection> pConnection,
-                QObject* pParent = nullptr);
+           QObject* pParent = nullptr);
 
   std::vector<std::shared_ptr<autoxtime::proto::Car> > list();
   std::vector<std::shared_ptr<autoxtime::proto::Car> > create(const autoxtime::proto::Car& car);

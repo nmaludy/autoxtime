@@ -4,13 +4,13 @@
 #include <autoxtime/db/db.h>
 #include <autoxtime/db/BaseModel.h>
 
-namespace autoxtime::proto { class CarClass; }
+namespace autoxtime { namespace proto { class CarClass; } }
 
 AUTOXTIME_DB_NAMESPACE_BEG
 
 class CarClassModel : public BaseModel
 {
-  Q_OBJECT;
+  Q_OBJECT
 
  public:
   static const std::string TABLE;

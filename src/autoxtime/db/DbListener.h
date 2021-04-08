@@ -4,9 +4,10 @@
 #include <autoxtime/db/db.h>
 #include <QtSql/QtSql>
 #include <memory>
-#include <autoxtime/db/DbConnection.h>
 
 AUTOXTIME_DB_NAMESPACE_BEG
+
+class DbConnection;
 
 class DbListener : public QObject
 {

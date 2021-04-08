@@ -2,8 +2,12 @@
 
 // autoxtime
 #include <autoxtime/log/Log.h>
-#include <autoxtime/proto/organization.pb.h>
+#include <autoxtime/db/EventModel.h>
+#include <autoxtime/db/OrganizationModel.h>
+#include <autoxtime/db/SeasonModel.h>
 #include <autoxtime/proto/event.pb.h>
+#include <autoxtime/proto/organization.pb.h>
+#include <autoxtime/proto/season.pb.h>
 #include <autoxtime/ui/EventWidget.h>
 
 // Qt
@@ -26,6 +30,8 @@ AdminWidget::AdminWidget(QWidget* pParent)
       mpAddItem(nullptr),
       mpOrganizationModel(new autoxtime::db::OrganizationModel(this)),
       mOrganizations(),
+      mpSeasonModel(new autoxtime::db::SeasonModel(this)),
+      mSeasons(),
       mpEventModel(new autoxtime::db::EventModel(this)),
       mEvents()
 {
@@ -77,24 +83,34 @@ AdminWidget::AdminWidget(QWidget* pParent)
   // connect our signals/ slots
   connect(mpOrganizationModel, &autoxtime::db::OrganizationModel::listResult,
           this,                &AdminWidget::setOrganizations);
+  connect(mpSeasonModel, &autoxtime::db::SeasonModel::listResult,
+          this,          &AdminWidget::setSeasons);
   connect(mpEventModel, &autoxtime::db::EventModel::listResult,
           this,         &AdminWidget::setEvents);
   connect(mpTree, &QTreeWidget::currentItemChanged,
           this,   &AdminWidget::treeSelectionChanged);
 
   // kick off async queries
-  mpEventModel->listAsync();
   mpOrganizationModel->listAsync();
+  mpSeasonModel->listAsync();
+  mpEventModel->listAsync();
 }
 
-void AdminWidget::setOrganizations(const autoxtime::db::OrganizationModel::ProtoPtrVec& orgs)
+void AdminWidget::setOrganizations(const std::vector<std::shared_ptr<autoxtime::proto::Organization>>& orgs)
 {
   // TODO store these in a better way
   mOrganizations = orgs;
   rebuildTree();
 }
 
-void AdminWidget::setEvents(const autoxtime::db::EventModel::ProtoPtrVec& events)
+void AdminWidget::setSeasons(const std::vector<std::shared_ptr<autoxtime::proto::Season>>& seasons)
+{
+  // TODO store these in a better way
+  mSeasons = seasons;
+  rebuildTree();
+}
+
+void AdminWidget::setEvents(const std::vector<std::shared_ptr<autoxtime::proto::Event>>& events)
 {
   // TODO store these in a better way
   mEvents = events;
@@ -103,18 +119,21 @@ void AdminWidget::setEvents(const autoxtime::db::EventModel::ProtoPtrVec& events
 
 void AdminWidget::rebuildTree()
 {
-  for (const autoxtime::db::OrganizationModel::ProtoPtr& p_org : mOrganizations)
+  for (const std::shared_ptr<autoxtime::proto::Organization>& p_org : mOrganizations)
   {
     rebuildTreeOrganization(p_org);
   }
-
-  for (const autoxtime::db::EventModel::ProtoPtr& p_event : mEvents)
+  for (const std::shared_ptr<autoxtime::proto::Season>& p_season : mSeasons)
+  {
+    rebuildTreeSeason(p_season);
+  }
+  for (const std::shared_ptr<autoxtime::proto::Event>& p_event : mEvents)
   {
     rebuildTreeEvent(p_event);
   }
 }
 
-void AdminWidget::rebuildTreeOrganization(const autoxtime::db::OrganizationModel::ProtoPtr& pOrg)
+void AdminWidget::rebuildTreeOrganization(const std::shared_ptr<autoxtime::proto::Organization>& pOrg)
 {
   // do we know about this organization yet or not?
   std::int64_t org_id = pOrg->organization_id();
@@ -143,7 +162,53 @@ void AdminWidget::rebuildTreeOrganization(const autoxtime::db::OrganizationModel
   p_org_item->setData(TREE_COLUMN_ID, TREE_ROLE_ID, QVariant::fromValue(pOrg->organization_id()));
 }
 
-void AdminWidget::rebuildTreeEvent(const autoxtime::db::EventModel::ProtoPtr& pEvent)
+void AdminWidget::rebuildTreeSeason(const std::shared_ptr<autoxtime::proto::Season>& pSeason)
+{
+  // do we know about this season yet or not?
+  std::int64_t season_id = pSeason->season_id();
+  std::unordered_map<std::int64_t, QTreeWidgetItem*>::iterator season_iter =
+      mSeasonTreeItems.find(season_id);
+
+  QTreeWidgetItem* p_season_item = nullptr;
+  if (season_iter != mSeasonTreeItems.end())
+  {
+    // use existing
+    p_season_item = season_iter->second;
+  }
+  else
+  {
+    // create new, first we need to find the org for this season
+    std::int64_t org_id = pSeason->organization_id();
+    std::unordered_map<std::int64_t, QTreeWidgetItem*>::iterator org_iter =
+        mOrganizationTreeItems.find(org_id);
+
+    // if we already have it, use existing
+    // else add a new one
+    QTreeWidgetItem* p_org_item = nullptr;
+    if (org_iter != mOrganizationTreeItems.end())
+    {
+      p_org_item = org_iter->second;
+    }
+    else
+    {
+      // Received an season from an unknown org, this is OK because our orgs should
+      // be coming (we kicked them off in parallel, so they might be slightly offset
+      // with regard to order of arrival)
+      return;
+    }
+
+    // creates a new item and adds it as a child under the organization
+    p_season_item = new QTreeWidgetItem(p_org_item, AdminWidget::TREE_ITEM_TYPE_SEASON);
+    mSeasonTreeItems[season_id] = p_season_item;
+  }
+
+  // set new items and update existing items with the current properties,
+  // just in case it changes
+  p_season_item->setText(TREE_COLUMN_NAME, QString::fromStdString(pSeason->name()));
+  p_season_item->setData(TREE_COLUMN_ID, TREE_ROLE_ID, QVariant::fromValue(pSeason->season_id()));
+}
+
+void AdminWidget::rebuildTreeEvent(const std::shared_ptr<autoxtime::proto::Event>& pEvent)
 {
   // do we know about this event yet or not?
   std::int64_t event_id = pEvent->event_id();
@@ -159,27 +224,27 @@ void AdminWidget::rebuildTreeEvent(const autoxtime::db::EventModel::ProtoPtr& pE
   else
   {
     // create new, first we need to find the org for this event
-    std::int64_t org_id = pEvent->organization_id();
-    std::unordered_map<std::int64_t, QTreeWidgetItem*>::iterator org_iter =
-        mOrganizationTreeItems.find(org_id);
+    std::int64_t season_id = pEvent->season_id();
+    std::unordered_map<std::int64_t, QTreeWidgetItem*>::iterator season_iter =
+        mSeasonTreeItems.find(season_id);
 
     // if we already have it, use existing
     // else add a new one
-    QTreeWidgetItem* p_org_item = nullptr;
-    if (org_iter != mOrganizationTreeItems.end())
+    QTreeWidgetItem* p_season_item = nullptr;
+    if (season_iter != mSeasonTreeItems.end())
     {
-      p_org_item = org_iter->second;
+      p_season_item = season_iter->second;
     }
     else
     {
-      // Received an event from an unknown org, this is OK because our orgs should
+      // Received an event from an unknown season, this is OK because our season should
       // be coming (we kicked them off in parallel, so they might be slightly offset
       // with regard to order of arrival)
       return;
     }
 
-    // creates a new item and adds it as a child under the organization
-    p_event_item = new QTreeWidgetItem(p_org_item, AdminWidget::TREE_ITEM_TYPE_EVENT);
+    // creates a new item and adds it as a child under the season
+    p_event_item = new QTreeWidgetItem(p_season_item, AdminWidget::TREE_ITEM_TYPE_EVENT);
     mEventTreeItems[event_id] = p_event_item;
   }
 
@@ -199,6 +264,14 @@ void AdminWidget::treeSelectionChanged(QTreeWidgetItem* pCurrent, QTreeWidgetIte
     std::shared_ptr<autoxtime::proto::Event> p_event =
         std::make_shared<autoxtime::proto::Event>();
     p_event->set_event_id(pCurrent->data(TREE_COLUMN_ID, TREE_ROLE_ID).toLongLong());
+
+    // set the season from the parent item
+    QTreeWidgetItem* p_season_item = pCurrent->parent();
+    p_event->set_season_id(p_season_item->data(TREE_COLUMN_ID, TREE_ROLE_ID).toLongLong());
+
+    // set the organization from the grandparent item
+    QTreeWidgetItem* p_org_item = p_season_item->parent();
+    p_event->set_organization_id(p_org_item->data(TREE_COLUMN_ID, TREE_ROLE_ID).toLongLong());
 
     // don't put the fake name in the text box
     if (pCurrent != mpAddItem)
@@ -243,9 +316,13 @@ void AdminWidget::addClicked(bool checked)
       AXT_INFO << "Clicked on org";
       p_org_item = p_item;
       break;
+    case TREE_ITEM_TYPE_SEASON:
+      AXT_INFO << "Clicked on season";
+      p_org_item = p_item->parent();
+      break;
     case TREE_ITEM_TYPE_EVENT:
       AXT_INFO << "Clicked on event";
-      p_org_item = p_item->parent();
+      p_org_item = p_item->parent()->parent();
       break;
     default:
       break;
@@ -281,6 +358,10 @@ void AdminWidget::deleteClicked(bool checked)
       AXT_INFO << "Delete org: " << id;
       mpOrganizationModel->destroyById(id);
       break;
+    case TREE_ITEM_TYPE_SEASON:
+      AXT_INFO << "Delete season: " << id;
+      mpSeasonModel->destroyById(id);
+      break;
     case TREE_ITEM_TYPE_EVENT:
       AXT_INFO << "Delete event: " << id;
       mpEventModel->destroyById(id);
@@ -302,8 +383,12 @@ void AdminWidget::eventSaved(const autoxtime::proto::Event& savedEvent)
   {
     return;
   }
-  // set the organization from the parent item
-  QTreeWidgetItem* p_org_item = p_event_item->parent();
+  // set the season from the parent item
+  QTreeWidgetItem* p_season_item = p_event_item->parent();
+  event.set_season_id(p_season_item->data(TREE_COLUMN_ID, TREE_ROLE_ID).toLongLong());
+
+  // set the organization from the grandparent item
+  QTreeWidgetItem* p_org_item = p_season_item->parent();
   event.set_organization_id(p_org_item->data(TREE_COLUMN_ID, TREE_ROLE_ID).toLongLong());
 
   if (mpAddItem)

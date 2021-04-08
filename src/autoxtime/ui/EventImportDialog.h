@@ -3,7 +3,6 @@
 
 // autoxtime
 #include <autoxtime/ui/ui.h>
-#include <autoxtime/proto/event.pb.h>
 
 // Qt
 #include <QDialog>
@@ -15,6 +14,8 @@ class QComboBox;
 class QDateEdit;
 class QLineEdit;
 class QPushButton;
+
+namespace autoxtime { namespace proto { class Event; } }
 
 AUTOXTIME_UI_NAMESPACE_BEG
 
