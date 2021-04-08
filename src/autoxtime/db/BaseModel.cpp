@@ -279,7 +279,7 @@ std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
   QSqlQuery query(connection()->database());
   query.prepare("SELECT " + tableQ() + ".* FROM " + tableQ()
                 + " " + custom);
-  for (const std::pair<QString, QVariant>& bind : bindings)
+  for (const std::pair<const QString, QVariant>& bind : bindings)
   {
     AXT_DEBUG << "BaseMode::findMessageCustom() binding " << bind.first
               << " = " << bind.second;
