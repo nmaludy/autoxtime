@@ -20,9 +20,18 @@ link_directories("${autoxtime_INSTALL_PREFIX}/lib64")
 
 # specify the C++ standard
 set(CMAKE_CXX_STANDARD 17)
+# set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
+# common string here, then assigned to targets later
+if (MSVC)
+  # warning level 4 and all warnings as errors
+  set(autoxtime_COMPILE_OPTIONS /W4 /WX)
+else()
+  # lots of warnings and all warnings as errors
+  set(autoxtime_COMPILE_OPTIONS -Wall -pedantic -Werror)
+endif()
 
 # As moc files are generated in the binary dir, tell CMake
 # to always look for includes there:
@@ -42,6 +51,7 @@ option(BUILD_SHARED_LIBS "Build libraries as SHARED" ON)
 # turn on debug builds
 set(CMAKE_BUILD_TYPE Debug)
 # set(CMAKE_BUILD_TYPE RelWithDebInfo)
+# set(CMAKE_BUILD_TYPE Release)
 
 # output our executables in the build/ directory
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")

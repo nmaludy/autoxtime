@@ -7,10 +7,15 @@
 // Qt
 #include <QDialog>
 
+// std
+#include <memory>
+
 class QComboBox;
 class QDateEdit;
 class QLineEdit;
 class QPushButton;
+
+namespace autoxtime { namespace proto { class Event; } }
 
 AUTOXTIME_UI_NAMESPACE_BEG
 
@@ -19,7 +24,7 @@ class EventImportDialog : public QDialog
   Q_OBJECT
 
  public:
-  explicit EventImportDialog(std::int64_t eventId,
+  explicit EventImportDialog(const std::shared_ptr<autoxtime::proto::Event>& pEvent,
                              QWidget* pParent = nullptr);
 
  public slots:
@@ -27,7 +32,7 @@ class EventImportDialog : public QDialog
   void saveClicked(bool checked = false);
 
  private:
-  const std::int64_t mEventId;
+  const std::shared_ptr<autoxtime::proto::Event> mpEvent;
 
   QComboBox* mpFormatComboBox;
 

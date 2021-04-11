@@ -4,7 +4,6 @@
 #include <autoxtime/proto/event.pb.h>
 
 #include <QtDebug>
-#include <QtConcurrent/QtConcurrent>
 
 AUTOXTIME_DB_NAMESPACE_BEG
 
@@ -17,53 +16,33 @@ EventModel::EventModel(QObject* pParent)
 
 EventModel::EventModel(std::shared_ptr<DbConnection> pConnection,
                        QObject* pParent)
-    : BaseModel(EventModel::TABLE,
-                EventModel::PRIMARY_KEY,
-                autoxtime::proto::Event::GetDescriptor(),
-                autoxtime::proto::Event::GetReflection(),
-                pConnection,
-                pParent)
-{
-  qRegisterMetaType<EventModel::ProtoPtrVec>();
-}
+    : BaseModelT(EventModel::TABLE,
+                 EventModel::PRIMARY_KEY,
+                 autoxtime::proto::Event::GetDescriptor(),
+                 autoxtime::proto::Event::GetReflection(),
+                 pConnection,
+                 pParent)
+{}
 
-EventModel::ProtoPtrVec EventModel::list()
+void EventModel
+::emitSignal(EventModel::Signal signal,
+             const std::vector<std::shared_ptr<autoxtime::proto::Event> >& protoList)
 {
-  return BaseModel::listT<EventModel::Proto>();
-}
-
-QFuture<EventModel::ProtoPtrVec> EventModel::listAsync()
-{
-  return QtConcurrent::run([=]() {
-    // Code in this block will run in another thread
-
-    // TODO, can we avoid createing new models for each query?
-    // right now we are doing this for thread safety, probably for the better (honestly)
-    std::unique_ptr<EventModel> p_model = std::make_unique<EventModel>();
-    EventModel::ProtoPtrVec results = p_model->list();
-    emit listResult(results);
-    return results;
-  });
-}
-
-EventModel::ProtoPtrVec EventModel::create(const EventModel::Proto& event)
-{
-  return BaseModel::createT(event);
-}
-
-EventModel::ProtoPtrVec EventModel::update(const EventModel::Proto& event)
-{
-  return BaseModel::updateT(event);
-}
-
-EventModel::ProtoPtrVec EventModel::find(const EventModel::Proto& prototype)
-{
-  return BaseModel::findT<EventModel::Proto>(prototype);
-}
-
-EventModel::ProtoPtrVec EventModel::findById(int id)
-{
-  return BaseModel::findByIdT<EventModel::Proto>(id);
+  switch (signal)
+  {
+    case SIGNAL_LIST_RESULT:
+      emit listResult(protoList);
+      break;
+    case SIGNAL_CREATE_RESULT:
+      emit createResult(protoList);
+      break;
+    case SIGNAL_UPDATE_RESULT:
+      emit updateResult(protoList);
+      break;
+    case SIGNAL_FIND_RESULT:
+      emit findResult(protoList);
+      break;
+  }
 }
 
 AUTOXTIME_DB_NAMESPACE_END

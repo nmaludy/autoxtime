@@ -6,7 +6,14 @@
 #include <autoxtime/db/DriverModel.h>
 #include <autoxtime/db/CarClassModel.h>
 #include <autoxtime/db/CarModel.h>
+#include <autoxtime/db/EventModel.h>
 #include <autoxtime/db/EventRegistrationModel.h>
+#include <autoxtime/proto/event.pb.h>
+#include <autoxtime/proto/driver.pb.h>
+#include <autoxtime/proto/car.pb.h>
+#include <autoxtime/proto/car_class.pb.h>
+#include <autoxtime/proto/event_registration.pb.h>
+
 
 // protobuf
 #include <google/protobuf/util/json_util.h>
@@ -20,10 +27,10 @@
 
 AUTOXTIME_UI_NAMESPACE_BEG
 
-EventImportDialog::EventImportDialog(std::int64_t eventId,
+EventImportDialog::EventImportDialog(const std::shared_ptr<autoxtime::proto::Event>& pEvent,
                                      QWidget* pParent)
     : QDialog(pParent),
-      mEventId(eventId),
+      mpEvent(pEvent),
       mpFormatComboBox(new QComboBox(this)),
       mpFileLineEdit(new QLineEdit(this)),
       mpFileBrowseButton(new QPushButton("Browse", this)),
@@ -129,15 +136,14 @@ void EventImportDialog::browseClicked(bool checked)
     }
 
     // order of creation
-    // organization (need to look this up)
-    int org_id = 1;
-    int event_id = 1;
-    int season_id = 1;
+    std::int64_t org_id = mpEvent->organization_id();
+    // std::int64_t season_id = mpEvent->season_id();
+    std::int64_t event_id = mpEvent->event_id();
 
-    int driver_id = -1;
-    int car_class_id = -1;
-    int car_id = -1;
-    int event_registration_id = -1;
+    std::int64_t driver_id = -1;
+    std::int64_t car_class_id = -1;
+    std::int64_t car_id = -1;
+    std::int64_t event_registration_id = -1;
 
     // driver
     {
@@ -185,6 +191,7 @@ void EventImportDialog::browseClicked(bool checked)
       autoxtime::db::EventRegistrationModel model;
       r->mpEventRegistration->set_event_id(event_id);
       r->mpEventRegistration->set_driver_id(driver_id);
+      r->mpEventRegistration->set_car_id(car_id);
 
       std::vector<std::shared_ptr<autoxtime::proto::EventRegistration> > created =
           model.createIfNotExists(*(r->mpEventRegistration));

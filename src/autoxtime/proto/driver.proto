@@ -12,9 +12,9 @@ message Driver {
   // primary key 5
   optional string phone_number = 5;
   // primary key 2
-  optional int32 msr_id = 6;
+  optional string msr_id = 6;
   // primary key 1
-  optional int32 scca_id = 7;
+  optional string scca_id = 7;
   optional int32 work_req = 8;
   optional int32 work_skill = 9;
 }

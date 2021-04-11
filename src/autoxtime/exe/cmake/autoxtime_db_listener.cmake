@@ -4,6 +4,8 @@
 # create our executable from source
 add_executable(autoxtime_db_listener "${CMAKE_CURRENT_LIST_DIR}/../db_listener.cpp")
 
+target_compile_options(autoxtime_db_listener PUBLIC ${autoxtime_COMPILE_OPTIONS})
+
 # Link against QtCore
 target_link_libraries(autoxtime_db_listener autoxtime)
 target_link_libraries(autoxtime_db_listener autoxtimeproto)

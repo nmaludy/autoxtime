@@ -2,15 +2,15 @@
 #define AUTOXTIME_DB_DRIVERMODEL
 
 #include <autoxtime/db/db.h>
-#include <autoxtime/db/BaseModel.h>
+#include <autoxtime/db/BaseModelT.h>
 
-namespace autoxtime::proto { class Driver; }
+namespace autoxtime { namespace proto { class Driver; } }
 
 AUTOXTIME_DB_NAMESPACE_BEG
 
-class DriverModel : public BaseModel
+class DriverModel : public BaseModelT<autoxtime::proto::Driver, DriverModel>
 {
-  Q_OBJECT;
+  Q_OBJECT
 
  public:
   static const std::string TABLE;
@@ -20,13 +20,6 @@ class DriverModel : public BaseModel
   DriverModel(std::shared_ptr<DbConnection> pConnection,
               QObject* pParent = nullptr);
 
-  std::vector<std::shared_ptr<autoxtime::proto::Driver> > list();
-  std::vector<std::shared_ptr<autoxtime::proto::Driver> > create(const autoxtime::proto::Driver& driver);
-  std::vector<std::shared_ptr<autoxtime::proto::Driver> > update(const autoxtime::proto::Driver& driver);
-
-  std::vector<std::shared_ptr<autoxtime::proto::Driver> > find(const autoxtime::proto::Driver& prototype);
-  std::vector<std::shared_ptr<autoxtime::proto::Driver> > findById(int id);
-
   // creates driver if doesn't exist, order of lookup is:
   // - scca_id
   // - msr_id
@@ -34,8 +27,21 @@ class DriverModel : public BaseModel
   // - email
   // - phone_number
   std::vector<std::shared_ptr<autoxtime::proto::Driver> > createIfNotExists(const autoxtime::proto::Driver& driver);
+
+  virtual void emitSignal(Signal signal,
+                          const std::vector<std::shared_ptr<autoxtime::proto::Driver> >& results);
+
+ signals:
+  // need the full namespace here so it matches the Q_DECLARE_METATYPE below
+  void listResult(const std::vector<std::shared_ptr<autoxtime::proto::Driver> >& protoList);
+  void createResult(const std::vector<std::shared_ptr<autoxtime::proto::Driver> >& protoList);
+  void updateResult(const std::vector<std::shared_ptr<autoxtime::proto::Driver> >& protoList);
+  void findResult(const std::vector<std::shared_ptr<autoxtime::proto::Driver> >& protoList);
 };
 
 AUTOXTIME_DB_NAMESPACE_END
+
+// needed so we can use signals/slots with this type
+Q_DECLARE_METATYPE(std::vector<std::shared_ptr<autoxtime::proto::Driver>>)
 
 #endif // AUTOXTIME_DB_DRIVER

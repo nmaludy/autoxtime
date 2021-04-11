@@ -2,15 +2,15 @@
 #define AUTOXTIME_DB_CARMODEL
 
 #include <autoxtime/db/db.h>
-#include <autoxtime/db/BaseModel.h>
+#include <autoxtime/db/BaseModelT.h>
 
-namespace autoxtime::proto { class Car; }
+namespace autoxtime { namespace proto { class Car; } }
 
 AUTOXTIME_DB_NAMESPACE_BEG
 
-class CarModel : public BaseModel
+class CarModel : public BaseModelT<autoxtime::proto::Car, CarModel>
 {
-  Q_OBJECT;
+  Q_OBJECT
 
  public:
   static const std::string TABLE;
@@ -18,20 +18,26 @@ class CarModel : public BaseModel
 
   CarModel(QObject* pParent = nullptr);
   CarModel(std::shared_ptr<DbConnection> pConnection,
-                QObject* pParent = nullptr);
-
-  std::vector<std::shared_ptr<autoxtime::proto::Car> > list();
-  std::vector<std::shared_ptr<autoxtime::proto::Car> > create(const autoxtime::proto::Car& car);
-  std::vector<std::shared_ptr<autoxtime::proto::Car> > update(const autoxtime::proto::Car& car);
-
-  std::vector<std::shared_ptr<autoxtime::proto::Car> > find(const autoxtime::proto::Car& prototype);
-  std::vector<std::shared_ptr<autoxtime::proto::Car> > findById(int id);
+           QObject* pParent = nullptr);
 
   // creates Car if doesn't exist, order of lookup is:
-  // - model + color + class_id + driver_id
+  // - model + class_id + driver_id + color (optional)
   std::vector<std::shared_ptr<autoxtime::proto::Car> > createIfNotExists(const autoxtime::proto::Car& car);
+
+  virtual void emitSignal(Signal signal,
+                          const std::vector<std::shared_ptr<autoxtime::proto::Car> >& results);
+
+ signals:
+  // need the full namespace here so it matches the Q_DECLARE_METATYPE below
+  void listResult(const std::vector<std::shared_ptr<autoxtime::proto::Car> >& protoList);
+  void createResult(const std::vector<std::shared_ptr<autoxtime::proto::Car> >& protoList);
+  void updateResult(const std::vector<std::shared_ptr<autoxtime::proto::Car> >& protoList);
+  void findResult(const std::vector<std::shared_ptr<autoxtime::proto::Car> >& protoList);
 };
 
 AUTOXTIME_DB_NAMESPACE_END
+
+// needed so we can use signals/slots with this type
+Q_DECLARE_METATYPE(std::vector<std::shared_ptr<autoxtime::proto::Car>>)
 
 #endif // AUTOXTIME_DB_CAR

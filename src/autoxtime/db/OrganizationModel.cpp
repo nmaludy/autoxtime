@@ -4,7 +4,6 @@
 #include <autoxtime/proto/organization.pb.h>
 
 #include <QtDebug>
-#include <QtConcurrent/QtConcurrent>
 
 AUTOXTIME_DB_NAMESPACE_BEG
 
@@ -17,55 +16,35 @@ OrganizationModel::OrganizationModel(QObject* pParent)
 
 OrganizationModel::OrganizationModel(std::shared_ptr<DbConnection> pConnection,
                                      QObject* pParent)
-    : BaseModel(OrganizationModel::TABLE,
-                OrganizationModel::PRIMARY_KEY,
-                autoxtime::proto::Organization::GetDescriptor(),
-                autoxtime::proto::Organization::GetReflection(),
-                pConnection,
-                pParent)
+    : BaseModelT(OrganizationModel::TABLE,
+                 OrganizationModel::PRIMARY_KEY,
+                 autoxtime::proto::Organization::GetDescriptor(),
+                 autoxtime::proto::Organization::GetReflection(),
+                 pConnection,
+                 pParent)
 {
   qRegisterMetaType<OrganizationModel::ProtoPtrVec>();
 }
 
-OrganizationModel::ProtoPtrVec OrganizationModel::list()
+void OrganizationModel
+::emitSignal(OrganizationModel::Signal signal,
+             const std::vector<std::shared_ptr<autoxtime::proto::Organization> >& protoList)
 {
-  return BaseModel::listT<OrganizationModel::Proto>();
-}
-
-QFuture<OrganizationModel::ProtoPtrVec> OrganizationModel::listAsync()
-{
-  return QtConcurrent::run([=]() {
-    // Code in this block will run in another thread
-
-    // TODO, can we avoid createing new models for each query?
-    // right now we are doing this for thread safety, probably for the better (honestly)
-    std::unique_ptr<OrganizationModel> p_model = std::make_unique<OrganizationModel>();
-    OrganizationModel::ProtoPtrVec results = p_model->list();
-    emit listResult(results);
-    return results;
-  });
-}
-
-OrganizationModel::ProtoPtrVec OrganizationModel
-::create(const OrganizationModel::Proto& organization)
-{
-  return BaseModel::createT(organization);
-}
-
-OrganizationModel::ProtoPtrVec OrganizationModel
-::update(const OrganizationModel::Proto& organization)
-{
-  return BaseModel::updateT(organization);
-}
-
-OrganizationModel::ProtoPtrVec OrganizationModel::find(const OrganizationModel::Proto& prototype)
-{
-  return BaseModel::findT<OrganizationModel::Proto>(prototype);
-}
-
-OrganizationModel::ProtoPtrVec OrganizationModel::findById(int id)
-{
-  return BaseModel::findByIdT<OrganizationModel::Proto>(id);
+  switch (signal)
+  {
+    case SIGNAL_LIST_RESULT:
+      emit listResult(protoList);
+      break;
+    case SIGNAL_CREATE_RESULT:
+      emit createResult(protoList);
+      break;
+    case SIGNAL_UPDATE_RESULT:
+      emit updateResult(protoList);
+      break;
+    case SIGNAL_FIND_RESULT:
+      emit findResult(protoList);
+      break;
+  }
 }
 
 AUTOXTIME_DB_NAMESPACE_END

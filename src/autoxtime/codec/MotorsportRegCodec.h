@@ -2,16 +2,18 @@
 #define AUTOXTIME_TRANSPORT_MOTORSPORTSREGREADER
 
 #include <autoxtime/autoxtime.h>
-#include <autoxtime/proto/driver.pb.h>
-#include <autoxtime/proto/car.pb.h>
-#include <autoxtime/proto/car_class.pb.h>
-#include <autoxtime/proto/event_registration.pb.h>
 
 #include <memory>
+#include <unordered_map>
 
 #include <QObject>
 
-namespace google::protobuf { class FieldDescriptor; }
+namespace google { namespace protobuf { class FieldDescriptor; } }
+
+namespace autoxtime { namespace proto { class Driver; } }
+namespace autoxtime { namespace proto { class Car; } }
+namespace autoxtime { namespace proto { class CarClass; } }
+namespace autoxtime { namespace proto { class EventRegistration; } }
 
 AUTOXTIME_NAMESPACE_BEG
 
@@ -33,7 +35,8 @@ class MotorsportRegCodec : public QObject
  public:
   explicit MotorsportRegCodec(QObject* pParent = nullptr);
 
-  std::vector<std::shared_ptr<MotorsportRegEntry>> readFile(const QString& fileName);
+  std::vector<std::shared_ptr<MotorsportRegEntry>> readFile(const QString& fileName,
+                                                            std::shared_ptr<std::vector<QString>> pErrors = nullptr);
 
  private:
   enum Proto

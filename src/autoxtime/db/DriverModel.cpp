@@ -16,41 +16,33 @@ DriverModel::DriverModel(QObject* pParent)
 
 DriverModel::DriverModel(std::shared_ptr<DbConnection> pConnection,
                          QObject* pParent)
-    : BaseModel(DriverModel::TABLE,
-                DriverModel::PRIMARY_KEY,
-                autoxtime::proto::Driver::GetDescriptor(),
-                autoxtime::proto::Driver::GetReflection(),
-                pConnection,
-                pParent)
+    : BaseModelT(DriverModel::TABLE,
+                 DriverModel::PRIMARY_KEY,
+                 autoxtime::proto::Driver::GetDescriptor(),
+                 autoxtime::proto::Driver::GetReflection(),
+                 pConnection,
+                 pParent)
 {}
 
-std::vector<std::shared_ptr<autoxtime::proto::Driver> > DriverModel::list()
+void DriverModel
+::emitSignal(DriverModel::Signal signal,
+             const std::vector<std::shared_ptr<autoxtime::proto::Driver> >& protoList)
 {
-  return BaseModel::listT<autoxtime::proto::Driver>();
-}
-
-std::vector<std::shared_ptr<autoxtime::proto::Driver> > DriverModel
-::create(const autoxtime::proto::Driver& driver)
-{
-  return BaseModel::createT(driver);
-}
-
-std::vector<std::shared_ptr<autoxtime::proto::Driver> > DriverModel
-::update(const autoxtime::proto::Driver& driver)
-{
-  return BaseModel::updateT(driver);
-}
-
-std::vector<std::shared_ptr<autoxtime::proto::Driver> > DriverModel
-::find(const autoxtime::proto::Driver& prototype)
-{
-  return BaseModel::findT<autoxtime::proto::Driver>(prototype);
-}
-
-std::vector<std::shared_ptr<autoxtime::proto::Driver> > DriverModel
-::findById(int id)
-{
-  return BaseModel::findByIdT<autoxtime::proto::Driver>(id);
+  switch (signal)
+  {
+    case SIGNAL_LIST_RESULT:
+      emit listResult(protoList);
+      break;
+    case SIGNAL_CREATE_RESULT:
+      emit createResult(protoList);
+      break;
+    case SIGNAL_UPDATE_RESULT:
+      emit updateResult(protoList);
+      break;
+    case SIGNAL_FIND_RESULT:
+      emit findResult(protoList);
+      break;
+  }
 }
 
 std::vector<std::shared_ptr<autoxtime::proto::Driver> > DriverModel

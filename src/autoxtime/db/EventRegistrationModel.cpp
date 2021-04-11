@@ -15,43 +15,36 @@ EventRegistrationModel::EventRegistrationModel(QObject* pParent)
 {}
 
 EventRegistrationModel::EventRegistrationModel(std::shared_ptr<DbConnection> pConnection,
-                         QObject* pParent)
-    : BaseModel(EventRegistrationModel::TABLE,
-                EventRegistrationModel::PRIMARY_KEY,
-                autoxtime::proto::EventRegistration::GetDescriptor(),
-                autoxtime::proto::EventRegistration::GetReflection(),
-                pConnection,
-                pParent)
+                                               QObject* pParent)
+    : BaseModelT(EventRegistrationModel::TABLE,
+                 EventRegistrationModel::PRIMARY_KEY,
+                 autoxtime::proto::EventRegistration::GetDescriptor(),
+                 autoxtime::proto::EventRegistration::GetReflection(),
+                 pConnection,
+                 pParent)
 {}
 
-std::vector<std::shared_ptr<autoxtime::proto::EventRegistration> > EventRegistrationModel::list()
+void EventRegistrationModel
+::emitSignal(EventRegistrationModel::Signal signal,
+             const std::vector<std::shared_ptr<autoxtime::proto::EventRegistration> >& protoList)
 {
-  return BaseModel::listT<autoxtime::proto::EventRegistration>();
+  switch (signal)
+  {
+    case SIGNAL_LIST_RESULT:
+      emit listResult(protoList);
+      break;
+    case SIGNAL_CREATE_RESULT:
+      emit createResult(protoList);
+      break;
+    case SIGNAL_UPDATE_RESULT:
+      emit updateResult(protoList);
+      break;
+    case SIGNAL_FIND_RESULT:
+      emit findResult(protoList);
+      break;
+  }
 }
 
-std::vector<std::shared_ptr<autoxtime::proto::EventRegistration> > EventRegistrationModel
-::create(const autoxtime::proto::EventRegistration& eventRegistration)
-{
-  return BaseModel::createT(eventRegistration);
-}
-
-std::vector<std::shared_ptr<autoxtime::proto::EventRegistration> > EventRegistrationModel
-::update(const autoxtime::proto::EventRegistration& eventRegistration)
-{
-  return BaseModel::updateT(eventRegistration);
-}
-
-std::vector<std::shared_ptr<autoxtime::proto::EventRegistration> > EventRegistrationModel
-::find(const autoxtime::proto::EventRegistration& prototype)
-{
-  return BaseModel::findT<autoxtime::proto::EventRegistration>(prototype);
-}
-
-std::vector<std::shared_ptr<autoxtime::proto::EventRegistration> > EventRegistrationModel
-::findById(int id)
-{
-  return BaseModel::findByIdT<autoxtime::proto::EventRegistration>(id);
-}
 
 std::vector<std::shared_ptr<autoxtime::proto::EventRegistration> > EventRegistrationModel
 ::createIfNotExists(const autoxtime::proto::EventRegistration& eventRegistration)
@@ -72,13 +65,15 @@ std::vector<std::shared_ptr<autoxtime::proto::EventRegistration> > EventRegistra
     }
   }
 
-  // event_id + driver_id
+  // event_id + driver_id + car_id
   if (eventRegistration.has_event_id() &&
-      eventRegistration.has_driver_id())
+      eventRegistration.has_driver_id() &&
+      eventRegistration.has_car_id())
   {
     autoxtime::proto::EventRegistration proto;
     proto.set_event_id(eventRegistration.event_id());
     proto.set_driver_id(eventRegistration.driver_id());
+    proto.set_car_id(eventRegistration.car_id());
 
     results = find(proto);
     if (!results.empty())

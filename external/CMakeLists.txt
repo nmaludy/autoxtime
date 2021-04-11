@@ -30,7 +30,8 @@ option(BUILD_SHARED_LIBS "Build libraries as SHARED" ON)
 
 # turn on debug builds
 # set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_BUILD_TYPE RelWithDebInfo)
+# set(CMAKE_BUILD_TYPE RelWithDebInfo)
+set(CMAKE_BUILD_TYPE Release)
 
 # output our executables in the build/ directory
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")

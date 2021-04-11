@@ -8,7 +8,6 @@
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/message.h>
 
-
 AUTOXTIME_DB_NAMESPACE_BEG
 
 BaseModel::BaseModel(const std::string& table,
@@ -26,21 +25,52 @@ BaseModel::BaseModel(const std::string& table,
       mpReflection(pReflection),
       mpPrototype(pReflection->GetMessageFactory()->GetPrototype(mpDescriptor)),
       mpConnection(pConnection ? pConnection : std::make_shared<DbConnection>(this)),
-      mFieldNames(),
-      mFieldNamesToFds()
+      mFieldNames(fieldNames(mpDescriptor)),
+      mFieldDescriptors(fieldDescriptors(mpDescriptor)),
+      mFieldNamesToFds(fieldNamesToFds(mpDescriptor))
+{}
+
+QStringList BaseModel::fieldNames(const google::protobuf::Descriptor* pDescriptor)
 {
+  QStringList field_names;
   // cache the mapping of field names to descriptors and the field name list
   // this will traverse the fields in the order they are defined in the .proto file
-  int field_count = mpDescriptor->field_count();
-  mFieldDescriptors.reserve(field_count);
-  mFieldNamesToFds.reserve(field_count);
+  int field_count = pDescriptor->field_count();
   for (int i = 0; i < field_count; ++i)
   {
-    const google::protobuf::FieldDescriptor* p_fd = mpDescriptor->field(i);
-    mFieldNames << QString::fromStdString(p_fd->name());
-    mFieldNamesToFds[p_fd->name()] = p_fd;
-    mFieldDescriptors.push_back(p_fd);
+    const google::protobuf::FieldDescriptor* p_fd = pDescriptor->field(i);
+    field_names << QString::fromStdString(p_fd->name());
   }
+  return field_names;
+}
+
+std::vector<const google::protobuf::FieldDescriptor*> BaseModel
+::fieldDescriptors(const google::protobuf::Descriptor* pDescriptor)
+{
+  int field_count = pDescriptor->field_count();
+  std::vector<const google::protobuf::FieldDescriptor*> field_descriptors;
+  field_descriptors.reserve(field_count);
+  for (int i = 0; i < field_count; ++i)
+  {
+    const google::protobuf::FieldDescriptor* p_fd = pDescriptor->field(i);
+    field_descriptors.push_back(p_fd);
+  }
+  return field_descriptors;
+}
+
+
+std::unordered_map<std::string, const google::protobuf::FieldDescriptor*> BaseModel
+::fieldNamesToFds(const google::protobuf::Descriptor* pDescriptor)
+{
+  int field_count = pDescriptor->field_count();
+  std::unordered_map<std::string, const google::protobuf::FieldDescriptor*> names_to_fds;
+  names_to_fds.reserve(field_count);
+  for (int i = 0; i < field_count; ++i)
+  {
+    const google::protobuf::FieldDescriptor* p_fd = pDescriptor->field(i);
+    names_to_fds[p_fd->name()] = p_fd;
+  }
+  return names_to_fds;
 }
 
 std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel::listMessage()
@@ -147,7 +177,7 @@ std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
   return results;
 }
 
-int BaseModel::destroyById(int id)
+std::int64_t BaseModel::destroyById(std::int64_t id)
 {
   QElapsedTimer timer;
   timer.start();
@@ -155,7 +185,7 @@ int BaseModel::destroyById(int id)
   QSqlQuery query(connection()->database());
   const QString& pkey = primaryKeyQ();
   query.prepare("DELETE FROM " + tableQ() + " WHERE " + pkey + " = :" + pkey);
-  query.bindValue(":" + pkey, id);
+  query.bindValue(":" + pkey, QVariant::fromValue(id));
   AXT_DEBUG << "BaseMode::destroyById() executing query: " << query.lastQuery()
             << "\n" << ":" + pkey << "=" << id;
   bool res = query.exec();
@@ -210,7 +240,7 @@ std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
 }
 
 std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
-::findMessageById(int id)
+::findMessageById(std::int64_t id)
 {
   QElapsedTimer timer;
   timer.start();
@@ -219,9 +249,43 @@ std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
   const QString& pkey = primaryKeyQ();
   query.prepare("SELECT " + mFieldNames.join(", ") + " FROM " + tableQ()
                 + " WHERE " + pkey + " = :" + pkey);
-  query.bindValue(":" + pkey, id);
+  query.bindValue(":" + pkey, QVariant::fromValue(id));
   AXT_DEBUG << "BaseMode::findById() executing query: " << query.lastQuery()
             << "\n" << ":" + pkey << "=" << id;
+
+  std::vector<std::shared_ptr<google::protobuf::Message> > results;
+  if (query.exec())
+  {
+    results = parseQueryResults(query);
+  }
+  else
+  {
+    // TODO what in case of an error?
+    AXT_ERROR << "Error executing query '" << query.lastQuery() << "' - "
+              << query.lastError().text();
+  }
+  AXT_DEBUG << "BaseMode::findMessageById() done query: " << query.lastQuery()
+            << " [" << timer.nsecsElapsed()/1.0e6 << "ms]";
+  return results;
+}
+
+std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
+::findMessageCustom(const QString& custom,
+                    const std::unordered_map<QString, QVariant>& bindings)
+{
+  QElapsedTimer timer;
+  timer.start();
+
+  QSqlQuery query(connection()->database());
+  query.prepare("SELECT " + tableQ() + ".* FROM " + tableQ()
+                + " " + custom);
+  for (const std::pair<const QString, QVariant>& bind : bindings)
+  {
+    AXT_DEBUG << "BaseMode::findMessageCustom() binding " << bind.first
+              << " = " << bind.second;
+    query.bindValue(bind.first, bind.second);
+  }
+  AXT_DEBUG << "BaseMode::findMessageCustom() executing query: " << query.lastQuery();
 
   std::vector<std::shared_ptr<google::protobuf::Message> > results;
   if (query.exec())
@@ -258,7 +322,8 @@ std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
   // iterate over every row the query returned
   while (query.next())
   {
-    AXT_DEBUG << "GOT QUERY RESULT";
+    // TODO make log levels configurable
+    // AXT_DEBUG << "GOT QUERY RESULT";
     // create a new protobuf (generically, from our prototype)
     std::shared_ptr<google::protobuf::Message> p_msg(mpPrototype->New());
     // set fields on the message for each column returned in the query
@@ -266,10 +331,10 @@ std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
     for (int c = 0; c < column_count; ++c)
     {
       const std::string& col_name = col_names.at(c);
-      AXT_DEBUG << "GOT QUERY RESULT - column = " << col_name;
-      const google::protobuf::FieldDescriptor* p_fd = mFieldNamesToFds[col_name];
+      // AXT_DEBUG << "GOT QUERY RESULT - column = " << col_name;
+      const google::protobuf::FieldDescriptor* p_fd = mFieldNamesToFds.at(col_name);
       const QVariant& value = query.value(c);
-      AXT_DEBUG << "GOT QUERY RESULT - value = " << value.toString();
+      // AXT_DEBUG << "GOT QUERY RESULT - value = " << value.toString();
       setFieldVariant(p_msg.get(), p_fd, value);
     }
     results.push_back(p_msg);
@@ -326,35 +391,37 @@ bool BaseModel::setFieldVariant(google::protobuf::Message* pMessage,
                                 const QVariant& var)
 {
   const google::protobuf::Reflection* p_reflection = pMessage->GetReflection();
+  bool b_ok = false;
   switch (pField->cpp_type())
   {
-    // for the int types, use the width based type names because its less confusing
     case google::protobuf::FieldDescriptor::CPPTYPE_INT32:
-      p_reflection->SetInt32(pMessage, pField, var.value<std::int32_t>());
+      p_reflection->SetInt32(pMessage, pField, var.toInt(&b_ok));
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_INT64:
-      p_reflection->SetInt64(pMessage, pField, var.value<std::int64_t>());
+      p_reflection->SetInt64(pMessage, pField, var.toLongLong(&b_ok));
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_UINT32:
-      p_reflection->SetUInt32(pMessage, pField, var.value<std::uint32_t>());
+      p_reflection->SetUInt32(pMessage, pField, var.toUInt(&b_ok));
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_UINT64:
-      p_reflection->SetUInt64(pMessage, pField, var.value<std::uint64_t>());
+      p_reflection->SetUInt64(pMessage, pField, var.toULongLong(&b_ok));
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_DOUBLE:
-      p_reflection->SetDouble(pMessage, pField, var.toFloat());
+      p_reflection->SetDouble(pMessage, pField, var.toFloat(&b_ok));
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_FLOAT:
-      p_reflection->SetFloat(pMessage, pField, var.toFloat());
+      p_reflection->SetFloat(pMessage, pField, var.toFloat(&b_ok));
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_BOOL:
       p_reflection->SetBool(pMessage, pField, var.toBool());
+      b_ok = true;
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_ENUM:
-      p_reflection->SetEnumValue(pMessage, pField, var.toInt());
+      p_reflection->SetEnumValue(pMessage, pField, var.toInt(&b_ok));
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_STRING:
       p_reflection->SetString(pMessage, pField, var.toString().toStdString());
+      b_ok = true;
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_MESSAGE:
       AXT_ERROR << "Error setting field '"
@@ -364,7 +431,18 @@ bool BaseModel::setFieldVariant(google::protobuf::Message* pMessage,
       return false;
       break;
   }
-  return true;
+
+  if (!b_ok)
+  {
+    AXT_ERROR << "Error converting field '"
+              << QString::fromStdString(pField->full_name())
+              << "' from QVariant(string) to protobuf("
+              << pField->type_name()
+              << ") / c++("
+              << pField->cpp_type_name()
+              << ")  value = '" << var.toString().toStdString() << "'";
+  }
+  return b_ok;
 }
 
 QString BaseModel::wherePrototype(const google::protobuf::Message& message)

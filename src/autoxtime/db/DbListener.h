@@ -4,9 +4,10 @@
 #include <autoxtime/db/db.h>
 #include <QtSql/QtSql>
 #include <memory>
-#include <autoxtime/db/DbConnection.h>
 
 AUTOXTIME_DB_NAMESPACE_BEG
+
+class DbConnection;
 
 class DbListener : public QObject
 {
@@ -22,7 +23,7 @@ class DbListener : public QObject
   void notification(const QString& name,
                     QSqlDriver::NotificationSource source,
                     const QVariant& payload);
-  
+
  private:
   QString mChannel;
   std::unique_ptr<DbConnection> mpConnection;

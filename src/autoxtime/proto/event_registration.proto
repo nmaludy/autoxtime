@@ -12,4 +12,6 @@ message EventRegistration {
   optional int64 event_id = 5;
   // primary key 1b
   optional int64 driver_id = 6;
+  // primary key 1c
+  optional int64 car_id = 7;
 }

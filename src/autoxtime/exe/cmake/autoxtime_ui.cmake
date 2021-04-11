@@ -4,6 +4,8 @@
 # create our executable from source
 add_executable(autoxtime_ui "${CMAKE_CURRENT_LIST_DIR}/../autoxtime.cpp")
 
+target_compile_options(autoxtime_ui PUBLIC ${autoxtime_COMPILE_OPTIONS})
+
 # Link against QtCore
 target_link_libraries(autoxtime_ui autoxtime)
 target_link_libraries(autoxtime_ui autoxtimeproto)

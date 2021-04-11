@@ -19,18 +19,20 @@ MainWindow::MainWindow(QWidget* pParent)
 
   QVector<QDockWidget*> dock_widgets;
   {
+    QDockWidget* p_dock_widget = new QDockWidget("Admin", this);
+    p_dock_widget->setWidget(mpAdminWidget);
+    addDockWidget(dock_area, p_dock_widget);
+    dock_widgets << p_dock_widget;
+  }
+
+  {
     QDockWidget* p_dock_widget = new QDockWidget("Registration", this);
     p_dock_widget->setWidget(mpRegistrationWidget);
     addDockWidget(dock_area, p_dock_widget);
     dock_widgets << p_dock_widget;
   }
 
-  {
-    QDockWidget* p_dock_widget = new QDockWidget("Admin", this);
-    p_dock_widget->setWidget(mpAdminWidget);
-    addDockWidget(dock_area, p_dock_widget);
-    dock_widgets << p_dock_widget;
-  }
+  // TODO figure out how to select a particular tabbified widget
 
   for (int i = 1; i < dock_widgets.size(); ++i)
   {
