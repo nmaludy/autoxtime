@@ -24,7 +24,6 @@ DriverModel::DriverModel(std::shared_ptr<DbConnection> pConnection,
                  pParent)
 {}
 
-
 void DriverModel
 ::emitSignal(DriverModel::Signal signal,
              const std::vector<std::shared_ptr<autoxtime::proto::Driver> >& protoList)

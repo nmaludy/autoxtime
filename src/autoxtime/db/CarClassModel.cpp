@@ -15,42 +15,34 @@ CarClassModel::CarClassModel(QObject* pParent)
 {}
 
 CarClassModel::CarClassModel(std::shared_ptr<DbConnection> pConnection,
-                         QObject* pParent)
-    : BaseModel(CarClassModel::TABLE,
-                CarClassModel::PRIMARY_KEY,
-                autoxtime::proto::CarClass::GetDescriptor(),
-                autoxtime::proto::CarClass::GetReflection(),
-                pConnection,
-                pParent)
+                             QObject* pParent)
+    : BaseModelT(CarClassModel::TABLE,
+                 CarClassModel::PRIMARY_KEY,
+                 autoxtime::proto::CarClass::GetDescriptor(),
+                 autoxtime::proto::CarClass::GetReflection(),
+                 pConnection,
+                 pParent)
 {}
 
-std::vector<std::shared_ptr<autoxtime::proto::CarClass> > CarClassModel::list()
+void CarClassModel
+::emitSignal(CarClassModel::Signal signal,
+             const std::vector<std::shared_ptr<autoxtime::proto::CarClass> >& protoList)
 {
-  return BaseModel::listT<autoxtime::proto::CarClass>();
-}
-
-std::vector<std::shared_ptr<autoxtime::proto::CarClass> > CarClassModel
-::create(const autoxtime::proto::CarClass& carClass)
-{
-  return BaseModel::createT(carClass);
-}
-
-std::vector<std::shared_ptr<autoxtime::proto::CarClass> > CarClassModel
-::update(const autoxtime::proto::CarClass& carClass)
-{
-  return BaseModel::updateT(carClass);
-}
-
-std::vector<std::shared_ptr<autoxtime::proto::CarClass> > CarClassModel
-::find(const autoxtime::proto::CarClass& prototype)
-{
-  return BaseModel::findT<autoxtime::proto::CarClass>(prototype);
-}
-
-std::vector<std::shared_ptr<autoxtime::proto::CarClass> > CarClassModel
-::findById(std::int64_t id)
-{
-  return BaseModel::findByIdT<autoxtime::proto::CarClass>(id);
+  switch (signal)
+  {
+    case SIGNAL_LIST_RESULT:
+      emit listResult(protoList);
+      break;
+    case SIGNAL_CREATE_RESULT:
+      emit createResult(protoList);
+      break;
+    case SIGNAL_UPDATE_RESULT:
+      emit updateResult(protoList);
+      break;
+    case SIGNAL_FIND_RESULT:
+      emit findResult(protoList);
+      break;
+  }
 }
 
 std::vector<std::shared_ptr<autoxtime::proto::CarClass> > CarClassModel

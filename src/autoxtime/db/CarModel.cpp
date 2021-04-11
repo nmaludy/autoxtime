@@ -15,42 +15,34 @@ CarModel::CarModel(QObject* pParent)
 {}
 
 CarModel::CarModel(std::shared_ptr<DbConnection> pConnection,
-                         QObject* pParent)
-    : BaseModel(CarModel::TABLE,
-                CarModel::PRIMARY_KEY,
-                autoxtime::proto::Car::GetDescriptor(),
-                autoxtime::proto::Car::GetReflection(),
-                pConnection,
-                pParent)
+                   QObject* pParent)
+    : BaseModelT(CarModel::TABLE,
+                 CarModel::PRIMARY_KEY,
+                 autoxtime::proto::Car::GetDescriptor(),
+                 autoxtime::proto::Car::GetReflection(),
+                 pConnection,
+                 pParent)
 {}
 
-std::vector<std::shared_ptr<autoxtime::proto::Car> > CarModel::list()
+void CarModel
+::emitSignal(CarModel::Signal signal,
+             const std::vector<std::shared_ptr<autoxtime::proto::Car> >& protoList)
 {
-  return BaseModel::listT<autoxtime::proto::Car>();
-}
-
-std::vector<std::shared_ptr<autoxtime::proto::Car> > CarModel
-::create(const autoxtime::proto::Car& car)
-{
-  return BaseModel::createT(car);
-}
-
-std::vector<std::shared_ptr<autoxtime::proto::Car> > CarModel
-::update(const autoxtime::proto::Car& car)
-{
-  return BaseModel::updateT(car);
-}
-
-std::vector<std::shared_ptr<autoxtime::proto::Car> > CarModel
-::find(const autoxtime::proto::Car& prototype)
-{
-  return BaseModel::findT<autoxtime::proto::Car>(prototype);
-}
-
-std::vector<std::shared_ptr<autoxtime::proto::Car> > CarModel
-::findById(std::int64_t id)
-{
-  return BaseModel::findByIdT<autoxtime::proto::Car>(id);
+  switch (signal)
+  {
+    case SIGNAL_LIST_RESULT:
+      emit listResult(protoList);
+      break;
+    case SIGNAL_CREATE_RESULT:
+      emit createResult(protoList);
+      break;
+    case SIGNAL_UPDATE_RESULT:
+      emit updateResult(protoList);
+      break;
+    case SIGNAL_FIND_RESULT:
+      emit findResult(protoList);
+      break;
+  }
 }
 
 std::vector<std::shared_ptr<autoxtime::proto::Car> > CarModel

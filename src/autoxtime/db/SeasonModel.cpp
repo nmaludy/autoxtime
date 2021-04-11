@@ -16,56 +16,34 @@ SeasonModel::SeasonModel(QObject* pParent)
 {}
 
 SeasonModel::SeasonModel(std::shared_ptr<DbConnection> pConnection,
-                                     QObject* pParent)
-    : BaseModel(SeasonModel::TABLE,
-                SeasonModel::PRIMARY_KEY,
-                autoxtime::proto::Season::GetDescriptor(),
-                autoxtime::proto::Season::GetReflection(),
-                pConnection,
-                pParent)
-{
-  qRegisterMetaType<SeasonModel::ProtoPtrVec>();
-}
+                         QObject* pParent)
+    : BaseModelT(SeasonModel::TABLE,
+                 SeasonModel::PRIMARY_KEY,
+                 autoxtime::proto::Season::GetDescriptor(),
+                 autoxtime::proto::Season::GetReflection(),
+                 pConnection,
+                 pParent)
+{}
 
-SeasonModel::ProtoPtrVec SeasonModel::list()
+void SeasonModel
+::emitSignal(SeasonModel::Signal signal,
+             const std::vector<std::shared_ptr<autoxtime::proto::Season> >& protoList)
 {
-  return BaseModel::listT<SeasonModel::Proto>();
-}
-
-QFuture<SeasonModel::ProtoPtrVec> SeasonModel::listAsync()
-{
-  return QtConcurrent::run([=]() {
-    // Code in this block will run in another thread
-
-    // TODO, can we avoid createing new models for each query?
-    // right now we are doing this for thread safety, probably for the better (honestly)
-    std::unique_ptr<SeasonModel> p_model = std::make_unique<SeasonModel>();
-    SeasonModel::ProtoPtrVec results = p_model->list();
-    emit listResult(results);
-    return results;
-  });
-}
-
-SeasonModel::ProtoPtrVec SeasonModel
-::create(const SeasonModel::Proto& season)
-{
-  return BaseModel::createT(season);
-}
-
-SeasonModel::ProtoPtrVec SeasonModel
-::update(const SeasonModel::Proto& season)
-{
-  return BaseModel::updateT(season);
-}
-
-SeasonModel::ProtoPtrVec SeasonModel::find(const SeasonModel::Proto& prototype)
-{
-  return BaseModel::findT<SeasonModel::Proto>(prototype);
-}
-
-SeasonModel::ProtoPtrVec SeasonModel::findById(std::int64_t id)
-{
-  return BaseModel::findByIdT<SeasonModel::Proto>(id);
+  switch (signal)
+  {
+    case SIGNAL_LIST_RESULT:
+      emit listResult(protoList);
+      break;
+    case SIGNAL_CREATE_RESULT:
+      emit createResult(protoList);
+      break;
+    case SIGNAL_UPDATE_RESULT:
+      emit updateResult(protoList);
+      break;
+    case SIGNAL_FIND_RESULT:
+      emit findResult(protoList);
+      break;
+  }
 }
 
 AUTOXTIME_DB_NAMESPACE_END

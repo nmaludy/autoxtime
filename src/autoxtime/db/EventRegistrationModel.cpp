@@ -4,7 +4,6 @@
 #include <autoxtime/proto/event_registration.pb.h>
 
 #include <QtDebug>
-#include <QtConcurrent/QtConcurrent>
 
 AUTOXTIME_DB_NAMESPACE_BEG
 
@@ -16,98 +15,36 @@ EventRegistrationModel::EventRegistrationModel(QObject* pParent)
 {}
 
 EventRegistrationModel::EventRegistrationModel(std::shared_ptr<DbConnection> pConnection,
-                         QObject* pParent)
-    : BaseModel(EventRegistrationModel::TABLE,
-                EventRegistrationModel::PRIMARY_KEY,
-                autoxtime::proto::EventRegistration::GetDescriptor(),
-                autoxtime::proto::EventRegistration::GetReflection(),
-                pConnection,
-                pParent)
+                                               QObject* pParent)
+    : BaseModelT(EventRegistrationModel::TABLE,
+                 EventRegistrationModel::PRIMARY_KEY,
+                 autoxtime::proto::EventRegistration::GetDescriptor(),
+                 autoxtime::proto::EventRegistration::GetReflection(),
+                 pConnection,
+                 pParent)
+{}
+
+void EventRegistrationModel
+::emitSignal(EventRegistrationModel::Signal signal,
+             const std::vector<std::shared_ptr<autoxtime::proto::EventRegistration> >& protoList)
 {
-  qRegisterMetaType<EventRegistrationModel::ProtoPtrVec>();
+  switch (signal)
+  {
+    case SIGNAL_LIST_RESULT:
+      emit listResult(protoList);
+      break;
+    case SIGNAL_CREATE_RESULT:
+      emit createResult(protoList);
+      break;
+    case SIGNAL_UPDATE_RESULT:
+      emit updateResult(protoList);
+      break;
+    case SIGNAL_FIND_RESULT:
+      emit findResult(protoList);
+      break;
+  }
 }
 
-std::vector<std::shared_ptr<autoxtime::proto::EventRegistration> > EventRegistrationModel::list()
-{
-  return BaseModel::listT<autoxtime::proto::EventRegistration>();
-}
-
-QFuture<EventRegistrationModel::ProtoPtrVec> EventRegistrationModel::listAsync()
-{
-  return QtConcurrent::run([=]() {
-    // create a new model so we have connection for this thread (required)
-    EventRegistrationModel model;
-    EventRegistrationModel::ProtoPtrVec results = model.list();
-    emit listResult(results);
-    return results;
-  });
-}
-
-std::vector<std::shared_ptr<autoxtime::proto::EventRegistration> > EventRegistrationModel
-::create(const autoxtime::proto::EventRegistration& eventRegistration)
-{
-  return BaseModel::createT(eventRegistration);
-}
-
-QFuture<EventRegistrationModel::ProtoPtrVec> EventRegistrationModel
-::createAsync(const EventRegistrationModel::Proto& event)
-{
-  // copy before transitioning to thread so we don't have dual memory access
-  EventRegistrationModel::Proto event_copy(event);
-  return QtConcurrent::run([=]() {
-    // create a new model so we have connection for this thread (required)
-    EventRegistrationModel model;
-    EventRegistrationModel::ProtoPtrVec results = model.create(event_copy);
-    emit createResult(results);
-    return results;
-  });
-}
-
-std::vector<std::shared_ptr<autoxtime::proto::EventRegistration> > EventRegistrationModel
-::update(const autoxtime::proto::EventRegistration& eventRegistration)
-{
-  return BaseModel::updateT(eventRegistration);
-}
-
-QFuture<EventRegistrationModel::ProtoPtrVec> EventRegistrationModel
-::updateAsync(const EventRegistrationModel::Proto& event)
-{
-  // copy before transitioning to thread so we don't have dual memory access
-  EventRegistrationModel::Proto event_copy(event);
-  return QtConcurrent::run([=]() {
-    // create a new model so we have connection for this thread (required)
-    EventRegistrationModel model;
-    EventRegistrationModel::ProtoPtrVec results = model.update(event_copy);
-    emit updateResult(results);
-    return results;
-  });
-}
-
-std::vector<std::shared_ptr<autoxtime::proto::EventRegistration> > EventRegistrationModel
-::find(const autoxtime::proto::EventRegistration& prototype)
-{
-  return BaseModel::findT<autoxtime::proto::EventRegistration>(prototype);
-}
-
-std::vector<std::shared_ptr<autoxtime::proto::EventRegistration> > EventRegistrationModel
-::findById(std::int64_t id)
-{
-  return BaseModel::findByIdT<autoxtime::proto::EventRegistration>(id);
-}
-
-QFuture<EventRegistrationModel::ProtoPtrVec> EventRegistrationModel
-::findAsync(const EventRegistrationModel::Proto& event)
-{
-  // copy before transitioning to thread so we don't have dual memory access
-  EventRegistrationModel::Proto event_copy(event);
-  return QtConcurrent::run([=]() {
-    // create a new model so we have connection for this thread (required)
-    EventRegistrationModel model;
-    EventRegistrationModel::ProtoPtrVec results = model.find(event_copy);
-    emit findResult(results);
-    return results;
-  });
-}
 
 std::vector<std::shared_ptr<autoxtime::proto::EventRegistration> > EventRegistrationModel
 ::createIfNotExists(const autoxtime::proto::EventRegistration& eventRegistration)

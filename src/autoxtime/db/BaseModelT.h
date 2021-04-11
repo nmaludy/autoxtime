@@ -85,7 +85,7 @@ QFuture<std::vector<std::shared_ptr<T>>> BaseModelT<T, M>::listAsync()
     // create a new model so we have connection for this thread (required)
     M model;
     ProtoPtrVec results = model.list();
-    emit listResult(results);
+    emitSignal(SIGNAL_LIST_RESULT, results);
     return results;
   });
 }
@@ -97,9 +97,33 @@ std::vector<std::shared_ptr<T>> BaseModelT<T, M>::create(const T& msg)
 }
 
 template <typename T, typename M>
+QFuture<std::vector<std::shared_ptr<T>>> BaseModelT<T, M>::createAsync(const T& msg)
+{
+  return QtConcurrent::run([=]() {
+    // create a new model so we have connection for this thread (required)
+    M model;
+    ProtoPtrVec results = model.create(msg);
+    emitSignal(SIGNAL_CREATE_RESULT, results);
+    return results;
+  });
+}
+
+template <typename T, typename M>
 std::vector<std::shared_ptr<T>> BaseModelT<T, M>::update(const T& msg)
 {
   return BaseModel::updateT(msg);
+}
+
+template <typename T, typename M>
+QFuture<std::vector<std::shared_ptr<T>>> BaseModelT<T, M>::updateAsync(const T& msg)
+{
+  return QtConcurrent::run([=]() {
+    // create a new model so we have connection for this thread (required)
+    M model;
+    ProtoPtrVec results = model.update(msg);
+    emitSignal(SIGNAL_UPDATE_RESULT, results);
+    return results;
+  });
 }
 
 template <typename T, typename M>
@@ -109,9 +133,33 @@ std::vector<std::shared_ptr<T>> BaseModelT<T, M>::find(const T& prototype)
 }
 
 template <typename T, typename M>
+QFuture<std::vector<std::shared_ptr<T>>> BaseModelT<T, M>::findAsync(const T& msg)
+{
+  return QtConcurrent::run([=]() {
+    // create a new model so we have connection for this thread (required)
+    M model;
+    ProtoPtrVec results = model.find(msg);
+    emitSignal(SIGNAL_FIND_RESULT, results);
+    return results;
+  });
+}
+
+template <typename T, typename M>
 std::vector<std::shared_ptr<T>> BaseModelT<T, M>::findById(std::int64_t id)
 {
   return BaseModel::findByIdT<T>(id);
+}
+
+template <typename T, typename M>
+QFuture<std::vector<std::shared_ptr<T>>> BaseModelT<T, M>::findByIdAsync(std::int64_t id)
+{
+  return QtConcurrent::run([=]() {
+    // create a new model so we have connection for this thread (required)
+    M model;
+    ProtoPtrVec results = model.findById(id);
+    emitSignal(SIGNAL_FIND_RESULT, results);
+    return results;
+  });
 }
 
 template <typename T, typename M>

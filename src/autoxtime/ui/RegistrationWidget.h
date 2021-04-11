@@ -3,9 +3,9 @@
 
 #include <autoxtime/ui/ui.h>
 #include <QWidget>
+#include <QTableWidget>
 
 class QComboBox;
-class QTableWidget;
 
 namespace autoxtime { namespace db { class CarModel; } }
 namespace autoxtime { namespace db { class CarClassModel; } }
@@ -37,16 +37,70 @@ class RegistrationWidget : public QWidget
   void eventComboIndexChanged(int index);
 
  private:
+  void resetTable();
+  void updateItem(int row,
+                  int col,
+                  QString text,
+                  int dataRole = -1,
+                  QVariant data = QVariant());
+  void updateCarClasses();
+
+  enum TableItem
+  {
+    TABLE_ITEM_CAR = QTableWidgetItem::UserType,
+    TABLE_ITEM_CAR_CLASS,
+    TABLE_ITEM_DRIVER,
+    TABLE_ITEM_EVENT_REGISTRATION4
+  };
+  enum TableColumn
+  {
+    TABLE_COLUMN_FIRST_NAME = 0,
+    TABLE_COLUMN_LAST_NAME  = 1,
+    TABLE_COLUMN_CLASS      = 2,
+    TABLE_COLUMN_CAR_NUM    = 3,
+    TABLE_COLUMN_CAR_COLOR  = 4,
+    TABLE_COLUMN_CAR        = 5
+  };
+  enum TableData
+  {
+    TABLE_ROLE_CAR_ID = Qt::UserRole,
+    TABLE_ROLE_CAR_CLASS_ID,
+    TABLE_ROLE_DRIVER_ID,
+    TABLE_ROLE_EVENT_REGISTRATION_ID
+  };
+
+
+  // models
   autoxtime::db::CarClassModel* mpCarClassModel;
   autoxtime::db::CarModel* mpCarModel;
   autoxtime::db::DriverModel* mpDriverModel;
   autoxtime::db::EventModel* mpEventModel;
   autoxtime::db::EventRegistrationModel* mpEventRegistrationModel;
 
+  // data
+  std::vector<std::shared_ptr<autoxtime::proto::Car>> mCars;
+  std::unordered_map<std::int64_t, std::shared_ptr<autoxtime::proto::CarClass>> mCarClasses;
+  std::vector<std::shared_ptr<autoxtime::proto::Driver>> mDrivers;
+  std::vector<std::shared_ptr<autoxtime::proto::EventRegistration>> mEventRegistrations;
+
+  // mapping id to table items
+  // each "cell" in the table is a different item, so by convention, we're going to use
+  // the first column ("First Name" aka TABLE_COLUMN_FIRST_NAME) to store the IDs of
+  // all the different types.
+  // from this item, we can retrieve the current row and then edit the other items in that row
+  // as necessary
+  std::unordered_map<std::int64_t, QTableWidgetItem*> mCarItems;
+  // don't need carclass items because we map those a different way
+  // (their ID is meaningless really)
+  std::unordered_map<std::int64_t, QTableWidgetItem*> mDriverItems;
+  std::unordered_map<std::int64_t, QTableWidgetItem*> mEventRegistrationItems;
+
+  // widgets
   QComboBox* mpEventComboBox;
 
   // table
   QTableWidget* mpEventRegistrationTable;
+  std::int64_t mTableRowAddIdx;
 };
 
 AUTOXTIME_UI_NAMESPACE_END

@@ -264,9 +264,11 @@ void AdminWidget::treeSelectionChanged(QTreeWidgetItem* pCurrent, QTreeWidgetIte
     std::shared_ptr<autoxtime::proto::Event> p_event =
         std::make_shared<autoxtime::proto::Event>();
     p_event->set_event_id(pCurrent->data(TREE_COLUMN_ID, TREE_ROLE_ID).toLongLong());
+    AXT_DEBUG << "current item type = " << pCurrent->type();
 
     // set the season from the parent item
     QTreeWidgetItem* p_season_item = pCurrent->parent();
+    AXT_DEBUG << "season item type = " << p_season_item->type();
     p_event->set_season_id(p_season_item->data(TREE_COLUMN_ID, TREE_ROLE_ID).toLongLong());
 
     // set the organization from the grandparent item
@@ -287,7 +289,11 @@ void AdminWidget::treeSelectionChanged(QTreeWidgetItem* pCurrent, QTreeWidgetIte
   }
 
   // don't want to have add/delete buttons enabled if we're currently adding
-  bool b_buttons_enabled = pCurrent != nullptr && pCurrent != mpAddItem;
+  // also don't want to add an event at the org level because we don't know what
+  // season to add to
+  bool b_buttons_enabled = (pCurrent != nullptr
+                            && pCurrent != mpAddItem
+                            && pCurrent->type() != TREE_ITEM_TYPE_ORGANIZATION);
   mpAddButton->setEnabled(b_buttons_enabled);
   mpDeleteButton->setEnabled(b_buttons_enabled);
 }
@@ -308,28 +314,26 @@ void AdminWidget::addClicked(bool checked)
     return;
   }
 
-  // find the organization of the thing we clicked on
-  QTreeWidgetItem* p_org_item = nullptr;
+  // find the season of the thing we clicked on
+  QTreeWidgetItem* p_season_item = nullptr;
   switch (p_item->type())
   {
     case TREE_ITEM_TYPE_ORGANIZATION:
-      AXT_INFO << "Clicked on org";
-      p_org_item = p_item;
+      AXT_INFO << "Clicked on org, ignoring the add";
+      return;
       break;
     case TREE_ITEM_TYPE_SEASON:
       AXT_INFO << "Clicked on season";
-      p_org_item = p_item->parent();
+      p_season_item = p_item;
       break;
     case TREE_ITEM_TYPE_EVENT:
       AXT_INFO << "Clicked on event";
-      p_org_item = p_item->parent()->parent();
-      break;
-    default:
+      p_season_item = p_item->parent();
       break;
   }
 
   // add a new item under the current organization
-  mpAddItem = new QTreeWidgetItem(p_org_item,  AdminWidget::TREE_ITEM_TYPE_EVENT);
+  mpAddItem = new QTreeWidgetItem(p_season_item,  AdminWidget::TREE_ITEM_TYPE_EVENT);
   mpAddItem->setText(TREE_COLUMN_NAME, QString("<new-event>"));
   // use todays date
   mpAddItem->setText(TREE_COLUMN_DATE, QDate::currentDate().toString(Qt::ISODate));

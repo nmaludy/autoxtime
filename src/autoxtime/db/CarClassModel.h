@@ -2,13 +2,13 @@
 #define AUTOXTIME_DB_CARCLASSMODEL
 
 #include <autoxtime/db/db.h>
-#include <autoxtime/db/BaseModel.h>
+#include <autoxtime/db/BaseModelT.h>
 
 namespace autoxtime { namespace proto { class CarClass; } }
 
 AUTOXTIME_DB_NAMESPACE_BEG
 
-class CarClassModel : public BaseModel
+class CarClassModel : public BaseModelT<autoxtime::proto::CarClass, CarClassModel>
 {
   Q_OBJECT
 
@@ -20,18 +20,24 @@ class CarClassModel : public BaseModel
   CarClassModel(std::shared_ptr<DbConnection> pConnection,
                 QObject* pParent = nullptr);
 
-  std::vector<std::shared_ptr<autoxtime::proto::CarClass> > list();
-  std::vector<std::shared_ptr<autoxtime::proto::CarClass> > create(const autoxtime::proto::CarClass& carClass);
-  std::vector<std::shared_ptr<autoxtime::proto::CarClass> > update(const autoxtime::proto::CarClass& carClass);
-
-  std::vector<std::shared_ptr<autoxtime::proto::CarClass> > find(const autoxtime::proto::CarClass& prototype);
-  std::vector<std::shared_ptr<autoxtime::proto::CarClass> > findById(std::int64_t id);
-
   // creates CarClass if doesn't exist, order of lookup is:
   // - name + subclass_name
   std::vector<std::shared_ptr<autoxtime::proto::CarClass> > createIfNotExists(const autoxtime::proto::CarClass& carClass);
+
+  virtual void emitSignal(Signal signal,
+                          const std::vector<std::shared_ptr<autoxtime::proto::CarClass> >& results);
+
+ signals:
+  // need the full namespace here so it matches the Q_DECLARE_METATYPE below
+  void listResult(const std::vector<std::shared_ptr<autoxtime::proto::CarClass> >& protoList);
+  void createResult(const std::vector<std::shared_ptr<autoxtime::proto::CarClass> >& protoList);
+  void updateResult(const std::vector<std::shared_ptr<autoxtime::proto::CarClass> >& protoList);
+  void findResult(const std::vector<std::shared_ptr<autoxtime::proto::CarClass> >& protoList);
 };
 
 AUTOXTIME_DB_NAMESPACE_END
+
+// needed so we can use signals/slots with this type
+Q_DECLARE_METATYPE(std::vector<std::shared_ptr<autoxtime::proto::CarClass>>)
 
 #endif // AUTOXTIME_DB_CARCLASS
