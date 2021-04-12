@@ -15,7 +15,8 @@ SerialPortAsyncReader::SerialPortAsyncReader(const QString& portName,
                                              QObject* pParent)
     : ITransport(pParent),
       mPortName(portName),
-      mSerialPort()
+      mSerialPort(),
+      mDataLogFile(ConfigStore::valueCast("serial/data_log_file", QString()))
 {
   if (mPortName.isNull()) {
     mPortName = ConfigStore::value("serial/port").toString();
@@ -25,6 +26,8 @@ SerialPortAsyncReader::SerialPortAsyncReader(const QString& portName,
   mSerialPort.setParity(ConfigStore::valueCast("serial/parity", QSerialPort::NoParity));
   mSerialPort.setStopBits(ConfigStore::valueCast("serial/stop_bits", QSerialPort::OneStop));
   // TODO should we cap the read buffer size? (default is unlimited)
+
+  mDataLogOpened = mDataLogFile.open(QFile::WriteOnly | QFile::Text | QFile::Append);
 
   connect(&mSerialPort, &QSerialPort::readyRead,
           this, &SerialPortAsyncReader::handleReadyRead);
@@ -134,6 +137,11 @@ void SerialPortAsyncReader::handleReadyRead()
   QByteArray read_data = mSerialPort.readAll();
   if (!read_data.isEmpty())
   {
+    if (mDataLogOpened)
+    {
+      mDataLogFile.write(read_data);
+      mDataLogFile.flush();
+    }
     emit dataRead(read_data);
   }
   else

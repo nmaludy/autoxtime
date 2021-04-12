@@ -7,6 +7,7 @@
 #include <QSerialPortInfo>
 #include <QSerialPort>
 #include <QTimer>
+#include <QFile>
 
 AUTOXTIME_NAMESPACE_BEG
 
@@ -29,6 +30,8 @@ class SerialPortAsyncReader : public ITransport
   QString mPortName;
   QSerialPort mSerialPort;
   QTimer mTimer;
+  QFile mDataLogFile;
+  bool mDataLogOpened;
 };
 
 AUTOXTIME_NAMESPACE_END

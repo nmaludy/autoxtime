@@ -103,6 +103,7 @@ CREATE TABLE IF NOT EXISTS event_registration(
   event_id INT NOT NULL,
   driver_id INT NOT NULL,
   car_id INT NOT NULL,
+  checked_in bool,
   PRIMARY KEY(event_registration_id),
   CONSTRAINT fk_event
     FOREIGN KEY(event_id)
@@ -323,7 +324,8 @@ FOR EACH ROW EXECUTE PROCEDURE notify_trigger(
   'membership_type',
   'event_id',
   'driver_id',
-  'car_id'
+  'car_id',
+  'checked_in'
 );
 
 CREATE TRIGGER notify_run

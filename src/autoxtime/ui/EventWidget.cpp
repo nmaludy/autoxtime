@@ -28,14 +28,21 @@ EventWidget::EventWidget(QWidget* pParent)
   mpEventDateEdit->setDate(QDate::currentDate());
 
   QGridLayout* p_evemt_layout = new QGridLayout(this);
+  // row 0
   p_evemt_layout->addWidget(new QLabel("Name", this), 0, 0);
   p_evemt_layout->addWidget(mpEventNameLineEdit, 0, 1, 1, -1);
+  // row 1
   p_evemt_layout->addWidget(new QLabel("Date", this), 1, 0);
   p_evemt_layout->addWidget(mpEventDateEdit, 1, 1, 1, -1);
-  p_evemt_layout->addWidget(mpEventImportButton, 3, 1, 1, -1);
-  p_evemt_layout->addWidget(mpEventSaveButton, 4, 0);
-  p_evemt_layout->addWidget(mpEventCancelButton, 4, 1, 1, -1);
+  // row 2
+  p_evemt_layout->addWidget(mpEventImportButton, 2, 1, 1, -1);
+  // row 3 = empty, so it can consume all of the space when stretched
   p_evemt_layout->setRowStretch(3, 1);
+  // row 4
+  p_evemt_layout->addWidget(mpEventSaveButton, 4, 0);
+  // so it can consume the wrest of the space
+  p_evemt_layout->setColumnStretch(1, 1);
+  p_evemt_layout->addWidget(mpEventCancelButton, 4, 2);
 
   // disable until we click on an event
   setEnabled(false);

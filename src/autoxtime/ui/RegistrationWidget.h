@@ -59,7 +59,8 @@ class RegistrationWidget : public QWidget
     TABLE_COLUMN_CLASS      = 2,
     TABLE_COLUMN_CAR_NUM    = 3,
     TABLE_COLUMN_CAR_COLOR  = 4,
-    TABLE_COLUMN_CAR        = 5
+    TABLE_COLUMN_CAR        = 5,
+    TABLE_COLUMN_CHECKED_IN = 6
   };
   enum TableData
   {

@@ -2,6 +2,8 @@
 #define AUTOXTIME_DB_BASEMODELT
 
 #include <autoxtime/db/BaseModel.h>
+#include <autoxtime/db/DbThreadPool.h>
+
 #include <QtConcurrent/QtConcurrent>
 
 AUTOXTIME_DB_NAMESPACE_BEG
@@ -81,7 +83,7 @@ std::vector<std::shared_ptr<T>> BaseModelT<T, M>::list()
 template <typename T, typename M>
 QFuture<std::vector<std::shared_ptr<T>>> BaseModelT<T, M>::listAsync()
 {
-  return QtConcurrent::run([=]() {
+  return QtConcurrent::run(DbThreadPool::instance(), [=]() {
     // create a new model so we have connection for this thread (required)
     M model;
     ProtoPtrVec results = model.list();
@@ -99,7 +101,7 @@ std::vector<std::shared_ptr<T>> BaseModelT<T, M>::create(const T& msg)
 template <typename T, typename M>
 QFuture<std::vector<std::shared_ptr<T>>> BaseModelT<T, M>::createAsync(const T& msg)
 {
-  return QtConcurrent::run([=]() {
+  return QtConcurrent::run(DbThreadPool::instance(), [=]() {
     // create a new model so we have connection for this thread (required)
     M model;
     ProtoPtrVec results = model.create(msg);
@@ -117,7 +119,7 @@ std::vector<std::shared_ptr<T>> BaseModelT<T, M>::update(const T& msg)
 template <typename T, typename M>
 QFuture<std::vector<std::shared_ptr<T>>> BaseModelT<T, M>::updateAsync(const T& msg)
 {
-  return QtConcurrent::run([=]() {
+  return QtConcurrent::run(DbThreadPool::instance(), [=]() {
     // create a new model so we have connection for this thread (required)
     M model;
     ProtoPtrVec results = model.update(msg);
@@ -135,7 +137,7 @@ std::vector<std::shared_ptr<T>> BaseModelT<T, M>::find(const T& prototype)
 template <typename T, typename M>
 QFuture<std::vector<std::shared_ptr<T>>> BaseModelT<T, M>::findAsync(const T& msg)
 {
-  return QtConcurrent::run([=]() {
+  return QtConcurrent::run(DbThreadPool::instance(), [=]() {
     // create a new model so we have connection for this thread (required)
     M model;
     ProtoPtrVec results = model.find(msg);
@@ -153,7 +155,7 @@ std::vector<std::shared_ptr<T>> BaseModelT<T, M>::findById(std::int64_t id)
 template <typename T, typename M>
 QFuture<std::vector<std::shared_ptr<T>>> BaseModelT<T, M>::findByIdAsync(std::int64_t id)
 {
-  return QtConcurrent::run([=]() {
+  return QtConcurrent::run(DbThreadPool::instance(), [=]() {
     // create a new model so we have connection for this thread (required)
     M model;
     ProtoPtrVec results = model.findById(id);
@@ -175,7 +177,7 @@ QFuture<std::vector<std::shared_ptr<T>>> BaseModelT<T, M>
 ::findCustomAsync(const QString& custom,
                   const std::unordered_map<QString, QVariant>& bindings)
 {
-  return QtConcurrent::run([=]() {
+  return QtConcurrent::run(DbThreadPool::instance(), [=]() {
     // create a new model so we have connection for this thread (required)
     M model;
     ProtoPtrVec results = model.findCustom(custom, bindings);

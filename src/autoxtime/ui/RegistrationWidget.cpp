@@ -90,9 +90,10 @@ void RegistrationWidget::resetTable()
   headers << "First Name"
           << "Last Name"
           << "Class"
-          << "#"
+          << "Number"
           << " "
-          << "Car";
+          << "Car"
+          << "Checked-in";
   mpEventRegistrationTable->setRowCount(0);
   mpEventRegistrationTable->setColumnCount(headers.size());
   mpEventRegistrationTable->setHorizontalHeaderLabels(headers);
@@ -174,6 +175,8 @@ void RegistrationWidget
                                         new QTableWidgetItem(TABLE_ITEM_CAR));
       mpEventRegistrationTable->setItem(row_idx, TABLE_COLUMN_CAR,
                                         new QTableWidgetItem(TABLE_ITEM_CAR));
+      mpEventRegistrationTable->setItem(row_idx, TABLE_COLUMN_CHECKED_IN,
+                                        new QTableWidgetItem(TABLE_ITEM_CAR));
     }
 
     // keep track of FIRST_NAME column, by convention
@@ -190,6 +193,12 @@ void RegistrationWidget
     mDriverItems[p_er->driver_id()] = p_item;
     mEventRegistrationItems[p_er->event_registration_id()] = p_item;
     mCarItems[p_er->car_id()] = p_item;
+
+    // set data from registration object
+    p_item = mpEventRegistrationTable->item(row_idx, TABLE_COLUMN_CHECKED_IN);
+    p_item->setFlags(p_item->flags() | Qt::ItemIsUserCheckable);
+    p_item->setCheckState(p_er->checked_in() ? Qt::Checked : Qt::Unchecked);
+    // TODO capture checked signal and send it somewhere
   }
   mpEventRegistrationTable->setSortingEnabled(true);
 

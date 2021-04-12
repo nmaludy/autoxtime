@@ -3,23 +3,26 @@
 
 #include <autoxtime/db/db.h>
 
-#include <cstdint>
-#include <memory>
+// qt
+#include <QFuture>
+#include <QThreadPool>
 
-class QThreadPool;
+// std
+#include <cstdint>
+#include <functional>
+#include <memory>
 
 AUTOXTIME_DB_NAMESPACE_BEG
 
-class DbThreadPool
+class DbThreadPool : public QThreadPool
 {
  public:
-  static DbThreadPool& instance();
+  static DbThreadPool* instance();
 
  private:
   DbThreadPool();
 
   std::uint32_t mNumThreads;
-  std::unique_ptr<QThreadPool> mpThreadPool;
 };
 
 AUTOXTIME_DB_NAMESPACE_END
