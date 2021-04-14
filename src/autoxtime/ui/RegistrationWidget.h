@@ -3,9 +3,14 @@
 
 #include <autoxtime/ui/ui.h>
 #include <QWidget>
-#include <QTableWidget>
+#include <QVariant>
 
 class QComboBox;
+class QLineEdit;
+class QSortFilterProxyModel;
+class QStandardItem;
+class QStandardItemModel;
+class QTableView;
 
 namespace autoxtime { namespace db { class CarModel; } }
 namespace autoxtime { namespace db { class CarClassModel; } }
@@ -18,6 +23,8 @@ namespace autoxtime { namespace proto { class CarClass; } }
 namespace autoxtime { namespace proto { class Driver; } }
 namespace autoxtime { namespace proto { class Event; } }
 namespace autoxtime { namespace proto { class EventRegistration; } }
+
+namespace autoxtime { namespace ui { class MultiSortFilterProxyModel; } }
 
 AUTOXTIME_UI_NAMESPACE_BEG
 
@@ -35,6 +42,7 @@ class RegistrationWidget : public QWidget
   void setEventRegistrations(const std::vector<std::shared_ptr<autoxtime::proto::EventRegistration>>& eventRegistrations);
   void setEvents(const std::vector<std::shared_ptr<autoxtime::proto::Event>>& events);
   void eventComboIndexChanged(int index);
+  void filterChanged(const QString& text);
 
  private:
   void resetTable();
@@ -45,13 +53,6 @@ class RegistrationWidget : public QWidget
                   QVariant data = QVariant());
   void updateCarClasses();
 
-  enum TableItem
-  {
-    TABLE_ITEM_CAR = QTableWidgetItem::UserType,
-    TABLE_ITEM_CAR_CLASS,
-    TABLE_ITEM_DRIVER,
-    TABLE_ITEM_EVENT_REGISTRATION4
-  };
   enum TableColumn
   {
     TABLE_COLUMN_FIRST_NAME = 0,
@@ -90,17 +91,22 @@ class RegistrationWidget : public QWidget
   // all the different types.
   // from this item, we can retrieve the current row and then edit the other items in that row
   // as necessary
-  std::unordered_map<std::int64_t, QTableWidgetItem*> mCarItems;
+  std::unordered_map<std::int64_t, QStandardItem*> mCarItems;
   // don't need carclass items because we map those a different way
   // (their ID is meaningless really)
-  std::unordered_map<std::int64_t, QTableWidgetItem*> mDriverItems;
-  std::unordered_map<std::int64_t, QTableWidgetItem*> mEventRegistrationItems;
+  std::unordered_map<std::int64_t, QStandardItem*> mDriverItems;
+  std::unordered_map<std::int64_t, QStandardItem*> mEventRegistrationItems;
 
-  // widgets
+  // combo box
   QComboBox* mpEventComboBox;
 
+  // filter
+  QLineEdit* mpFilterLineEdit;
+
   // table
-  QTableWidget* mpEventRegistrationTable;
+  QTableView* mpEventRegistrationTable;
+  QStandardItemModel* mpEventItemModel;
+  MultiSortFilterProxyModel* mpEventSortFilterProxyModel;
   std::int64_t mTableRowAddIdx;
 };
 

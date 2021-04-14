@@ -11,12 +11,17 @@
 #include <autoxtime/proto/driver.pb.h>
 #include <autoxtime/proto/event.pb.h>
 #include <autoxtime/proto/event_registration.pb.h>
+#include <autoxtime/ui/CheckBoxItemDelegate.h>
+#include <autoxtime/ui/MultiSortFilterProxyModel.h>
 #include <autoxtime/util/ColorUtil.h>
 
+#include <QComboBox>
 #include <QGridLayout>
 #include <QLabel>
-#include <QComboBox>
-#include <QTableWidget>
+#include <QLineEdit>
+#include <QStandardItem>
+#include <QStandardItemModel>
+#include <QTableView>
 
 using autoxtime::db::CarModel;
 using autoxtime::db::CarClassModel;
@@ -34,7 +39,10 @@ RegistrationWidget::RegistrationWidget(QWidget* pParent)
       mpEventModel(new autoxtime::db::EventModel(this)),
       mpEventRegistrationModel(new autoxtime::db::EventRegistrationModel(this)),
       mpEventComboBox(new QComboBox(this)),
-      mpEventRegistrationTable(new QTableWidget(this)),
+      mpFilterLineEdit(new QLineEdit(this)),
+      mpEventRegistrationTable(new QTableView(this)),
+      mpEventItemModel(new QStandardItemModel(this)),
+      mpEventSortFilterProxyModel(new MultiSortFilterProxyModel(this)),
       mTableRowAddIdx(0)
 {
   QGridLayout* p_layout = new QGridLayout(this);
@@ -54,10 +62,33 @@ RegistrationWidget::RegistrationWidget(QWidget* pParent)
     p_layout->addWidget(mpEventComboBox, 0, 0, 1, -1);
   }
 
+  // filter
+  {
+    connect(mpFilterLineEdit, &QLineEdit::textChanged,
+            this,             &RegistrationWidget::filterChanged);
+
+    p_layout->addWidget(new QLabel("Filter:"), 1, 0);
+    p_layout->addWidget(mpFilterLineEdit, 1, 1, 1, -1);
+  }
+
   // table
   {
+    QList<int> columns;
+    columns << TABLE_COLUMN_FIRST_NAME
+            << TABLE_COLUMN_LAST_NAME
+            << TABLE_COLUMN_CLASS
+            << TABLE_COLUMN_CAR_NUM
+            << TABLE_COLUMN_CAR;
+    mpEventSortFilterProxyModel->setFilterKeyColumnList(columns);
+    mpEventSortFilterProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    mpEventSortFilterProxyModel->setSourceModel(mpEventItemModel);
+    mpEventRegistrationTable->setModel(mpEventSortFilterProxyModel);
+
+    mpEventRegistrationTable->setItemDelegateForColumn(TABLE_COLUMN_CHECKED_IN,
+                                                       new CheckBoxItemDelegate(this));
+
     resetTable();
-    p_layout->addWidget(mpEventRegistrationTable, 1, 0, -1, -1);
+    p_layout->addWidget(mpEventRegistrationTable, 2, 0, -1, -1);
   }
 
   // model signals
@@ -73,7 +104,7 @@ RegistrationWidget::RegistrationWidget(QWidget* pParent)
 
 void RegistrationWidget::resetTable()
 {
-  mpEventRegistrationTable->clear();
+  mpEventItemModel->clear();
 
   // clear our underlying state
   mTableRowAddIdx = 0;
@@ -94,11 +125,11 @@ void RegistrationWidget::resetTable()
           << " "
           << "Car"
           << "Checked-in";
-  mpEventRegistrationTable->setRowCount(0);
-  mpEventRegistrationTable->setColumnCount(headers.size());
-  mpEventRegistrationTable->setHorizontalHeaderLabels(headers);
+  mpEventItemModel->setRowCount(0);
+  mpEventItemModel->setColumnCount(headers.size());
+  mpEventItemModel->setHorizontalHeaderLabels(headers);
 
-  AXT_DEBUG << "Rows in table after clear: " << mpEventRegistrationTable->rowCount();
+  AXT_DEBUG << "Rows in table after clear: " << mpEventItemModel->rowCount();
 }
 
 void RegistrationWidget::setEvents(const autoxtime::db::EventModel::ProtoPtrVec& events)
@@ -130,6 +161,11 @@ void RegistrationWidget::eventComboIndexChanged(int index)
   mpEventRegistrationModel->findAsync(er);
 }
 
+void RegistrationWidget::filterChanged(const QString& text)
+{
+  mpEventSortFilterProxyModel->setFilterWildcard(text);
+}
+
 void RegistrationWidget
 ::setEventRegistrations(const std::vector<std::shared_ptr<autoxtime::proto::EventRegistration>>& eventRegistrations)
 {
@@ -145,7 +181,7 @@ void RegistrationWidget
   {
     // do we know about this driver yet or not?
     std::int64_t id = p_er->event_registration_id();
-    std::unordered_map<std::int64_t, QTableWidgetItem*>::iterator iter =
+    std::unordered_map<std::int64_t, QStandardItem*>::iterator iter =
         mEventRegistrationItems.find(id);
 
     int row_idx = -1;
@@ -153,41 +189,44 @@ void RegistrationWidget
     {
       AXT_DEBUG << "event registration id exists in the map: " << id;
       // convert the item into a row index using the table's mapping
-      row_idx = mpEventRegistrationTable->row(iter->second);
+      QModelIndex idx = mpEventItemModel->indexFromItem(iter->second);
+      row_idx = idx.row();
     }
     else
     {
-      // AXT_DEBUG << "event registration id doesn't exists in the map: " << id;
+      AXT_DEBUG << "event registration id doesn't exists in the map: " << id;
       // add a new row at the end of the table
-      row_idx = mpEventRegistrationTable->rowCount();
-      mpEventRegistrationTable->insertRow(row_idx);
+      row_idx = mpEventItemModel->rowCount();
+      mpEventItemModel->insertRow(row_idx);
 
       // add all of the item columns
-      mpEventRegistrationTable->setItem(row_idx, TABLE_COLUMN_FIRST_NAME,
-                                        new QTableWidgetItem(TABLE_ITEM_DRIVER));
-      mpEventRegistrationTable->setItem(row_idx, TABLE_COLUMN_LAST_NAME,
-                                        new QTableWidgetItem(TABLE_ITEM_DRIVER));
-      mpEventRegistrationTable->setItem(row_idx, TABLE_COLUMN_CLASS,
-                                        new QTableWidgetItem(TABLE_ITEM_CAR_CLASS));
-      mpEventRegistrationTable->setItem(row_idx, TABLE_COLUMN_CAR_NUM,
-                                        new QTableWidgetItem(TABLE_ITEM_CAR));
-      mpEventRegistrationTable->setItem(row_idx, TABLE_COLUMN_CAR_COLOR,
-                                        new QTableWidgetItem(TABLE_ITEM_CAR));
-      mpEventRegistrationTable->setItem(row_idx, TABLE_COLUMN_CAR,
-                                        new QTableWidgetItem(TABLE_ITEM_CAR));
-      mpEventRegistrationTable->setItem(row_idx, TABLE_COLUMN_CHECKED_IN,
-                                        new QTableWidgetItem(TABLE_ITEM_CAR));
+      mpEventItemModel->setItem(row_idx, TABLE_COLUMN_FIRST_NAME,
+                                new QStandardItem());
+      mpEventItemModel->setItem(row_idx, TABLE_COLUMN_LAST_NAME,
+                                new QStandardItem());
+      mpEventItemModel->setItem(row_idx, TABLE_COLUMN_CLASS,
+                                new QStandardItem());
+      mpEventItemModel->setItem(row_idx, TABLE_COLUMN_CAR_NUM,
+                                new QStandardItem());
+      mpEventItemModel->setItem(row_idx, TABLE_COLUMN_CAR_COLOR,
+                                new QStandardItem());
+      mpEventItemModel->setItem(row_idx, TABLE_COLUMN_CAR,
+                                new QStandardItem());
+      mpEventItemModel->setItem(row_idx, TABLE_COLUMN_CHECKED_IN,
+                                new QStandardItem());
     }
 
     // keep track of FIRST_NAME column, by convention
-    QTableWidgetItem* p_item =
-        mpEventRegistrationTable->item(row_idx, TABLE_COLUMN_FIRST_NAME);
+    QStandardItem* p_item =
+        mpEventItemModel->item(row_idx, TABLE_COLUMN_FIRST_NAME);
 
     // keep IDs in the item of the FIRST_NAME column
-    p_item->setData(TABLE_ROLE_EVENT_REGISTRATION_ID,
-                    QVariant::fromValue(p_er->event_registration_id()));
-    p_item->setData(TABLE_ROLE_DRIVER_ID, QVariant::fromValue(p_er->driver_id()));
-    p_item->setData(TABLE_ROLE_CAR_ID, QVariant::fromValue(p_er->car_id()));
+    p_item->setData(QVariant::fromValue(p_er->event_registration_id()),
+                    TABLE_ROLE_EVENT_REGISTRATION_ID);
+    p_item->setData(QVariant::fromValue(p_er->driver_id()),
+                    TABLE_ROLE_DRIVER_ID);
+    p_item->setData(QVariant::fromValue(p_er->car_id()),
+                    TABLE_ROLE_CAR_ID);
 
     // keep track of mappings from ID -> item
     mDriverItems[p_er->driver_id()] = p_item;
@@ -195,8 +234,8 @@ void RegistrationWidget
     mCarItems[p_er->car_id()] = p_item;
 
     // set data from registration object
-    p_item = mpEventRegistrationTable->item(row_idx, TABLE_COLUMN_CHECKED_IN);
-    p_item->setFlags(p_item->flags() | Qt::ItemIsUserCheckable);
+    p_item = mpEventItemModel->item(row_idx, TABLE_COLUMN_CHECKED_IN);
+    // p_item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsUserCheckable);
     p_item->setCheckState(p_er->checked_in() ? Qt::Checked : Qt::Unchecked);
     // TODO capture checked signal and send it somewhere
   }
@@ -260,14 +299,15 @@ void RegistrationWidget
   {
     // do we know about this driver yet or not?
     std::int64_t id = p_driver->driver_id();
-    std::unordered_map<std::int64_t, QTableWidgetItem*>::iterator iter =
+    std::unordered_map<std::int64_t, QStandardItem*>::iterator iter =
         mDriverItems.find(id);
 
     if (iter != mDriverItems.end())
     {
       // AXT_DEBUG << "driver id exists in the map: " << id;
       // convert the item into a row index using the table's mapping
-      int row_idx = mpEventRegistrationTable->row(iter->second);
+      QModelIndex idx = mpEventItemModel->indexFromItem(iter->second);
+      int row_idx = idx.row();
 
       // update existing items with data
       // add this items id to the FIST_NAME column, by convention
@@ -291,7 +331,7 @@ void RegistrationWidget::updateItem(int row,
                                     int dataRole,
                                     QVariant data)
 {
-  QTableWidgetItem* p_item = mpEventRegistrationTable->item(row, col);
+  QStandardItem* p_item = mpEventItemModel->item(row, col);
   if (p_item)
   {
     if (!text.isNull())
@@ -300,7 +340,7 @@ void RegistrationWidget::updateItem(int row,
     }
     if (!data.isNull())
     {
-      p_item->setData(dataRole, data);
+      p_item->setData(data, dataRole);
     }
   }
   else
@@ -327,14 +367,15 @@ void RegistrationWidget
   {
     // do we know about this yet or not?
     std::int64_t id = p_car->car_id();
-    std::unordered_map<std::int64_t, QTableWidgetItem*>::iterator iter =
+    std::unordered_map<std::int64_t, QStandardItem*>::iterator iter =
         mCarItems.find(id);
 
     if (iter != mCarItems.end())
     {
       // AXT_DEBUG << "car id exists in the map: " << id;
       // convert the item into a row index using the table's mapping
-      int row_idx = mpEventRegistrationTable->row(iter->second);
+      QModelIndex idx = mpEventItemModel->indexFromItem(iter->second);
+      int row_idx = idx.row();
       updateItem(row_idx, TABLE_COLUMN_CAR,
                  QString::fromStdString(p_car->make()
                                         + " "
@@ -343,8 +384,7 @@ void RegistrationWidget
                  QString("%1").arg(p_car->car_number()));
 
       // car color is special because we have to mess with the brush
-      QTableWidgetItem* p_item = mpEventRegistrationTable->item(row_idx,
-                                                                TABLE_COLUMN_CAR_COLOR);
+      QStandardItem* p_item = mpEventItemModel->item(row_idx, TABLE_COLUMN_CAR_COLOR);
       if (p_item)
       {
         QString color_name = QString::fromStdString(p_car->color());
@@ -407,9 +447,9 @@ void RegistrationWidget::updateCarClasses()
             << " car classes size = " << mCarClasses.size();
 
   mpEventRegistrationTable->setSortingEnabled(false);
-  for (std::pair<const std::int64_t, QTableWidgetItem*>& id_item : mCarItems)
+  for (std::pair<const std::int64_t, QStandardItem*>& id_item : mCarItems)
   {
-    QTableWidgetItem* p_item = id_item.second;
+    QStandardItem* p_item = id_item.second;
     QVariant data = p_item->data(TABLE_ROLE_CAR_CLASS_ID);
     if (data.isNull())
     {
@@ -436,7 +476,8 @@ void RegistrationWidget::updateCarClasses()
     }
 
     // add text to the item
-    int row_idx = mpEventRegistrationTable->row(p_item);
+    QModelIndex idx = mpEventItemModel->indexFromItem(p_item);
+    int row_idx = idx.row();
     updateItem(row_idx, TABLE_COLUMN_CLASS,
                QString::fromStdString(name));
   }
