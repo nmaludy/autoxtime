@@ -8,12 +8,7 @@
 
 AUTOXTIME_DB_NAMESPACE_BEG
 
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-DbListenerThread::DbListenerThread()
+DbListener::DbListener()
     : QThread(),
       mpStartSemaphore(new QSemaphore()),
       mpConnection()
@@ -27,13 +22,13 @@ DbListenerThread::DbListenerThread()
   moveToThread(this);
 }
 
-DbListenerThread& DbListenerThread::instance()
+DbListener& DbListener::instance()
 {
-  static DbListenerThread thread;
+  static DbListener thread;
   return thread;
 }
 
-void DbListenerThread::run()
+void DbListener::run()
 {
   AXT_DEBUG << "In run thread"
             << QString("autoxtime::thread_") + QString::number((intptr_t)QThread::currentThreadId());
@@ -42,16 +37,16 @@ void DbListenerThread::run()
   // hook up our listener before subscribing
   connect(mpConnection->database().driver(),
           qOverload<const QString&, QSqlDriver::NotificationSource , const QVariant&>(&QSqlDriver::notification),
-          this, &DbListenerThread::notification);
-  connect(this, &DbListenerThread::subscribeSignal,
-          this, &DbListenerThread::subscribeSlot);
+          this, &DbListener::notification);
+  connect(this, &DbListener::subscribeSignal,
+          this, &DbListener::subscribeSlot);
 
   // avoid race condition on start, wait until we're connected
   mpStartSemaphore->release(1);
   QThread::run();
 }
 
-void DbListenerThread::subscribe(const QString& channel)
+void DbListener::subscribe(const QString& channel)
 {
   AXT_DEBUG << "subscribe called from thread: " << QString("autoxtime::thread_") + QString::number((intptr_t)QThread::currentThreadId());
 
@@ -59,13 +54,13 @@ void DbListenerThread::subscribe(const QString& channel)
   emit subscribeSignal(channel);
 }
 
-void DbListenerThread::subscribeSlot(const QString& channel)
+void DbListener::subscribeSlot(const QString& channel)
 {
   AXT_DEBUG << "subscribeSlot called in thread: " << QString("autoxtime::thread_") + QString::number((intptr_t)QThread::currentThreadId());
   mpConnection->database().driver()->subscribeToNotification(channel);
 }
 
-void DbListenerThread::notification(const QString& name,
+void DbListener::notification(const QString& name,
                               QSqlDriver::NotificationSource source,
                               const QVariant& payload)
 {

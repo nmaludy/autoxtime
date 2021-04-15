@@ -12,40 +12,32 @@ AUTOXTIME_DB_NAMESPACE_BEG
 
 class DbConnection;
 
-
-class DbSubscriber : public QObject
+class DbListener : public QThread
 {
   Q_OBJECT
  public:
-  DbSubscriber(const QString& channel);
+  static DbListener& instance();
 
- signals:
-  void subscribeSignal(const QString& channel);
-};
+  virtual ~DbListener() = default;
 
-class DbListenerThread : public QThread
-{
-  Q_OBJECT
- public:
-  static DbListenerThread& instance();
-
-  virtual ~DbListenerThread() = default;
-
-  virtual void run() override;
   void subscribe(const QString& channel);
 
  public slots:
   void notification(const QString& name,
                     QSqlDriver::NotificationSource source,
                     const QVariant& payload);
+
+ protected slots:
   void subscribeSlot(const QString& channel);
 
  signals:
   void subscribeSignal(const QString& channel);
 
- private:
-  DbListenerThread();
+ protected:
+  virtual void run() override;
 
+ private:
+  DbListener();
 
   std::unique_ptr<QSemaphore> mpStartSemaphore;
   std::unique_ptr<DbConnection> mpConnection;
