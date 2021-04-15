@@ -25,7 +25,7 @@ DbThreadPool::DbThreadPool()
   // initialize database connnection from main thread, this should setup the database
   // without a race condition
   DbConnection main_con;
-                          
+
   std::shared_ptr<QSemaphore> p_semaphore = std::make_unique<QSemaphore>();
   std::shared_ptr<QMutex> p_mutex = std::make_unique<QMutex>();
   std::shared_ptr<QWaitCondition> p_wait_condition = std::make_unique<QWaitCondition>();
@@ -45,7 +45,7 @@ DbThreadPool::DbThreadPool()
       p_mutex->unlock();
     });
   }
-  
+
   for (std::uint32_t i = 0; i < mNumThreads; ++i)
   {
     AXT_DEBUG << "Waiting for thread to start " << i;

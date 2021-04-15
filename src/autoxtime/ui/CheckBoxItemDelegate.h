@@ -3,7 +3,6 @@
 
 #include <autoxtime/ui/ui.h>
 
-#include <QObject>
 #include <QStyledItemDelegate>
 
 AUTOXTIME_UI_NAMESPACE_BEG
@@ -14,7 +13,7 @@ class CheckBoxItemDelegate : public QStyledItemDelegate
 
  public:
   explicit CheckBoxItemDelegate(QObject* parent = nullptr);
-
+  virtual ~CheckBoxItemDelegate() = default;
 
   virtual QWidget* createEditor(QWidget* parent,
                                 const QStyleOptionViewItem& option,
@@ -38,6 +37,10 @@ class CheckBoxItemDelegate : public QStyledItemDelegate
                            QAbstractItemModel* model,
                            const QStyleOptionViewItem& option,
                            const QModelIndex& index) override;
+
+
+  virtual QSize sizeHint(const QStyleOptionViewItem& option,
+                         const QModelIndex& index) const override;
  public slots:
   void commitAndCloseEditor();
 

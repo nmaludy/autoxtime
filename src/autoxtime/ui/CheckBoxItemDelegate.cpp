@@ -106,4 +106,14 @@ void CheckBoxItemDelegate::updateEditorGeometry(QWidget* editor,
   editor->setGeometry(checkboxstyle.rect);
 }
 
+QSize CheckBoxItemDelegate::sizeHint(const QStyleOptionViewItem& option,
+                                     const QModelIndex& index) const
+{
+  // QStyleOptionButton checkboxstyle;
+  // QRect checkbox_rect = QApplication::style()->subElementRect(QStyle::SE_CheckBoxIndicator,
+  //                                                             &checkboxstyle);
+  // return checkbox_rect.size();
+  return QSize(10,10);
+}
+
 AUTOXTIME_UI_NAMESPACE_END

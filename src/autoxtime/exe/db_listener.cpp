@@ -22,9 +22,10 @@ int main(int argc, char *argv[])
   QCoreApplication app(argc, argv);
   autoxtime::AppCommon::init(&app, "autoxtime_db_listener");
 
-  autoxtime::db::DbThreadPool::instance();
+  // autoxtime::db::DbThreadPool::instance();
 
-  // autoxtime::db::DbListener db("driver");
+  autoxtime::db::DbListenerThread& listener = autoxtime::db::DbListenerThread::instance();
+  listener.subscribe("driver");
 
   // autoxtime::db::DriverModel driver;
 

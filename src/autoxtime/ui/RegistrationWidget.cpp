@@ -19,6 +19,8 @@
 #include <QGridLayout>
 #include <QLabel>
 #include <QLineEdit>
+#include <QMenu>
+#include <QPushButton>
 #include <QStandardItem>
 #include <QStandardItemModel>
 #include <QTableView>
@@ -46,7 +48,19 @@ RegistrationWidget::RegistrationWidget(QWidget* pParent)
       mTableRowAddIdx(0)
 {
   QGridLayout* p_layout = new QGridLayout(this);
-  // p_layout->addWidget(new QLabel("This will be some registration stuff"), 0, 0);
+  mTableColumnHeaders << "First Name"
+                      << "Last Name"
+                      << "Class"
+                      << "Number"
+                      << "Color"
+                      << "Car"
+                      << "✓ In";
+
+  mTableFilterColumns << TABLE_COLUMN_FIRST_NAME
+                      << TABLE_COLUMN_LAST_NAME
+                      << TABLE_COLUMN_CLASS
+                      << TABLE_COLUMN_CAR_NUM
+                      << TABLE_COLUMN_CAR;
 
   // events combo box
   {
@@ -59,7 +73,10 @@ RegistrationWidget::RegistrationWidget(QWidget* pParent)
             this,         &RegistrationWidget::setEvents);
     mpEventModel->listAsync();
 
-    p_layout->addWidget(mpEventComboBox, 0, 0, 1, -1);
+    QLabel* p_label = new QLabel("Event");
+    p_label->setAlignment(p_label->alignment() | Qt::AlignRight);
+    p_layout->addWidget(p_label, 0, 0);
+    p_layout->addWidget(mpEventComboBox, 0, 1, 1, -1);
   }
 
   // filter
@@ -67,19 +84,28 @@ RegistrationWidget::RegistrationWidget(QWidget* pParent)
     connect(mpFilterLineEdit, &QLineEdit::textChanged,
             this,             &RegistrationWidget::filterChanged);
 
-    p_layout->addWidget(new QLabel("Filter:"), 1, 0);
+    QMenu* p_menu = new QMenu(this);
+    for (int i = 0; i < mTableColumnHeaders.size(); ++i)
+    {
+      const QString& hdr = mTableColumnHeaders.at(i);
+      QAction* p_action = p_menu->addAction(hdr);
+      p_action->setData(i);
+      p_action->setCheckable(true);
+      p_action->setChecked(mTableFilterColumns.contains(i));
+      mTableFilterColumnActions << p_action;
+      connect(p_action, &QAction::toggled,
+              this,     &RegistrationWidget::filterColumnToggled);
+    }
+
+    QPushButton* p_filter_button = new QPushButton("Filter", this);
+    p_filter_button->setMenu(p_menu);
+    p_layout->addWidget(p_filter_button, 1, 0);
     p_layout->addWidget(mpFilterLineEdit, 1, 1, 1, -1);
   }
 
   // table
   {
-    QList<int> columns;
-    columns << TABLE_COLUMN_FIRST_NAME
-            << TABLE_COLUMN_LAST_NAME
-            << TABLE_COLUMN_CLASS
-            << TABLE_COLUMN_CAR_NUM
-            << TABLE_COLUMN_CAR;
-    mpEventSortFilterProxyModel->setFilterKeyColumnList(columns);
+    mpEventSortFilterProxyModel->setFilterKeyColumnList(mTableFilterColumns);
     mpEventSortFilterProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
     mpEventSortFilterProxyModel->setSourceModel(mpEventItemModel);
     mpEventRegistrationTable->setModel(mpEventSortFilterProxyModel);
@@ -117,17 +143,10 @@ void RegistrationWidget::resetTable()
   mDriverItems.clear();
   mEventRegistrationItems.clear();
 
-  QStringList headers;
-  headers << "First Name"
-          << "Last Name"
-          << "Class"
-          << "Number"
-          << " "
-          << "Car"
-          << "Checked-in";
   mpEventItemModel->setRowCount(0);
-  mpEventItemModel->setColumnCount(headers.size());
-  mpEventItemModel->setHorizontalHeaderLabels(headers);
+  mpEventItemModel->setColumnCount(mTableColumnHeaders.size());
+  mpEventItemModel->setHorizontalHeaderLabels(mTableColumnHeaders);
+  mpEventRegistrationTable->resizeColumnsToContents();
 
   AXT_DEBUG << "Rows in table after clear: " << mpEventItemModel->rowCount();
 }
@@ -164,6 +183,20 @@ void RegistrationWidget::eventComboIndexChanged(int index)
 void RegistrationWidget::filterChanged(const QString& text)
 {
   mpEventSortFilterProxyModel->setFilterWildcard(text);
+}
+
+void RegistrationWidget::filterColumnToggled()
+{
+  mTableFilterColumns.clear();
+  for (int i = 0; i < mTableFilterColumnActions.size(); ++i)
+  {
+    QAction* p_action = mTableFilterColumnActions.at(i);
+    if (p_action->isChecked())
+    {
+      mTableFilterColumns << i;
+    }
+  }
+  mpEventSortFilterProxyModel->setFilterKeyColumnList(mTableFilterColumns);
 }
 
 void RegistrationWidget
@@ -239,6 +272,7 @@ void RegistrationWidget
     p_item->setCheckState(p_er->checked_in() ? Qt::Checked : Qt::Unchecked);
     // TODO capture checked signal and send it somewhere
   }
+  mpEventRegistrationTable->resizeColumnsToContents();
   mpEventRegistrationTable->setSortingEnabled(true);
 
   // TODO add all of the event IDs, driver ids, etc so we can match them later
@@ -322,6 +356,7 @@ void RegistrationWidget
       continue;
     }
   }
+  mpEventRegistrationTable->resizeColumnsToContents();
   mpEventRegistrationTable->setSortingEnabled(true);
 }
 
@@ -413,6 +448,7 @@ void RegistrationWidget
       continue;
     }
   }
+  mpEventRegistrationTable->resizeColumnsToContents();
   mpEventRegistrationTable->setSortingEnabled(true);
 
   // update car classes in case they came back before the cars did
@@ -481,6 +517,7 @@ void RegistrationWidget::updateCarClasses()
     updateItem(row_idx, TABLE_COLUMN_CLASS,
                QString::fromStdString(name));
   }
+  mpEventRegistrationTable->resizeColumnsToContents();
   mpEventRegistrationTable->setSortingEnabled(true);
   AXT_DEBUG << "updateCarClasses - done";
 }

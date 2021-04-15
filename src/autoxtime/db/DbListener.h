@@ -3,29 +3,51 @@
 
 #include <autoxtime/db/db.h>
 #include <QtSql/QtSql>
+#include <QThread>
 #include <memory>
+
+class QSemaphore;
 
 AUTOXTIME_DB_NAMESPACE_BEG
 
 class DbConnection;
 
-class DbListener : public QObject
+
+class DbSubscriber : public QObject
 {
   Q_OBJECT
-
  public:
-  // subscribe to events on this channel:
-  // https://www.postgresql.org/docs/13/sql-notify.html
-  DbListener(const QString& channel = QString(),
-             QObject* pParent = nullptr);
+  DbSubscriber(const QString& channel);
+
+ signals:
+  void subscribeSignal(const QString& channel);
+};
+
+class DbListenerThread : public QThread
+{
+  Q_OBJECT
+ public:
+  static DbListenerThread& instance();
+
+  virtual ~DbListenerThread() = default;
+
+  virtual void run() override;
+  void subscribe(const QString& channel);
 
  public slots:
   void notification(const QString& name,
                     QSqlDriver::NotificationSource source,
                     const QVariant& payload);
+  void subscribeSlot(const QString& channel);
+
+ signals:
+  void subscribeSignal(const QString& channel);
 
  private:
-  QString mChannel;
+  DbListenerThread();
+
+
+  std::unique_ptr<QSemaphore> mpStartSemaphore;
   std::unique_ptr<DbConnection> mpConnection;
 };
 

@@ -5,6 +5,7 @@
 #include <QWidget>
 #include <QVariant>
 
+class QAction;
 class QComboBox;
 class QLineEdit;
 class QSortFilterProxyModel;
@@ -43,6 +44,7 @@ class RegistrationWidget : public QWidget
   void setEvents(const std::vector<std::shared_ptr<autoxtime::proto::Event>>& events);
   void eventComboIndexChanged(int index);
   void filterChanged(const QString& text);
+  void filterColumnToggled();
 
  private:
   void resetTable();
@@ -104,6 +106,9 @@ class RegistrationWidget : public QWidget
   QLineEdit* mpFilterLineEdit;
 
   // table
+  QStringList mTableColumnHeaders;
+  QList<int> mTableFilterColumns;
+  QList<QAction*> mTableFilterColumnActions;
   QTableView* mpEventRegistrationTable;
   QStandardItemModel* mpEventItemModel;
   MultiSortFilterProxyModel* mpEventSortFilterProxyModel;
