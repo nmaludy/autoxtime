@@ -7,10 +7,33 @@
 #include <memory>
 
 class QSemaphore;
+namespace autoxtime { namespace db { class DbConnection; } }
 
 AUTOXTIME_DB_NAMESPACE_BEG
 
-class DbConnection;
+class DbEmitter : public QObject
+{
+  Q_OBJECT
+ protected:
+  DbEmitter(const google::protobuf::Message& prototype);
+
+ signals:
+  void notification(const QString& name,
+                    QSqlDriver::NotificationSource source,
+                    std::shared_ptr<google::protobuf::Message>& pMessage);
+
+ public slots:
+  // DbListener::notification -> this
+  void recvNotification(const QString& name,
+                        QSqlDriver::NotificationSource source,
+                        const QString& payload);
+
+ private:
+  friend class DbListener;
+  std::unique<google::protobuf::Message> mpPrototype;
+};
+
+////////////////////////////////////////////////////////////////////////////////
 
 class DbListener : public QThread
 {
@@ -20,24 +43,35 @@ class DbListener : public QThread
 
   virtual ~DbListener() = default;
 
+  DbEmitter* emitter(const QString& channel,
+                     const google::protobuf::Message& prototype);
   void subscribe(const QString& channel);
 
- public slots:
+ protected slots:
+  // subscribe() -> this
+  void subscribeSlot(const QString& channel);
+  // QSqlDriver -> this
+  void recvNotification(const QString& name,
+                        QSqlDriver::NotificationSource source,
+                        const QVariant& payload);
+
+ signals:
+  // subscribe() -> subscribeSlot()
+  void subscribeSignal(const QString& channel);
+  // QSqlDriver -> this
   void notification(const QString& name,
                     QSqlDriver::NotificationSource source,
                     const QVariant& payload);
-
- protected slots:
-  void subscribeSlot(const QString& channel);
-
- signals:
-  void subscribeSignal(const QString& channel);
 
  protected:
   virtual void run() override;
 
  private:
   DbListener();
+  friend class DbEmitter;
+
+  std::mutex mEmitterMutex;
+  std::unordered_map<QString, std::unique_ptr<DbEmitter>> mEmitters;
 
   std::unique_ptr<QSemaphore> mpStartSemaphore;
   std::unique_ptr<DbConnection> mpConnection;
