@@ -36,15 +36,25 @@ class BaseModelT : public BaseModel
   virtual void emitSignal(Signal signal,
                           const std::vector<std::shared_ptr<T> >& results) = 0;
 
+  // conversion helpers
+  static std::shared_ptr<T> messageToT(std::shared_ptr<google::protobuf::Message>& msg);
+  static std::vector<std::shared_ptr<T> > messagesToT(std::vector<std::shared_ptr<google::protobuf::Message> >& messages);
+
+  // list
   std::vector<std::shared_ptr<T> > list();
   QFuture<std::vector<std::shared_ptr<T>>> listAsync();
 
+  // create
+  std::vector<std::shared_ptr<T> > create(const T* pMsg);
   std::vector<std::shared_ptr<T> > create(const T& msg);
   QFuture<std::vector<std::shared_ptr<T>>> createAsync(const T& msg);
 
+  // update
+  std::vector<std::shared_ptr<T> > update(const T* pMsg);
   std::vector<std::shared_ptr<T> > update(const T& msg);
   QFuture<std::vector<std::shared_ptr<T>>> updateAsync(const T& msg);
 
+  // find
   std::vector<std::shared_ptr<T> > find(const T& prototype);
   QFuture<std::vector<std::shared_ptr<T>>> findAsync(const T& event);
 
@@ -75,9 +85,30 @@ BaseModelT<T, M>::BaseModelT(const std::string& table,
 }
 
 template <typename T, typename M>
+std::shared_ptr<T> BaseModelT<T, M>
+::messageToT(std::shared_ptr<google::protobuf::Message>& msg)
+{
+  return std::dynamic_pointer_cast<T>(msg);
+}
+
+template <typename T, typename M>
+std::vector<std::shared_ptr<T> > BaseModelT<T, M>
+::messagesToT(std::vector<std::shared_ptr<google::protobuf::Message> >& messages)
+{
+  std::vector<std::shared_ptr<T> > results;
+  results.reserve(messages.size());
+  std::transform(messages.begin(), messages.end(), std::back_inserter(results),
+                 BaseModelT::messageToT);
+  return results;
+}
+
+/////////////////////////////////////////////////////////////////// list
+
+template <typename T, typename M>
 std::vector<std::shared_ptr<T>> BaseModelT<T, M>::list()
 {
-  return BaseModel::listT<T>();
+  std::vector<std::shared_ptr<google::protobuf::Message> > msgs = listMessage();
+  return messagesToT(msgs);
 }
 
 template <typename T, typename M>
@@ -92,10 +123,21 @@ QFuture<std::vector<std::shared_ptr<T>>> BaseModelT<T, M>::listAsync()
   });
 }
 
+////////////////////////////////////////////////////////////////// create
+
+template <typename T, typename M>
+std::vector<std::shared_ptr<T> > BaseModelT<T, M>::create(const T* pMessage)
+{
+  const google::protobuf::Message* p_proto =
+      dynamic_cast<const google::protobuf::Message*>(pMessage);
+  std::vector<std::shared_ptr<google::protobuf::Message> > msgs = createMessage(p_proto);
+  return messagesToT(msgs);
+}
+
 template <typename T, typename M>
 std::vector<std::shared_ptr<T>> BaseModelT<T, M>::create(const T& msg)
 {
-  return BaseModel::createT(msg);
+  return create(&msg);
 }
 
 template <typename T, typename M>
@@ -111,9 +153,20 @@ QFuture<std::vector<std::shared_ptr<T>>> BaseModelT<T, M>::createAsync(const T& 
 }
 
 template <typename T, typename M>
+std::vector<std::shared_ptr<T> > BaseModelT<T, M>::update(const T* pMessage)
+{
+  const google::protobuf::Message* p_proto =
+      dynamic_cast<const google::protobuf::Message*>(pMessage);
+  std::vector<std::shared_ptr<google::protobuf::Message> > msgs = updateMessage(p_proto);
+  return messagesToT(msgs);
+}
+
+/////////////////////////////////////////////////////////////////////// update
+
+template <typename T, typename M>
 std::vector<std::shared_ptr<T>> BaseModelT<T, M>::update(const T& msg)
 {
-  return BaseModel::updateT(msg);
+  return update(&msg);
 }
 
 template <typename T, typename M>
@@ -128,10 +181,13 @@ QFuture<std::vector<std::shared_ptr<T>>> BaseModelT<T, M>::updateAsync(const T& 
   });
 }
 
+////////////////////////////////////////////////////////////////////// find
+
 template <typename T, typename M>
 std::vector<std::shared_ptr<T>> BaseModelT<T, M>::find(const T& prototype)
 {
-  return BaseModel::findT<T>(prototype);
+  std::vector<std::shared_ptr<google::protobuf::Message> > msgs = findMessage(prototype);
+  return messagesToT(msgs);
 }
 
 template <typename T, typename M>
@@ -149,7 +205,8 @@ QFuture<std::vector<std::shared_ptr<T>>> BaseModelT<T, M>::findAsync(const T& ms
 template <typename T, typename M>
 std::vector<std::shared_ptr<T>> BaseModelT<T, M>::findById(std::int64_t id)
 {
-  return BaseModel::findByIdT<T>(id);
+  std::vector<std::shared_ptr<google::protobuf::Message> > msgs = findMessageById(id);
+  return messagesToT(msgs);
 }
 
 template <typename T, typename M>
@@ -169,7 +226,8 @@ std::vector<std::shared_ptr<T>> BaseModelT<T, M>
 ::findCustom(const QString& custom,
              const std::unordered_map<QString, QVariant>& bindings)
 {
-  return BaseModel::findCustomT<T>(custom, bindings);
+  std::vector<std::shared_ptr<google::protobuf::Message> > msgs = findMessageCustom(custom, bindings);
+  return messagesToT(msgs);
 }
 
 template <typename T, typename M>

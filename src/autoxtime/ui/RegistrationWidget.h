@@ -27,6 +27,8 @@ namespace autoxtime { namespace proto { class EventRegistration; } }
 
 namespace autoxtime { namespace ui { class MultiSortFilterProxyModel; } }
 
+namespace google { namespace protobuf { class Message; } }
+
 AUTOXTIME_UI_NAMESPACE_BEG
 
 class RegistrationWidget : public QWidget
@@ -45,6 +47,19 @@ class RegistrationWidget : public QWidget
   void eventComboIndexChanged(int index);
   void filterChanged(const QString& text);
   void filterColumnToggled();
+
+  void carNotification(const std::shared_ptr<google::protobuf::Message>& pMessage,
+                       const QDateTime& timestamp,
+                       const QString& operation);
+  void carClassNotification(const std::shared_ptr<google::protobuf::Message>& pMessage,
+                            const QDateTime& timestamp,
+                            const QString& operation);
+  void driverNotification(const std::shared_ptr<google::protobuf::Message>& pMessage,
+                          const QDateTime& timestamp,
+                          const QString& operation);
+  void eventRegistrationNotification(const std::shared_ptr<google::protobuf::Message>& pMessage,
+                                     const QDateTime& timestamp,
+                                     const QString& operation);
 
  private:
   void resetTable();

@@ -120,12 +120,29 @@ RegistrationWidget::RegistrationWidget(QWidget* pParent)
   // model signals
   connect(mpCarModel, &autoxtime::db::CarModel::findResult,
           this,       &RegistrationWidget::setCars);
+  connect(mpCarModel, &autoxtime::db::CarModel::notification,
+          this,       &RegistrationWidget::carNotification);
+
   connect(mpCarClassModel, &autoxtime::db::CarClassModel::findResult,
           this,            &RegistrationWidget::setCarClasses);
+  connect(mpCarClassModel, &autoxtime::db::CarClassModel::notification,
+          this,            &RegistrationWidget::carClassNotification);
+
   connect(mpDriverModel, &autoxtime::db::DriverModel::findResult,
           this,          &RegistrationWidget::setDrivers);
+  connect(mpDriverModel, &autoxtime::db::DriverModel::notification,
+          this,          &RegistrationWidget::driverNotification);
+
   connect(mpEventRegistrationModel, &autoxtime::db::EventRegistrationModel::findResult,
           this,                     &RegistrationWidget::setEventRegistrations);
+  connect(mpEventRegistrationModel, &autoxtime::db::EventRegistrationModel::notification,
+          this,                     &RegistrationWidget::eventRegistrationNotification);
+
+  // notifications
+  mpCarModel->subscribeToNotifications();
+  mpCarClassModel->subscribeToNotifications();
+  mpDriverModel->subscribeToNotifications();
+  mpEventRegistrationModel->subscribeToNotifications();
 }
 
 void RegistrationWidget::resetTable()
@@ -520,6 +537,35 @@ void RegistrationWidget::updateCarClasses()
   mpEventRegistrationTable->resizeColumnsToContents();
   mpEventRegistrationTable->setSortingEnabled(true);
   AXT_DEBUG << "updateCarClasses - done";
+}
+
+void RegistrationWidget::carNotification(const std::shared_ptr<google::protobuf::Message>& pMessage,
+                                         const QDateTime& timestamp,
+                                         const QString& operation)
+{
+  AXT_DEBUG << "RegistrationWidget - car notification";
+}
+
+void RegistrationWidget::carClassNotification(const std::shared_ptr<google::protobuf::Message>& pMessage,
+                                              const QDateTime& timestamp,
+                                              const QString& operation)
+{
+  AXT_DEBUG << "RegistrationWidget - car class notification";
+}
+
+void RegistrationWidget::driverNotification(const std::shared_ptr<google::protobuf::Message>& pMessage,
+                                            const QDateTime& timestamp,
+                                            const QString& operation)
+{
+  AXT_DEBUG << "RegistrationWidget - driver notification " << operation << "\n"
+            << pMessage->DebugString();
+}
+
+void RegistrationWidget::eventRegistrationNotification(const std::shared_ptr<google::protobuf::Message>& pMessage,
+                                                       const QDateTime& timestamp,
+                                                       const QString& operation)
+{
+  AXT_DEBUG << "RegistrationWidget - event registration notification";
 }
 
 AUTOXTIME_UI_NAMESPACE_END

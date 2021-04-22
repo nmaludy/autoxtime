@@ -5,9 +5,9 @@
 #include <QtSql/QtSql>
 #include <QThread>
 #include <memory>
+#include <google/protobuf/message.h>
 
 class QSemaphore;
-namespace google { namespace protobuf { class Message; } }
 namespace autoxtime { namespace db { class DbConnection; } }
 
 AUTOXTIME_DB_NAMESPACE_BEG
@@ -20,9 +20,9 @@ class DbEmitter : public QObject
   virtual ~DbEmitter();
 
  signals:
-  void notification(const QString& name,
-                    QSqlDriver::NotificationSource source,
-                    std::shared_ptr<google::protobuf::Message>& pMessage);
+  void notification(const std::shared_ptr<google::protobuf::Message>& pMessage,
+                    const QDateTime& timestamp,
+                    const QString& operation);
 
  public slots:
   // DbListener::notification -> this
@@ -80,5 +80,8 @@ class DbListener : public QThread
 };
 
 AUTOXTIME_DB_NAMESPACE_END
+
+// needed so we can use signals/slots with this type
+Q_DECLARE_METATYPE(std::shared_ptr<google::protobuf::Message>)
 
 #endif // AUTOXTIME_DB_DBLISTENER

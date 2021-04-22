@@ -32,12 +32,16 @@ void DbEmitter::emitNotification(const QString& name,
   // "timestamp" - string
   // "operation" - string (UPDATE, INSERT, DELETE, etc)
   // "data" - data/row that was changed, encoded as JSON
+  QString timestamp_str = payload_json.value("timestamp").toString();
+  QString operation = payload_json.value("operation").toString();
   QJsonDocument data_doc(payload_json.value("data").toObject());
-  QString payload_data(data_doc.toJson());
-  AXT_DEBUG << "payload_data = " << payload_data;
+
+  // parse ISO 8601 timestamp
+  QDateTime timestamp = QDateTime::fromString(timestamp_str, Qt::ISODate);
 
   // convert Qt string to string we can use for parsing
-  std::string data_str(payload_data.toStdString());
+  QString data_json(data_doc.toJson());
+  std::string data_str(data_json.toStdString());
   google::protobuf::StringPiece piece(data_str.data());
 
   // create a new message that will be filled in with the data from the JSON string
@@ -49,15 +53,19 @@ void DbEmitter::emitNotification(const QString& name,
   {
     AXT_DEBUG << "DbEmitter - Notification name=" << name
               << " thread=" << QString("autoxtime::thread_") + QString::number((intptr_t)QThread::currentThreadId())
+              << " timestamp=" << timestamp
+              << " operation=" << operation
               << " payload=" << payload_ba << "\n"
               << " msg=" << msg->DebugString();
-    emit notification(name, source, msg);
+    emit notification(msg, timestamp, operation);
   }
   else
   {
-    AXT_ERROR << "Error parsing JSON payload: "<< status.ToString() << "\n"
-              << "channel = " << name << "\n"
-              << "payload = " << payload;
+    AXT_ERROR << "Error parsing JSON payload error='"<< status.ToString() << "'"
+              << " channel=" << name
+              << " timestamp=" << timestamp
+              << " operation=" << operation
+              << " payload=" << payload;
   }
 }
 
@@ -68,6 +76,7 @@ DbListener::DbListener()
       mpStartSemaphore(new QSemaphore()),
       mpConnection()
 {
+  qRegisterMetaType<std::shared_ptr<google::protobuf::Message>>();
   start();
 
   // avoid race condition on start, wait until we're connected
