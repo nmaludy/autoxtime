@@ -22,18 +22,35 @@ void DbEmitter::emitNotification(const QString& name,
                                  QSqlDriver::NotificationSource source,
                                  const QVariant& payload)
 {
-  std::string data_str(payload.toString().toStdString());
+  // Note: as a measure of efficiency we convert and parse the JSON data once
+  //       then pass the parsed google::protobuf::Message to the emitted signal
+  //       so that we dont' have to parse the message over/over in each listener
+  QByteArray payload_ba = payload.toString().toUtf8();
+  QJsonDocument payload_doc = QJsonDocument::fromJson(payload_ba);
+  QJsonObject payload_json = payload_doc.object();
+  // payload contains following fields:
+  // "timestamp" - string
+  // "operation" - string (UPDATE, INSERT, DELETE, etc)
+  // "data" - data/row that was changed, encoded as JSON
+  QJsonDocument data_doc(payload_json.value("data").toObject());
+  QString payload_data(data_doc.toJson());
+  AXT_DEBUG << "payload_data = " << payload_data;
+
+  // convert Qt string to string we can use for parsing
+  std::string data_str(payload_data.toStdString());
   google::protobuf::StringPiece piece(data_str.data());
+
+  // create a new message that will be filled in with the data from the JSON string
   std::shared_ptr<google::protobuf::Message> msg(mpPrototype->New());
+  // parse JSON into the message
   google::protobuf::util::Status status =
       google::protobuf::util::JsonStringToMessage(piece, msg.get());
   if (status.ok())
   {
-    
     AXT_DEBUG << "DbEmitter - Notification name=" << name
-              << " payload=" << data_str
-              << "\n"
-              << "  in thread: " << QString("autoxtime::thread_") + QString::number((intptr_t)QThread::currentThreadId());;
+              << " thread=" << QString("autoxtime::thread_") + QString::number((intptr_t)QThread::currentThreadId())
+              << " payload=" << payload_ba << "\n"
+              << " msg=" << msg->DebugString();
     emit notification(name, source, msg);
   }
   else
@@ -96,20 +113,20 @@ DbEmitter* DbListener::emitter(const google::protobuf::Message& prototype,
   }
   else
   {
-    std::unique_ptr<DbEmitter> ptr = std::make_unique<DbEmitter>(prototype);
-    // get reference to emitter ptr before we move it into the container
-    DbEmitter* p_emitter = ptr.get();
-    mEmitters[tableName] = std::move(ptr);
-    return p_emitter;
+    mEmitters[tableName] = std::make_unique<DbEmitter>(prototype);
+    return mEmitters[tableName].get();
   }
 }
 
 void DbListener::subscribe(const google::protobuf::Message& prototype,
-                           const QString& tableName)
+                                 const QString& tableName)
 {
   AXT_DEBUG << "subscribe for channel "
             << tableName
             << " called from thread: " << QString("autoxtime::thread_") + QString::number((intptr_t)QThread::currentThreadId());
+
+  // create an emitter for this subscription, just in case one doesn't exist
+  emitter(prototype, tableName);
 
   // send signal to our background thread that we want to subscribe to this new channel
   emit subscribeSignal(tableName);

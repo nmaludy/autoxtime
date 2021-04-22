@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
   // autoxtime::db::DbThreadPool::instance();
   autoxtime::db::DbListener& listener = autoxtime::db::DbListener::instance();
   autoxtime::proto::Driver driver;
-  // listener.emitter(driver);
+  listener.emitter(driver, QString::fromStdString(autoxtime::db::DriverModel::TABLE));
   listener.subscribe(driver, QString::fromStdString(autoxtime::db::DriverModel::TABLE));
 
   // autoxtime::db::DriverModel driver;
