@@ -7,6 +7,7 @@
 #include <memory>
 
 class QSemaphore;
+namespace google { namespace protobuf { class Message; } }
 namespace autoxtime { namespace db { class DbConnection; } }
 
 AUTOXTIME_DB_NAMESPACE_BEG
@@ -14,8 +15,9 @@ AUTOXTIME_DB_NAMESPACE_BEG
 class DbEmitter : public QObject
 {
   Q_OBJECT
- protected:
+ public:
   DbEmitter(const google::protobuf::Message& prototype);
+  virtual ~DbEmitter();
 
  signals:
   void notification(const QString& name,
@@ -24,13 +26,12 @@ class DbEmitter : public QObject
 
  public slots:
   // DbListener::notification -> this
-  void recvNotification(const QString& name,
+  void emitNotification(const QString& name,
                         QSqlDriver::NotificationSource source,
-                        const QString& payload);
+                        const QVariant& payload);
 
  private:
-  friend class DbListener;
-  std::unique<google::protobuf::Message> mpPrototype;
+  std::unique_ptr<google::protobuf::Message> mpPrototype;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -43,9 +44,10 @@ class DbListener : public QThread
 
   virtual ~DbListener() = default;
 
-  DbEmitter* emitter(const QString& channel,
-                     const google::protobuf::Message& prototype);
-  void subscribe(const QString& channel);
+  DbEmitter* emitter(const google::protobuf::Message& prototype,
+                     const QString& tableName);
+  void subscribe(const google::protobuf::Message& prototype,
+                 const QString& tableName);
 
  protected slots:
   // subscribe() -> this
