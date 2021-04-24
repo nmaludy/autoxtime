@@ -42,6 +42,7 @@ void CheckBoxItemDelegate::setModelData(QWidget* editor,
 {
   QCheckBox* cb = dynamic_cast<QCheckBox*>(editor);
   model->setData(index, cb->checkState(), Qt::CheckStateRole);
+  model->setData(index, cb->checkState() == Qt::Checked, Qt::EditRole);
 }
 
 bool CheckBoxItemDelegate::editorEvent(QEvent* event,
@@ -55,6 +56,7 @@ bool CheckBoxItemDelegate::editorEvent(QEvent* event,
     // invert checkbox state
     Qt::CheckState inverted = (data == Qt::Checked) ? Qt::Unchecked : Qt::Checked;
     model->setData(index, inverted, Qt::CheckStateRole);
+    model->setData(index, inverted == Qt::Checked, Qt::EditRole);
     return true;
   }
   return QStyledItemDelegate::editorEvent(event, model, option, index);

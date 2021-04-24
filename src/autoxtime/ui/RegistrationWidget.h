@@ -42,12 +42,12 @@ class RegistrationWidget : public QWidget
   enum TableColumn
   {
     TABLE_COLUMN_FIRST_NAME = 0,
-    TABLE_COLUMN_LAST_NAME  = 1,
-    TABLE_COLUMN_CLASS      = 2,
-    TABLE_COLUMN_CAR_NUM    = 3,
-    TABLE_COLUMN_CAR_COLOR  = 4,
-    TABLE_COLUMN_CAR        = 5,
-    TABLE_COLUMN_CHECKED_IN = 6
+    TABLE_COLUMN_LAST_NAME,
+    TABLE_COLUMN_CLASS,
+    TABLE_COLUMN_CAR_NUM,
+    TABLE_COLUMN_CAR_COLOR,
+    TABLE_COLUMN_CAR_MODEL,
+    TABLE_COLUMN_CHECKED_IN
   };
   enum TableData
   {
@@ -87,6 +87,11 @@ class RegistrationWidget : public QWidget
 
  private:
   void resetTable();
+  
+  bool updateCar(const std::shared_ptr<autoxtime::proto::Car>& car);
+  bool updateCarClass(const std::shared_ptr<autoxtime::proto::CarClass>& carClass);
+  bool updateDriver(const std::shared_ptr<autoxtime::proto::Driver>& driver);
+  bool updateEventRegistration(const std::shared_ptr<autoxtime::proto::EventRegistration>& eventRegistration);
   void updateItem(int row,
                   int col,
                   QString text,
@@ -103,10 +108,10 @@ class RegistrationWidget : public QWidget
   autoxtime::db::EventRegistrationModel* mpEventRegistrationModel;
 
   // data
-  std::vector<std::shared_ptr<autoxtime::proto::Car>> mCars;
+  std::unordered_map<std::int64_t, std::shared_ptr<autoxtime::proto::Car>> mCars;
   std::unordered_map<std::int64_t, std::shared_ptr<autoxtime::proto::CarClass>> mCarClasses;
-  std::vector<std::shared_ptr<autoxtime::proto::Driver>> mDrivers;
-  std::vector<std::shared_ptr<autoxtime::proto::EventRegistration>> mEventRegistrations;
+  std::unordered_map<std::int64_t, std::shared_ptr<autoxtime::proto::Driver>> mDrivers;
+  std::unordered_map<std::int64_t, std::shared_ptr<autoxtime::proto::EventRegistration>> mEventRegistrations;
 
   // mapping id to table items
   // each "cell" in the table is a different item, so by convention, we're going to use

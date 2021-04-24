@@ -37,7 +37,7 @@ class BaseModelT : public BaseModel
                           const std::vector<std::shared_ptr<T> >& results) = 0;
 
   // conversion helpers
-  static std::shared_ptr<T> messageToT(std::shared_ptr<google::protobuf::Message>& msg);
+  static std::shared_ptr<T> messageToT(const std::shared_ptr<google::protobuf::Message>& msg);
   static std::vector<std::shared_ptr<T> > messagesToT(std::vector<std::shared_ptr<google::protobuf::Message> >& messages);
 
   // list
@@ -86,7 +86,7 @@ BaseModelT<T, M>::BaseModelT(const std::string& table,
 
 template <typename T, typename M>
 std::shared_ptr<T> BaseModelT<T, M>
-::messageToT(std::shared_ptr<google::protobuf::Message>& msg)
+::messageToT(const std::shared_ptr<google::protobuf::Message>& msg)
 {
   return std::dynamic_pointer_cast<T>(msg);
 }
