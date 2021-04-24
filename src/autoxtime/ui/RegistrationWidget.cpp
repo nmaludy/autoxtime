@@ -33,6 +33,20 @@ using autoxtime::db::EventRegistrationModel;
 
 AUTOXTIME_UI_NAMESPACE_BEG
 
+void AutoXTimeStandardItem::setData(const QVariant& value, int role)
+{
+  // if the data is the same, don't set it
+  // this avoids random writes to the database when the editor signifies something changed
+  // but it really hasn't... it probably can't tell the difference
+  if (value == data(role)) { return; }
+
+  QStandardItem::setData(value, role);
+  if (role == Qt::EditRole)
+  {
+    QStandardItem::setData(value, RegistrationWidget::TABLE_ROLE_EDIT);
+  }
+}
+
 RegistrationWidget::RegistrationWidget(QWidget* pParent)
     : QWidget(pParent),
       mpCarClassModel(new autoxtime::db::CarClassModel(this)),
@@ -112,6 +126,9 @@ RegistrationWidget::RegistrationWidget(QWidget* pParent)
 
     mpEventRegistrationTable->setItemDelegateForColumn(TABLE_COLUMN_CHECKED_IN,
                                                        new CheckBoxItemDelegate(this));
+
+    connect(mpEventItemModel, &QStandardItemModel::dataChanged,
+            this,             &RegistrationWidget::modelDataChanged);
 
     resetTable();
     p_layout->addWidget(mpEventRegistrationTable, 2, 0, -1, -1);
@@ -251,19 +268,19 @@ void RegistrationWidget
 
       // add all of the item columns
       mpEventItemModel->setItem(row_idx, TABLE_COLUMN_FIRST_NAME,
-                                new QStandardItem());
+                                new AutoXTimeStandardItem());
       mpEventItemModel->setItem(row_idx, TABLE_COLUMN_LAST_NAME,
-                                new QStandardItem());
+                                new AutoXTimeStandardItem());
       mpEventItemModel->setItem(row_idx, TABLE_COLUMN_CLASS,
-                                new QStandardItem());
+                                new AutoXTimeStandardItem());
       mpEventItemModel->setItem(row_idx, TABLE_COLUMN_CAR_NUM,
-                                new QStandardItem());
+                                new AutoXTimeStandardItem());
       mpEventItemModel->setItem(row_idx, TABLE_COLUMN_CAR_COLOR,
-                                new QStandardItem());
+                                new AutoXTimeStandardItem());
       mpEventItemModel->setItem(row_idx, TABLE_COLUMN_CAR,
-                                new QStandardItem());
+                                new AutoXTimeStandardItem());
       mpEventItemModel->setItem(row_idx, TABLE_COLUMN_CHECKED_IN,
-                                new QStandardItem());
+                                new AutoXTimeStandardItem());
     }
 
     // keep track of FIRST_NAME column, by convention
@@ -566,6 +583,16 @@ void RegistrationWidget::eventRegistrationNotification(const std::shared_ptr<goo
                                                        const QString& operation)
 {
   AXT_DEBUG << "RegistrationWidget - event registration notification";
+}
+
+void RegistrationWidget::modelDataChanged(const QModelIndex& topLeft,
+                                          const QModelIndex& bottomRight,
+                                          const QVector<int>& roles)
+{
+  if (roles.contains(TABLE_ROLE_EDIT))
+  {
+    AXT_DEBUG << "Got data changes EDIT event";
+  }
 }
 
 AUTOXTIME_UI_NAMESPACE_END

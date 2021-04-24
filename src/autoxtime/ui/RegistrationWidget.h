@@ -4,12 +4,13 @@
 #include <autoxtime/ui/ui.h>
 #include <QWidget>
 #include <QVariant>
+#include <QStandardItem>
 
 class QAction;
 class QComboBox;
 class QLineEdit;
 class QSortFilterProxyModel;
-class QStandardItem;
+// class QStandardItem;
 class QStandardItemModel;
 class QTableView;
 
@@ -38,6 +39,25 @@ class RegistrationWidget : public QWidget
  public:
   explicit RegistrationWidget(QWidget* pParent = nullptr);
 
+  enum TableColumn
+  {
+    TABLE_COLUMN_FIRST_NAME = 0,
+    TABLE_COLUMN_LAST_NAME  = 1,
+    TABLE_COLUMN_CLASS      = 2,
+    TABLE_COLUMN_CAR_NUM    = 3,
+    TABLE_COLUMN_CAR_COLOR  = 4,
+    TABLE_COLUMN_CAR        = 5,
+    TABLE_COLUMN_CHECKED_IN = 6
+  };
+  enum TableData
+  {
+    TABLE_ROLE_CAR_ID = Qt::UserRole,
+    TABLE_ROLE_CAR_CLASS_ID,
+    TABLE_ROLE_DRIVER_ID,
+    TABLE_ROLE_EVENT_REGISTRATION_ID,
+    TABLE_ROLE_EDIT
+  };
+
  public slots:
   void setCarClasses(const std::vector<std::shared_ptr<autoxtime::proto::CarClass>>& carClasses);
   void setCars(const std::vector<std::shared_ptr<autoxtime::proto::Car>>& cars);
@@ -61,6 +81,10 @@ class RegistrationWidget : public QWidget
                                      const QDateTime& timestamp,
                                      const QString& operation);
 
+  void modelDataChanged(const QModelIndex& topLeft,
+                        const QModelIndex& bottomRight,
+                        const QVector<int>& roles);
+
  private:
   void resetTable();
   void updateItem(int row,
@@ -69,24 +93,6 @@ class RegistrationWidget : public QWidget
                   int dataRole = -1,
                   QVariant data = QVariant());
   void updateCarClasses();
-
-  enum TableColumn
-  {
-    TABLE_COLUMN_FIRST_NAME = 0,
-    TABLE_COLUMN_LAST_NAME  = 1,
-    TABLE_COLUMN_CLASS      = 2,
-    TABLE_COLUMN_CAR_NUM    = 3,
-    TABLE_COLUMN_CAR_COLOR  = 4,
-    TABLE_COLUMN_CAR        = 5,
-    TABLE_COLUMN_CHECKED_IN = 6
-  };
-  enum TableData
-  {
-    TABLE_ROLE_CAR_ID = Qt::UserRole,
-    TABLE_ROLE_CAR_CLASS_ID,
-    TABLE_ROLE_DRIVER_ID,
-    TABLE_ROLE_EVENT_REGISTRATION_ID
-  };
 
 
   // models
@@ -128,6 +134,14 @@ class RegistrationWidget : public QWidget
   QStandardItemModel* mpEventItemModel;
   MultiSortFilterProxyModel* mpEventSortFilterProxyModel;
   std::int64_t mTableRowAddIdx;
+};
+
+class AutoXTimeStandardItem : public QStandardItem
+{
+ public:
+  AutoXTimeStandardItem() = default;
+  virtual ~AutoXTimeStandardItem() = default;
+  virtual void setData(const QVariant &value, int role);
 };
 
 AUTOXTIME_UI_NAMESPACE_END
