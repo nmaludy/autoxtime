@@ -17,13 +17,17 @@
 
 #include <QComboBox>
 #include <QGridLayout>
+#include <QHeaderView>
 #include <QLabel>
 #include <QLineEdit>
 #include <QMenu>
 #include <QPushButton>
+#include <QSplitter>
 #include <QStandardItem>
 #include <QStandardItemModel>
+#include <QStatusBar>
 #include <QTableView>
+#include <QToolButton>
 
 using autoxtime::db::CarModel;
 using autoxtime::db::CarClassModel;
@@ -56,10 +60,14 @@ RegistrationWidget::RegistrationWidget(QWidget* pParent)
       mpEventRegistrationModel(new autoxtime::db::EventRegistrationModel(this)),
       mpEventComboBox(new QComboBox(this)),
       mpFilterLineEdit(new QLineEdit(this)),
+      mpSplitter(new QSplitter(this)),
+      mpSplitterButton(new QToolButton(this)),
       mpEventRegistrationTable(new QTableView(this)),
       mpEventItemModel(new QStandardItemModel(this)),
       mpEventSortFilterProxyModel(new MultiSortFilterProxyModel(this)),
-      mTableRowAddIdx(0)
+      mTableRowAddIdx(0),
+      mpStatusBar(new QStatusBar(this)),
+      mNumCheckedInEntries(0)
 {
   QGridLayout* p_layout = new QGridLayout(this);
   mTableColumnHeaders << "First Name"
@@ -124,6 +132,10 @@ RegistrationWidget::RegistrationWidget(QWidget* pParent)
     mpEventSortFilterProxyModel->setSourceModel(mpEventItemModel);
     mpEventRegistrationTable->setModel(mpEventSortFilterProxyModel);
 
+    // disable row numbers
+    // mpEventRegistrationTable->verticalHeader()->setVisible(false);
+
+    // setup check boxes
     mpEventRegistrationTable->setItemDelegateForColumn(TABLE_COLUMN_CHECKED_IN,
                                                        new CheckBoxItemDelegate(this));
 
@@ -131,9 +143,62 @@ RegistrationWidget::RegistrationWidget(QWidget* pParent)
             this,                        &RegistrationWidget::modelDataChanged);
 
     resetTable();
-    p_layout->addWidget(mpEventRegistrationTable, 2, 0, -1, -1);
+
+    mpSplitter->addWidget(mpEventRegistrationTable);
+    // don't let the table be hidden
+    mpSplitter->setCollapsible(mpSplitter->count() - 1, false);
   }
 
+  // TODO editor widget
+
+  // splitter
+  {
+    // need to add widget before getting the handle
+    // it is only created once a widget is added
+    mpSplitter->addWidget(new QLabel("hello world"));
+    mpSplitter->setStyleSheet(
+        "QSplitter::handle { "
+        " width: 10px; "
+        " height: 100px; "
+        "}");
+    QSplitterHandle* p_handle = mpSplitter->handle(1);
+    
+    QGridLayout* p_handle_layout = new QGridLayout(p_handle);
+
+    // frame/line
+    QFrame* p_handle_frame = new QFrame(p_handle);
+    // p_handle_frame->setFrameShape(QFrame::VLine);
+    // p_handle_frame->setFrameShadow(QFrame::Sunken);
+    
+    p_handle_layout->addWidget(p_handle_frame, 0, 0, 1, 1);
+    p_handle_layout->setRowStretch(0, 1);
+
+    // button
+    mpSplitterButton->setStyleSheet("QToolButton { border: none; }");
+    mpSplitterButton->setArrowType(Qt::ArrowType::LeftArrow);
+    mpSplitter->setHandleWidth(32); 
+    p_handle_layout->addWidget(mpSplitterButton, 1, 0, 1, 1);
+    
+    p_handle->setLayout(p_handle_layout);
+
+    // show table, hide editor
+    mpSplitter->setSizes({1, 0});
+    
+    p_layout->addWidget(mpSplitter, 2, 0, 1, -1);
+    p_layout->setRowStretch(2, 1);
+
+    connect(mpSplitterButton, &QPushButton::clicked,
+            this,             &RegistrationWidget::splitterClicked);
+    connect(mpSplitter, &QSplitter::splitterMoved,
+            this,       &RegistrationWidget::splitterMoved);
+  }
+
+  // status bar
+  {
+    mpStatusBar->setSizeGripEnabled(false);
+    p_layout->addWidget(mpStatusBar, 3, 0, 1, -1);
+  }
+  
   // model signals
   connect(mpCarModel, &autoxtime::db::CarModel::findResult,
           this,       &RegistrationWidget::setCars);
@@ -168,6 +233,7 @@ void RegistrationWidget::resetTable()
 
   // clear our underlying state
   mTableRowAddIdx = 0;
+  mNumCheckedInEntries = 0;
   mCars.clear();
   mCarClasses.clear();
   mDrivers.clear();
@@ -465,12 +531,28 @@ bool RegistrationWidget
 
   // set data from registration object
   p_item = mpEventItemModel->item(row_idx, TABLE_COLUMN_CHECKED_IN);
-  // p_item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsUserCheckable);
-  p_item->setCheckState(pEventRegistration->checked_in() ? Qt::Checked : Qt::Unchecked);
+  
+  Qt::CheckState old_check_state = p_item->checkState();
+  Qt::CheckState check_state =
+      pEventRegistration->checked_in() ? Qt::Checked : Qt::Unchecked;
+  p_item->setCheckState(check_state);
   p_item->setData(QVariant::fromValue(pEventRegistration->checked_in()),
                   Qt::DisplayRole);
-  p_item->setData(QVariant::fromValue(pEventRegistration->checked_in() ? Qt::Checked : Qt::Unchecked),
+  p_item->setData(QVariant::fromValue(check_state),
                   Qt::CheckStateRole);
+  // only modify checked in entries when checked state changes
+  if (old_check_state != check_state)
+  {
+    if (pEventRegistration->checked_in())
+    {
+      ++mNumCheckedInEntries;
+    }
+    else
+    {
+      --mNumCheckedInEntries;
+    }
+  }
+  updateStatusBar();
   return true;
 }
 
@@ -593,6 +675,14 @@ void RegistrationWidget::updateCarClasses()
   mpEventRegistrationTable->resizeColumnsToContents();
   mpEventRegistrationTable->setSortingEnabled(true);
   AXT_DEBUG << "updateCarClasses - done";
+}
+
+
+void RegistrationWidget::updateStatusBar()
+{
+  mpStatusBar->showMessage(QString("Entries: %1    ✓ In: %2")
+                           .arg(mEventRegistrations.size())
+                           .arg(mNumCheckedInEntries));
 }
 
 void RegistrationWidget::carNotification(const std::shared_ptr<google::protobuf::Message>& pMessage,
@@ -743,7 +833,7 @@ void RegistrationWidget::modelDataChanged(const QModelIndex& topLeft,
               mpCarModel->update(*p_car);
             }
           }
-          break;
+         break;
         case TABLE_COLUMN_CAR_MODEL:
           // car
           {
@@ -771,11 +861,54 @@ void RegistrationWidget::modelDataChanged(const QModelIndex& topLeft,
                         << data.toBool();
               p_er->set_checked_in(data.toBool());
               mpEventRegistrationModel->update(*p_er);
+              if (data.toBool())
+              {
+                ++mNumCheckedInEntries;
+              }
+              else
+              {
+                --mNumCheckedInEntries;
+              }
+              updateStatusBar();
             }
           }
           break;
       }
     }
+  }
+}
+
+void RegistrationWidget::splitterClicked()
+{
+  QList<int> sizes = mpSplitter->sizes();
+  if (sizes.last() == 0)
+  {
+    // right widget will be shown, make arrow to the right so it
+    // can collapse
+    sizes.last() = 1;
+    mpSplitterButton->setArrowType(Qt::ArrowType::RightArrow);
+  }
+  else
+  {
+    // right widget will be hidden, make arrow to the left so it
+    // can expand
+    sizes.last() = 0;
+    mpSplitterButton->setArrowType(Qt::ArrowType::LeftArrow);
+  }
+  mpSplitter->setSizes(sizes);
+}
+
+void RegistrationWidget::splitterMoved(int pos, int index)
+{  
+  QList<int> sizes = mpSplitter->sizes();
+  // are we at the right edge? if so, expand to the left
+  if (sizes.last() == 0)
+  {
+    mpSplitterButton->setArrowType(Qt::ArrowType::LeftArrow);
+  }
+  else
+  {
+    mpSplitterButton->setArrowType(Qt::ArrowType::RightArrow);
   }
 }
 

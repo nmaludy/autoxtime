@@ -4,6 +4,8 @@
 #include <autoxtime/ui/ui.h>
 #include <QMainWindow>
 
+class QTabWidget;
+
 AUTOXTIME_UI_NAMESPACE_BEG
 
 class AdminWidget;
@@ -17,6 +19,7 @@ class MainWindow : public QMainWindow
   explicit MainWindow(QWidget* pParent = nullptr);
 
  private:
+  QTabWidget* mpTabWidget;
   RegistrationWidget* mpRegistrationWidget;
   AdminWidget* mpAdminWidget;
 };

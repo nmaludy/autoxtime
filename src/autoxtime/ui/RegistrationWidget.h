@@ -9,9 +9,12 @@
 class QAction;
 class QComboBox;
 class QLineEdit;
+class QToolButton;
 class QSortFilterProxyModel;
+class QSplitter;
 // class QStandardItem;
 class QStandardItemModel;
+class QStatusBar;
 class QTableView;
 
 namespace autoxtime { namespace db { class CarModel; } }
@@ -85,6 +88,10 @@ class RegistrationWidget : public QWidget
                         const QModelIndex& bottomRight,
                         const QVector<int>& roles);
 
+  void splitterClicked();
+  void splitterMoved(int pos, int index);
+
+
  private:
   void resetTable();
   
@@ -98,6 +105,7 @@ class RegistrationWidget : public QWidget
                   int dataRole = -1,
                   QVariant data = QVariant());
   void updateCarClasses();
+  void updateStatusBar();
 
 
   // models
@@ -131,6 +139,10 @@ class RegistrationWidget : public QWidget
   // filter
   QLineEdit* mpFilterLineEdit;
 
+  // splitter
+  QSplitter* mpSplitter;
+  QToolButton* mpSplitterButton;
+  
   // table
   QStringList mTableColumnHeaders;
   QList<int> mTableFilterColumns;
@@ -139,6 +151,10 @@ class RegistrationWidget : public QWidget
   QStandardItemModel* mpEventItemModel;
   MultiSortFilterProxyModel* mpEventSortFilterProxyModel;
   std::int64_t mTableRowAddIdx;
+
+  // status bar
+  QStatusBar* mpStatusBar;
+  std::int64_t mNumCheckedInEntries;
 };
 
 class AutoXTimeStandardItem : public QStandardItem
