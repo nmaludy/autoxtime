@@ -181,7 +181,7 @@ void RegistrationTableWidget::setEventId(std::int64_t eventId)
 
 void RegistrationTableWidget::filterChanged(const QString& text)
 {
-  mpEventSortFilterProxyModel->setFilterWildcard(text);
+  mpEventSortFilterProxyModel->setFilterSmart(text);
 }
 
 void RegistrationTableWidget::filterColumnToggled()
