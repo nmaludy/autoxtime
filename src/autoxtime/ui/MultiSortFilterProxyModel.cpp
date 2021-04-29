@@ -59,8 +59,8 @@ void MultiSortFilterProxyModel::setFilterSmart(const QString& filter)
   mSmartFilterRegexes.clear();
   for (const QString& p : parts)
   {
-    mSmartFilterRegexes.push_back(QRegularExpression("^.*?" + p + ".*?$",
-                                                     QRegularExpression::CaseInsensitiveOption));
+    mSmartFilterRegexes << QRegularExpression("^.*?" + p + ".*?$",
+                                              QRegularExpression::CaseInsensitiveOption);
   }
   // AXT_DEBUG << "set regex filter: " << mSmartFilterRegexes;
 
