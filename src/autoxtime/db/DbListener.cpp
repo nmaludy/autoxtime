@@ -94,9 +94,12 @@ DbListener& DbListener::instance()
 
 void DbListener::run()
 {
-  AXT_DEBUG << "In run thread"
+  AXT_DEBUG << "In DbListener thread"
             << QString("autoxtime::thread_") + QString::number((intptr_t)QThread::currentThreadId());
-  mpConnection = std::make_unique<DbConnection>();
+  {
+    std::unique_lock<std::mutex> lock(mConnectionMutex);
+    mpConnection = std::make_unique<DbConnection>(this);
+  }
 
   // hook up our listener before subscribing
   connect(mpConnection->database().driver(),
@@ -107,7 +110,18 @@ void DbListener::run()
 
   // avoid race condition on start, wait until we're connected
   mpStartSemaphore->release(1);
+
+  // run our event loop
   QThread::run();
+
+  {
+    AXT_DEBUG << "Stopping DbListener thread"
+              << QString("autoxtime::thread_") + QString::number((intptr_t)QThread::currentThreadId());
+    // destroy the connection, still in our thread, to avoid warnings about tearing
+    // down the QTimers in another thread
+    std::unique_lock<std::mutex> lock(mConnectionMutex);
+    mpConnection.reset();
+  }
 }
 
 DbEmitter* DbListener::emitter(const google::protobuf::Message& prototype,
@@ -146,7 +160,11 @@ void DbListener::subscribeSlot(const QString& channel)
   AXT_DEBUG << "subscribeSlot for channel "
             << channel
             << " called in thread: " << QString("autoxtime::thread_") + QString::number((intptr_t)QThread::currentThreadId());
-  mpConnection->database().driver()->subscribeToNotification(channel);
+  std::unique_lock<std::mutex> lock(mConnectionMutex);
+  if (mpConnection)
+  {
+    mpConnection->database().driver()->subscribeToNotification(channel);
+  }
 }
 
 void DbListener::recvNotification(const QString& name,

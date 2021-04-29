@@ -17,7 +17,7 @@ DbConnection::DbConnection(const QString& name,
       mName(!name.isEmpty() ? name : QString("autoxtime::thread_") + QString::number((intptr_t)QThread::currentThreadId())),
       mState(DbConnectionState::INITIALIZE),
       mDatabase(),
-      mTimer()
+      mpTimer(new QTimer(this))
 {
   AXT_INFO << "DbConnection() - Creating db connection" << mName;
 
@@ -42,11 +42,17 @@ DbConnection::DbConnection(const QString& name,
     mDatabase.setPort(ConfigStore::valueCast<int>("db/port", 5432));
   }
 
-  connect(&mTimer, &QTimer::timeout,
+  connect(mpTimer, &QTimer::timeout,
           this,    &DbConnection::tryConnect);
 
   tryConnect();
-  mTimer.start(ConfigStore::valueCast("db/reconnect_interval_ms", 5000));
+  mpTimer->start(ConfigStore::valueCast("db/reconnect_interval_ms", 5000));
+}
+
+DbConnection::~DbConnection()
+{
+  mpTimer->stop();
+  AXT_DEBUG << QString("Killing connection from thread: autoxtime::thread_") + QString::number((intptr_t)QThread::currentThreadId()) << " name = " << mName;
 }
 
 void DbConnection::tryConnect()

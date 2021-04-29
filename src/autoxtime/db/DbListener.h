@@ -72,10 +72,12 @@ class DbListener : public QThread
   DbListener();
   friend class DbEmitter;
 
+  std::unique_ptr<QSemaphore> mpStartSemaphore;
+
   std::mutex mEmitterMutex;
   std::unordered_map<QString, std::unique_ptr<DbEmitter>> mEmitters;
 
-  std::unique_ptr<QSemaphore> mpStartSemaphore;
+  std::mutex mConnectionMutex;
   std::unique_ptr<DbConnection> mpConnection;
 };
 
