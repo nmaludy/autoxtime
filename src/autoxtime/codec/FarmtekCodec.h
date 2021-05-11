@@ -2,26 +2,25 @@
 #define AUTOXTIME_CODEC_FARMTEKCODEC
 
 #include <autoxtime/autoxtime.h>
+#include <autoxtime/codec/ICodec.h>
 
 // Qt
 #include <QObject>
 
 AUTOXTIME_NAMESPACE_BEG
 
-class ITransport;
-
-class FarmtekCodec : public QObject
+class FarmtekCodec : public ICodec
 {
   Q_OBJECT
 
  public:
   explicit FarmtekCodec(ITransport* pTransport, QObject* pParent = nullptr);
+  virtual ~FarmtekCodec() = default;
 
- public slots:
-  void handleDataRead(const QByteArray& data);
+  virtual bool decodeData(const QByteArray& data,
+                          std::vector<std::shared_ptr<google::protobuf::Message>>& rMsgs) override;
 
  private:
-  ITransport* mpTransport;
   QByteArray mDataBuffer;
 };
 
