@@ -13,12 +13,12 @@ class FileIO : public ITransport
 {
   Q_OBJECT
  public:
-  FileIO(QObject* pParent = nullptr);
-  FileIO(const QString& filePath,
-         QObject* pParent = nullptr);
-  FileIO(const QString& filePath,
-         const QString& configPath,
-         QObject* pParent = nullptr);
+  explicit FileIO(QObject* pParent = nullptr);
+  explicit FileIO(const QString& filePath,
+                  QObject* pParent = nullptr);
+  explicit FileIO(const QString& filePath,
+                  const QString& configPath,
+                  QObject* pParent = nullptr);
 
   virtual ~FileIO() = default;
 
