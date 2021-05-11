@@ -25,7 +25,7 @@ class RegistrationWidget : public QWidget
  public slots:
   void setEvents(const std::vector<std::shared_ptr<autoxtime::proto::Event>>& events);
   void eventComboIndexChanged(int index);
-  
+
   void splitterClicked();
   void splitterMoved(int pos, int index);
 
@@ -44,7 +44,7 @@ class RegistrationWidget : public QWidget
   // splitter
   QSplitter* mpSplitter;
   QToolButton* mpSplitterButton;
-  
+
   // table
   RegistrationTableWidget* mpTableWidget;
 

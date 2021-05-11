@@ -2,6 +2,7 @@
 
 #include <autoxtime/ui/AdminWidget.h>
 #include <autoxtime/ui/RegistrationWidget.h>
+#include <autoxtime/ui/TimingWidget.h>
 
 #include <QDockWidget>
 #include <QGuiApplication>
@@ -14,8 +15,9 @@ AUTOXTIME_UI_NAMESPACE_BEG
 MainWindow::MainWindow(QWidget* pParent)
     : QMainWindow(pParent),
       mpTabWidget(new QTabWidget(this)),
+      mpAdminWidget(new AdminWidget(this)),
       mpRegistrationWidget(new RegistrationWidget(this)),
-      mpAdminWidget(new AdminWidget(this))
+      mpTimingWidget(new TimingWidget(this))
 {
   QIcon icon("../img/autoxtime_icon.png");
   setWindowIcon(icon);
@@ -64,7 +66,8 @@ MainWindow::MainWindow(QWidget* pParent)
   {
     mpTabWidget->addTab(mpAdminWidget, "Admin");
     mpTabWidget->addTab(mpRegistrationWidget, "Registration");
-    mpTabWidget->setCurrentIndex(1);
+    mpTabWidget->addTab(mpTimingWidget, "Timing");
+    mpTabWidget->setCurrentIndex(2);
     setCentralWidget(mpTabWidget);
   }
 

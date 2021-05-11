@@ -10,6 +10,7 @@ AUTOXTIME_UI_NAMESPACE_BEG
 
 class AdminWidget;
 class RegistrationWidget;
+class TimingWidget;
 
 class MainWindow : public QMainWindow
 {
@@ -20,8 +21,9 @@ class MainWindow : public QMainWindow
 
  private:
   QTabWidget* mpTabWidget;
-  RegistrationWidget* mpRegistrationWidget;
   AdminWidget* mpAdminWidget;
+  RegistrationWidget* mpRegistrationWidget;
+  TimingWidget* mpTimingWidget;
 };
 
 AUTOXTIME_UI_NAMESPACE_END

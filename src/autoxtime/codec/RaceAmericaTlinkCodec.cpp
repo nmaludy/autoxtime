@@ -57,7 +57,8 @@ void RaceAmericaTlinkCodec::handleDataRead(const QByteArray& data)
   {
     QList<QByteArray> lines = mDataBuffer.split('\r');
     mDataBuffer = lines.takeLast();
-    for (const QByteArray& line : lines) {
+    for (const QByteArray& line : lines)
+    {
       if (line.size() != RACEAMERICATLINK_MSG_EXPECTED_SIZE)
       {
         AXT_WARNING

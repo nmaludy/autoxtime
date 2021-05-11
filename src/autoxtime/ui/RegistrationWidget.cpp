@@ -48,7 +48,7 @@ RegistrationWidget::RegistrationWidget(QWidget* pParent)
     mpSplitter->addWidget(mpTableWidget);
     connect(mpTableWidget, &RegistrationTableWidget::numEntriesChanged,
             this,          &RegistrationWidget::updateStatusBar);
-    
+
     // don't let the table be hidden
     mpSplitter->setCollapsible(mpSplitter->count() - 1, false);
   }
@@ -61,28 +61,28 @@ RegistrationWidget::RegistrationWidget(QWidget* pParent)
     // it is only created once a widget is added
     mpSplitter->addWidget(new QLabel("hello world"));
     QSplitterHandle* p_handle = mpSplitter->handle(1);
-    
+
     QGridLayout* p_handle_layout = new QGridLayout(p_handle);
 
     // frame/line
     QFrame* p_handle_frame = new QFrame(p_handle);
     p_handle_frame->setFrameShape(QFrame::Box);
     p_handle_frame->setFrameShadow(QFrame::Raised);
-    
+
     p_handle_layout->addWidget(p_handle_frame, 0, 0, 1, 1);
     p_handle_layout->setRowStretch(0, 1);
 
     // button
     mpSplitterButton->setStyleSheet("QToolButton { border: none; }");
     mpSplitterButton->setArrowType(Qt::ArrowType::LeftArrow);
-    mpSplitter->setHandleWidth(24); 
+    mpSplitter->setHandleWidth(24);
     p_handle_layout->addWidget(mpSplitterButton, 1, 0, 1, 1);
-    
+
     p_handle->setLayout(p_handle_layout);
 
     // show table, hide editor
     mpSplitter->setSizes({1, 0});
-    
+
     p_layout->addWidget(mpSplitter, 1, 0, 1, -1);
 
     connect(mpSplitterButton, &QPushButton::clicked,
@@ -152,7 +152,7 @@ void RegistrationWidget::splitterClicked()
 }
 
 void RegistrationWidget::splitterMoved(int pos, int index)
-{  
+{
   QList<int> sizes = mpSplitter->sizes();
   // are we at the right edge? if so, expand to the left
   if (sizes.last() == 0)
