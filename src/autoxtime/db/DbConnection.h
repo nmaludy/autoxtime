@@ -3,7 +3,8 @@
 
 #include <autoxtime/db/db.h>
 #include <QtSql/QtSql>
-#include <QTimer>
+
+class QTimer;
 
 AUTOXTIME_DB_NAMESPACE_BEG
 
@@ -21,6 +22,7 @@ class DbConnection : public QObject
  public:
   explicit DbConnection(QObject* pParent = nullptr);
   explicit DbConnection(const QString& name, QObject* pParent = nullptr);
+  virtual ~DbConnection();
 
   QSqlDatabase& database()
   {
@@ -43,7 +45,7 @@ class DbConnection : public QObject
   QString mName;
   DbConnectionState mState;
   QSqlDatabase mDatabase;
-  QTimer mTimer;
+  QTimer* mpTimer;
 };
 
 AUTOXTIME_DB_NAMESPACE_END

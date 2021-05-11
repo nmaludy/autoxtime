@@ -5,6 +5,7 @@
 
 #include <QList>
 #include <QSortFilterProxyModel>
+#include <QRegularExpression>
 
 AUTOXTIME_UI_NAMESPACE_BEG
 
@@ -18,12 +19,14 @@ class MultiSortFilterProxyModel : public QSortFilterProxyModel
 
   inline const QList<int>& filterKeyColumnList() const;
   void setFilterKeyColumnList(const QList<int>& columns);
+  void setFilterSmart(const QString& filter);
 
  protected:
   virtual bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
 
  private:
   QList<int> mFilterKeyColumnList;
+  QList<QRegularExpression> mSmartFilterRegexes;
 };
 
 inline const QList<int>& MultiSortFilterProxyModel::filterKeyColumnList() const

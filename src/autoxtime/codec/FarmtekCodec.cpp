@@ -41,7 +41,8 @@ void FarmtekCodec::handleDataRead(const QByteArray& data)
   {
     QList<QByteArray> lines = mDataBuffer.split('\r');
     mDataBuffer = lines.takeLast();
-    for (const QByteArray& line : lines) {
+    for (const QByteArray& line : lines)
+    {
       if (line.size() != FARMTEK_MSG_EXPECTED_SIZE)
       {
         AXT_WARNING
@@ -69,7 +70,6 @@ void FarmtekCodec::handleDataRead(const QByteArray& data)
           << " timestamp_s=" << timestamp_s;
     }
   }
-
 }
 
 AUTOXTIME_NAMESPACE_END

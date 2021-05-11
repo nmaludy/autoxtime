@@ -15,14 +15,14 @@ void CheckBoxItemDelegate::commitAndCloseEditor()
 {
   QCheckBox* editor = dynamic_cast<QCheckBox*>(sender());
   emit commitData(editor);
-  emit closeEditor(editor);
+  // emit closeEditor(editor);
 }
 
 QWidget* CheckBoxItemDelegate::createEditor(QWidget* parent,
                                             const QStyleOptionViewItem& option,
                                             const QModelIndex& index) const
 {
-  //create the checkbox editor
+  // create the checkbox editor
   QCheckBox* cb = new QCheckBox(parent);
   connect(cb,   &QCheckBox::toggled,
           this, &CheckBoxItemDelegate::commitAndCloseEditor);
@@ -31,7 +31,7 @@ QWidget* CheckBoxItemDelegate::createEditor(QWidget* parent,
 
 void CheckBoxItemDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
 {
-  //set if checked or not
+  // set if checked or not
   QCheckBox* cb = dynamic_cast<QCheckBox*>(editor);
   cb->setCheckState(indexCheckState(index));
 }
@@ -42,6 +42,7 @@ void CheckBoxItemDelegate::setModelData(QWidget* editor,
 {
   QCheckBox* cb = dynamic_cast<QCheckBox*>(editor);
   model->setData(index, cb->checkState(), Qt::CheckStateRole);
+  model->setData(index, cb->checkState() == Qt::Checked, Qt::EditRole);
 }
 
 bool CheckBoxItemDelegate::editorEvent(QEvent* event,
@@ -55,6 +56,17 @@ bool CheckBoxItemDelegate::editorEvent(QEvent* event,
     // invert checkbox state
     Qt::CheckState inverted = (data == Qt::Checked) ? Qt::Unchecked : Qt::Checked;
     model->setData(index, inverted, Qt::CheckStateRole);
+    model->setData(index, inverted == Qt::Checked, Qt::EditRole);
+    return true;
+  }
+  // capture the mouse button press and double click events
+  // so that the cell underneath the checkbox doesn't get selected
+  // causing the list to track a row when you click on a checkbox
+  // and the list is sorted by the Checkbox column, this makes
+  // things jump all over and a headache for the user
+  else if (event->type() == QEvent::MouseButtonDblClick ||
+           event->type() == QEvent::MouseButtonPress)
+  {
     return true;
   }
   return QStyledItemDelegate::editorEvent(event, model, option, index);

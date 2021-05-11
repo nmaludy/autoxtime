@@ -2,6 +2,7 @@
 
 // autoxtime
 #include <autoxtime/db/DbConnection.h>
+#include <autoxtime/db/DbListener.h>
 #include <autoxtime/log/Log.h>
 
 // protobuf
@@ -71,6 +72,23 @@ std::unordered_map<std::string, const google::protobuf::FieldDescriptor*> BaseMo
     names_to_fds[p_fd->name()] = p_fd;
   }
   return names_to_fds;
+}
+
+void BaseModel::subscribeToNotifications()
+{
+  autoxtime::db::DbListener& listener = autoxtime::db::DbListener::instance();
+  DbEmitter* p_emitter = listener.emitter(*mpPrototype, tableQ());
+  connect(p_emitter, &DbEmitter::notification,
+          this,      &BaseModel::emitNotification);
+  listener.subscribe(*mpPrototype, tableQ());
+}
+
+void BaseModel::emitNotification(const std::shared_ptr<google::protobuf::Message>& pMessage,
+                                 const QDateTime& timestamp,
+                                 const QString& operation)
+{
+  AXT_DEBUG << "Base Model  " << table() << " emitting notification";
+  emit notification(pMessage, timestamp, operation);
 }
 
 std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel::listMessage()
