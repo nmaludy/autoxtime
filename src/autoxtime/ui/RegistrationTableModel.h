@@ -1,15 +1,15 @@
-#ifndef AUTOXTIME_UI_REGISTRATIONTABLEWIDGET
-#define AUTOXTIME_UI_REGISTRATIONTABLEWIDGET
+#ifndef AUTOXTIME_UI_REGISTRATIONTABLEMODEL
+#define AUTOXTIME_UI_REGISTRATIONTABLEMODEL
 
 #include <autoxtime/ui/ui.h>
-#include <QWidget>
-#include <QVariant>
 
-class QAction;
-class QLineEdit;
-class QStandardItem;
-class QStandardItemModel;
-class QTableView;
+// std
+#include <memory>
+
+// qt
+#include <QColor>
+#include <QVariant>
+#include <QAbstractTableModel>
 
 namespace autoxtime { namespace db { class CarModel; } }
 namespace autoxtime { namespace db { class CarClassModel; } }
@@ -22,18 +22,16 @@ namespace autoxtime { namespace proto { class CarClass; } }
 namespace autoxtime { namespace proto { class Driver; } }
 namespace autoxtime { namespace proto { class EventRegistration; } }
 
-namespace autoxtime { namespace ui { class MultiSortFilterProxyModel; } }
-
 namespace google { namespace protobuf { class Message; } }
 
 AUTOXTIME_UI_NAMESPACE_BEG
 
-class RegistrationTableWidget : public QWidget
+class RegistrationTableModel : public QAbstractTableModel
 {
   Q_OBJECT
 
  public:
-  explicit RegistrationTableWidget(QWidget* pParent = nullptr);
+  explicit RegistrationTableModel(QWidget* pParent = nullptr);
 
   enum TableColumn
   {
@@ -54,7 +52,14 @@ class RegistrationTableWidget : public QWidget
     TABLE_ROLE_CAR_ID
   };
 
-  std::uint64_t numCheckedInEntries() const;
+  inline std::uint64_t numCheckedInEntries() const;
+
+  virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+  virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+  virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+  virtual QVariant	headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+  virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+  virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
 
  signals:
   void numEntriesChanged(std::uint64_t numEntries,
@@ -62,13 +67,12 @@ class RegistrationTableWidget : public QWidget
 
  public slots:
   void setEventId(std::int64_t eventId);
+  inline std::int64_t eventId() const;
 
   void setCarClasses(const std::vector<std::shared_ptr<autoxtime::proto::CarClass>>& carClasses);
   void setCars(const std::vector<std::shared_ptr<autoxtime::proto::Car>>& cars);
   void setDrivers(const std::vector<std::shared_ptr<autoxtime::proto::Driver>>& drivers);
   void setEventRegistrations(const std::vector<std::shared_ptr<autoxtime::proto::EventRegistration>>& eventRegistrations);
-  void filterChanged(const QString& text);
-  void filterColumnToggled();
 
   void carNotification(const std::shared_ptr<google::protobuf::Message>& pMessage,
                        const QDateTime& timestamp,
@@ -83,23 +87,16 @@ class RegistrationTableWidget : public QWidget
                                      const QDateTime& timestamp,
                                      const QString& operation);
 
-  void modelDataChanged(const QModelIndex& topLeft,
-                        const QModelIndex& bottomRight,
-                        const QVector<int>& roles);
-
  private:
-  void resetTable();
+  void reset();
 
   bool updateCar(const std::shared_ptr<autoxtime::proto::Car>& car);
   bool updateCarClass(const std::shared_ptr<autoxtime::proto::CarClass>& carClass);
   bool updateDriver(const std::shared_ptr<autoxtime::proto::Driver>& driver);
   bool updateEventRegistration(const std::shared_ptr<autoxtime::proto::EventRegistration>& eventRegistration);
-  void updateItem(int row,
-                  int col,
-                  QString text,
-                  int dataRole = -1,
-                  QVariant data = QVariant());
   void updateCarClasses();
+
+  static const std::unordered_map<TableColumn, QString> COLUMN_HEADER_MAP;
 
   // models
   autoxtime::db::CarClassModel* mpCarClassModel;
@@ -108,42 +105,45 @@ class RegistrationTableWidget : public QWidget
   autoxtime::db::EventRegistrationModel* mpEventRegistrationModel;
 
   // data
-  std::unordered_map<std::int64_t, std::shared_ptr<autoxtime::proto::Car>> mCars;
-  std::unordered_map<std::int64_t, std::shared_ptr<autoxtime::proto::CarClass>> mCarClasses;
-  std::unordered_map<std::int64_t, std::shared_ptr<autoxtime::proto::Driver>> mDrivers;
-  std::unordered_map<std::int64_t, std::shared_ptr<autoxtime::proto::EventRegistration>> mEventRegistrations;
+  struct DataItem
+  {
+    int row;
+    std::shared_ptr<autoxtime::proto::Car> mpCar;
+    std::shared_ptr<autoxtime::proto::CarClass> mpCarClass;
+    std::shared_ptr<autoxtime::proto::Driver> mpDriver;
+    std::shared_ptr<autoxtime::proto::EventRegistration> mpEventRegistration;
+    QColor mCarColor;
+  };
 
-  // mapping id to table items
-  // each "cell" in the table is a different item, so by convention, we're going to use
-  // the first column ("First Name" aka TABLE_COLUMN_FIRST_NAME) to store the IDs of
-  // all the different types.
-  // from this item, we can retrieve the current row and then edit the other items in that row
-  // as necessary
-  std::unordered_map<std::int64_t, QStandardItem*> mCarItems;
-  // don't need carclass items because we map those a different way
-  // (their ID is meaningless really)
-  std::unordered_map<std::int64_t, QStandardItem*> mDriverItems;
-  std::unordered_map<std::int64_t, QStandardItem*> mEventRegistrationItems;
+  std::shared_ptr<DataItem> itemFromIndex(const QModelIndex& index) const;
+  void itemDataChanged(const std::shared_ptr<DataItem>& pItem);
+
+  std::unordered_map<std::int64_t, std::shared_ptr<DataItem>> mCars;
+  std::unordered_map<std::int64_t, std::shared_ptr<autoxtime::proto::CarClass>> mCarClasses;
+  std::unordered_map<std::int64_t, std::shared_ptr<DataItem>> mDrivers;
+  std::unordered_map<std::int64_t, std::shared_ptr<DataItem>> mEventRegistrations;
+  std::vector<std::shared_ptr<DataItem>> mDataItems;
 
   // ID of the event to be shown in the table
   std::int64_t mEventId;
 
-  // filter
-  QLineEdit* mpFilterLineEdit;
-
   // table
   QStringList mTableColumnHeaders;
-  QList<int> mTableFilterColumns;
-  QList<QAction*> mTableFilterColumnActions;
-  QTableView* mpEventRegistrationTable;
-  QStandardItemModel* mpEventItemModel;
-  MultiSortFilterProxyModel* mpEventSortFilterProxyModel;
-  std::uint64_t mTableRowAddIdx;
 
   // status
   std::uint64_t mNumCheckedInEntries;
 };
 
+inline std::int64_t RegistrationTableModel::eventId() const
+{
+  return mEventId;
+}
+
+inline std::uint64_t RegistrationTableModel::numCheckedInEntries() const
+{
+  return mNumCheckedInEntries;
+}
+
 AUTOXTIME_UI_NAMESPACE_END
 
-#endif // AUTOXTIME_UI_REGISTRATIONTABLEWIDGET
+#endif // AUTOXTIME_UI_REGISTRATIONTABLEMODEL

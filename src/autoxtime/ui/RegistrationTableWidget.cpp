@@ -109,8 +109,7 @@ RegistrationTableWidget::RegistrationTableWidget(QWidget* pParent)
             this,                        &RegistrationTableWidget::modelDataChanged);
 
     p_layout->addWidget(mpEventRegistrationTable, 1, 0, 1, -1);
-    p_layout->setRowStretch(1, 1);
-    
+    p_layout->setRowStretch(1, 1);    
     resetTable();
   }
 

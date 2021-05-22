@@ -7,6 +7,8 @@
 
 AUTOXTIME_UI_NAMESPACE_BEG
 
+class RegistrationTableWidget;
+
 class TimingWidget : public QWidget
 {
   Q_OBJECT
@@ -14,6 +16,8 @@ class TimingWidget : public QWidget
  public:
   explicit TimingWidget(QWidget* pParent = nullptr);
 
+ private:
+  RegistrationTableWidget* mpRegTableWidget;
 };
 
 AUTOXTIME_UI_NAMESPACE_END

@@ -33,7 +33,7 @@ void TimingStateMachine
   // - Finish (triggered by finish timer, only if started)
   //
   // each state you advance the "first" car in the queue waiting on that state
-  
+
   AXT_DEBUG << "TimingStateMachine::handleMessagesRead()";
 }
 
