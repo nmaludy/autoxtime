@@ -48,7 +48,7 @@ const std::unordered_map<RegistrationTableModel::TableColumn, QString> Registrat
   { TABLE_COLUMN_CAR_NUM, "Number" },
   { TABLE_COLUMN_CAR_COLOR, "Color" },
   { TABLE_COLUMN_CAR_MODEL, "Car Model" },
-  { TABLE_COLUMN_CHECKED_IN, "✓ In"},
+  { TABLE_COLUMN_CHECKED_IN, "✓ In"}
 };
 
 RegistrationTableModel::RegistrationTableModel(QWidget* pParent)
@@ -57,27 +57,13 @@ RegistrationTableModel::RegistrationTableModel(QWidget* pParent)
       mpCarModel(new autoxtime::db::CarModel(this)),
       mpDriverModel(new autoxtime::db::DriverModel(this)),
       mpEventRegistrationModel(new autoxtime::db::EventRegistrationModel(this)),
+      mCarsPopulated(false),
+      mCarClassesPopulated(false),
+      mDriversPopulated(false),
+      mEventRegistrationsPopulated(false),
       mEventId(-1),
       mNumCheckedInEntries(0)
 {
-  mTableColumnHeaders << "First Name"
-                      << "Last Name"
-                      << "Class"
-                      << "Number"
-                      << "Color"
-                      << "Car Model"
-                      << "✓ In";
-  // table
-  {
-    // disable row numbers
-    // verticalHeader()->setVisible(false);
-
-    // TODO set this on the view
-    // // setup check boxes
-    // setItemDelegateForColumn(TABLE_COLUMN_CHECKED_IN,
-    //                          new CheckBoxItemDelegate(this));
-  }
-
   // model signals
   connect(mpCarModel, &autoxtime::db::CarModel::findResult,
           this,       &RegistrationTableModel::setCars);
@@ -105,6 +91,9 @@ RegistrationTableModel::RegistrationTableModel(QWidget* pParent)
   mpDriverModel->subscribeToNotifications();
   mpEventRegistrationModel->subscribeToNotifications();
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// BEGIN Qt Model Functions
 
 // When subclassing QAbstractTableModel, you must implement rowCount(), columnCount(), and data().
 // Well behaved models will also implement headerData().
@@ -229,12 +218,9 @@ QVariant RegistrationTableModel::headerData(int section,
                                             Qt::Orientation orientation,
                                             int role) const
 {
-  switch (orientation)
+  if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
   {
-    case Qt::Horizontal:
-      return QVariant(COLUMN_HEADER_MAP.at(static_cast<TableColumn>(section)));
-    case Qt::Vertical:
-      return QVariant();
+    return QVariant(COLUMN_HEADER_MAP.at(static_cast<TableColumn>(section)));
   }
   return QVariant();
 }
@@ -245,7 +231,7 @@ bool RegistrationTableModel::setData(const QModelIndex& index,
 {
   bool b_updated = false;
   const std::shared_ptr<DataItem> p_item = itemFromIndex(index);
-  if (p_item == nullptr)
+  if (p_item == nullptr || role != Qt::EditRole)
   {
     return b_updated;
   }
@@ -349,19 +335,8 @@ Qt::ItemFlags RegistrationTableModel::flags(const QModelIndex &index) const
       |Qt::ItemIsDropEnabled;
 }
 
-void RegistrationTableModel::reset()
-{
-  beginResetModel();
-
-  // clear our underlying state
-  mCars.clear();
-  mCarClasses.clear();
-  mDrivers.clear();
-  mEventRegistrations.clear();
-  mDataItems.clear();
-
-  endResetModel();
-}
+// END Qt Model Functions
+////////////////////////////////////////////////////////////////////////////////
 
 void RegistrationTableModel::setEventId(std::int64_t eventId)
 {
@@ -376,9 +351,30 @@ void RegistrationTableModel::setEventId(std::int64_t eventId)
   mpEventRegistrationModel->findAsync(er);
 }
 
+void RegistrationTableModel::reset()
+{
+  beginResetModel();
+
+  // clear our underlying state
+  mCars.clear();
+  mCarClasses.clear();
+  mDrivers.clear();
+  mEventRegistrations.clear();
+  mDataItems.clear();
+
+  mCarsPopulated = false;
+  mCarClassesPopulated = false;
+  mDriversPopulated = false;
+  mEventRegistrationsPopulated = false;
+
+  endResetModel();
+}
+
 void RegistrationTableModel
 ::setEventRegistrations(const std::vector<std::shared_ptr<autoxtime::proto::EventRegistration>>& eventRegistrations)
 {
+  beginResetModel();
+
   AXT_DEBUG << "Found " << eventRegistrations.size() << " registrations for event id: "
             << mEventId;
   for (const std::shared_ptr<autoxtime::proto::EventRegistration>& p_er : eventRegistrations)
@@ -426,75 +422,7 @@ void RegistrationTableModel
         + " = " + bind_event_id + " )";
     mpCarClassModel->findCustomAsync(QString::fromStdString(custom), bindings);
   }
-}
-
-void RegistrationTableModel
-::setDrivers(const std::vector<std::shared_ptr<autoxtime::proto::Driver>>& drivers)
-{
-  AXT_DEBUG << "Found " << drivers.size() << " drivers for event id: "
-            << mEventId;
-  for (const std::shared_ptr<autoxtime::proto::Driver>& p_driver : drivers)
-  {
-    if (!updateDriver(p_driver))
-    {
-      AXT_ERROR << "A Driver came back without a corresponding event registration: "
-                << p_driver->driver_id();
-    }
-  }
-}
-
-bool RegistrationTableModel
-::updateCar(const std::shared_ptr<autoxtime::proto::Car>& pCar)
-{
-  // do we know about this yet or not?
-  std::int64_t id = pCar->car_id();
-  std::unordered_map<std::int64_t, std::shared_ptr<DataItem>>::iterator iter =
-      mCars.find(id);
-
-  if (iter != mCars.end())
-  {
-    std::shared_ptr<DataItem>& p_item = iter->second;
-    p_item->mpCar = pCar;
-
-    // car color is special because we have to mess with the brush
-    QString color_name = QString::fromStdString(pCar->color());
-    QColor color = autoxtime::util::ColorUtil::nameToColor(color_name);
-    iter->second->mCarColor = color;
-
-    itemDataChanged(p_item);
-    return true;
-  }
-  return false;
-}
-
-void RegistrationTableModel::itemDataChanged(const std::shared_ptr<DataItem>& pItem)
-{
-  int row = pItem->row;
-  QModelIndex tl_idx = createIndex(row, 0);
-  QModelIndex br_idx = createIndex(row, columnCount() - 1);
-  emit dataChanged(tl_idx, br_idx);
-}
-
-bool RegistrationTableModel
-::updateCarClass(const std::shared_ptr<autoxtime::proto::CarClass>& carClass)
-{
-  return false;
-}
-
-bool RegistrationTableModel
-::updateDriver(const std::shared_ptr<autoxtime::proto::Driver>& pDriver)
-{
-  std::int64_t id = pDriver->driver_id();
-  std::unordered_map<std::int64_t, std::shared_ptr<DataItem>>::iterator iter =
-      mDrivers.find(id);
-  if (iter != mDrivers.end())
-  {
-    std::shared_ptr<DataItem>& p_item = iter->second;
-    p_item->mpDriver = pDriver;
-    itemDataChanged(p_item);
-    return true;
-  }
-  return false;
+  mEventRegistrationsPopulated = true;
 }
 
 bool RegistrationTableModel
@@ -532,7 +460,9 @@ bool RegistrationTableModel
   }
 
   // map related IDs to this item
+  AXT_DEBUG << "Adding driver id: " << pEventRegistration->driver_id();
   mDrivers[pEventRegistration->driver_id()] = p_item;
+  AXT_DEBUG << "Adding car id: " << pEventRegistration->car_id();
   mCars[pEventRegistration->car_id()] = p_item;
 
   Qt::CheckState old_check_state = Qt::Unchecked;
@@ -569,9 +499,40 @@ bool RegistrationTableModel
 }
 
 void RegistrationTableModel
+::setDrivers(const std::vector<std::shared_ptr<autoxtime::proto::Driver>>& drivers)
+{
+  AXT_DEBUG << "Found " << drivers.size() << " drivers for event id: "
+            << mEventId;
+  for (const std::shared_ptr<autoxtime::proto::Driver>& p_driver : drivers)
+  {
+    if (!updateDriver(p_driver))
+    {
+      AXT_ERROR << "A Driver came back without a corresponding event registration: "
+                << p_driver->driver_id();
+    }
+  }
+  mDriversPopulated = true;
+}
+
+bool RegistrationTableModel
+::updateDriver(const std::shared_ptr<autoxtime::proto::Driver>& pDriver)
+{
+  std::int64_t id = pDriver->driver_id();
+  std::unordered_map<std::int64_t, std::shared_ptr<DataItem>>::iterator iter =
+      mDrivers.find(id);
+  if (iter != mDrivers.end())
+  {
+    std::shared_ptr<DataItem>& p_item = iter->second;
+    p_item->mpDriver = pDriver;
+    itemDataChanged(p_item);
+    return true;
+  }
+  return false;
+}
+
+void RegistrationTableModel
 ::setCars(const std::vector<std::shared_ptr<autoxtime::proto::Car>>& cars)
 {
-  mCars.clear();
   AXT_DEBUG << "Found " << cars.size() << " cars for event id: "
             << mEventId;
 
@@ -586,6 +547,30 @@ void RegistrationTableModel
 
   // update car classes in case they came back before the cars did
   updateCarClasses();
+  mCarsPopulated = true;
+}
+
+bool RegistrationTableModel
+::updateCar(const std::shared_ptr<autoxtime::proto::Car>& pCar)
+{
+  // do we know about this yet or not?
+  std::int64_t id = pCar->car_id();
+  std::unordered_map<std::int64_t, std::shared_ptr<DataItem>>::iterator iter =
+      mCars.find(id);
+  if (iter != mCars.end())
+  {
+    std::shared_ptr<DataItem>& p_item = iter->second;
+    p_item->mpCar = pCar;
+
+    // car color is special because we have to mess with the brush
+    QString color_name = QString::fromStdString(pCar->color());
+    QColor color = autoxtime::util::ColorUtil::nameToColor(color_name);
+    iter->second->mCarColor = color;
+
+    itemDataChanged(p_item);
+    return true;
+  }
+  return false;
 }
 
 void RegistrationTableModel
@@ -593,14 +578,18 @@ void RegistrationTableModel
 {
   AXT_DEBUG << "Found " << carClasses.size() << " cars classes for event id: "
             << mEventId;
-  mCarClasses.clear();
   for (const std::shared_ptr<autoxtime::proto::CarClass>& p_cc : carClasses)
   {
+    // note: don't call updateCarClass here because that function expects that we
+    //       know about all of the car classes and also calls update() which is an
+    //       expensive operation every time. that function is designed for updates from
+    //       database, not model loading
     mCarClasses[p_cc->car_class_id()] = p_cc;
   }
 
   // update car classes in case they came back after the cars did
   updateCarClasses();
+  mCarClassesPopulated = true;
 }
 
 void RegistrationTableModel::updateCarClasses()
@@ -640,13 +629,30 @@ void RegistrationTableModel::updateCarClasses()
   AXT_DEBUG << "updateCarClasses - done";
 }
 
+bool RegistrationTableModel
+::updateCarClass(const std::shared_ptr<autoxtime::proto::CarClass>& pCarClass)
+{
+  // do we know about this yet or not?
+  std::int64_t car_class_id = pCarClass->car_class_id();
+  std::unordered_map<std::int64_t, std::shared_ptr<autoxtime::proto::CarClass>>::iterator iter =
+      mCarClasses.find(car_class_id);
+  if (iter != mCarClasses.end())
+  {
+    std::shared_ptr<autoxtime::proto::CarClass>& p_cc = iter->second;
+    *p_cc = *pCarClass;
+    updateCarClasses();
+    return true;
+  }
+  return false;
+}
+
+
 void RegistrationTableModel::carNotification(const std::shared_ptr<google::protobuf::Message>& pMessage,
                                               const QDateTime& timestamp,
                                               const QString& operation)
 {
   AXT_DEBUG << "RegistrationTableModel - car notification";
-  std::shared_ptr<autoxtime::proto::Car> p_car =
-      CarModel::messageToT(pMessage);
+  std::shared_ptr<autoxtime::proto::Car> p_car = CarModel::messageToT(pMessage);
   // only update if we care about it
   if (mCars.find(p_car->car_id()) != mCars.end())
   {
@@ -659,6 +665,12 @@ void RegistrationTableModel::carClassNotification(const std::shared_ptr<google::
                                                    const QString& operation)
 {
   AXT_DEBUG << "RegistrationTableModel - car class notification";
+  // only update if we care about it
+  std::shared_ptr<autoxtime::proto::CarClass> p_car_class = CarClassModel::messageToT(pMessage);
+  if (mCarClasses.find(p_car_class->car_class_id()) != mCarClasses.end())
+  {
+    updateCarClass(p_car_class);
+  }
 }
 
 void RegistrationTableModel::driverNotification(const std::shared_ptr<google::protobuf::Message>& pMessage,
@@ -667,8 +679,7 @@ void RegistrationTableModel::driverNotification(const std::shared_ptr<google::pr
 {
   AXT_DEBUG << "RegistrationTableModel - driver notification " << operation << "\n"
             << pMessage->DebugString();
-  std::shared_ptr<autoxtime::proto::Driver> p_driver =
-      DriverModel::messageToT(pMessage);
+  std::shared_ptr<autoxtime::proto::Driver> p_driver = DriverModel::messageToT(pMessage);
   // only update if we care about it
   if (mDrivers.find(p_driver->driver_id()) != mDrivers.end())
   {
@@ -677,17 +688,35 @@ void RegistrationTableModel::driverNotification(const std::shared_ptr<google::pr
 }
 
 void RegistrationTableModel::eventRegistrationNotification(const std::shared_ptr<google::protobuf::Message>& pMessage,
-                                                            const QDateTime& timestamp,
-                                                            const QString& operation)
+                                                           const QDateTime& timestamp,
+                                                           const QString& operation)
 {
   AXT_DEBUG << "RegistrationTableModel - event registration notification";
-
   std::shared_ptr<autoxtime::proto::EventRegistration> p_er =
       EventRegistrationModel::messageToT(pMessage);
   // only update if we care about it
   if (mEventRegistrations.find(p_er->event_registration_id()) != mEventRegistrations.end())
   {
     updateEventRegistration(p_er);
+  }
+}
+
+void RegistrationTableModel::itemDataChanged(const std::shared_ptr<DataItem>& pItem)
+{
+  int row = pItem->row;
+  QModelIndex tl_idx = createIndex(row, 0);
+  QModelIndex br_idx = createIndex(row, columnCount() - 1);
+  emit dataChanged(tl_idx, br_idx);
+}
+
+void RegistrationTableModel::endResetIfPopulated()
+{
+  if (mCarsPopulated &&
+      mCarClassesPopulated &&
+      mDriversPopulated &&
+      mEventRegistrationsPopulated)
+  {
+    endResetModel();
   }
 }
 

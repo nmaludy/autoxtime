@@ -1,9 +1,11 @@
 #include <autoxtime/ui/MainWindow.h>
 
 #include <autoxtime/ui/AdminWidget.h>
+#include <autoxtime/ui/EventSelectionWidget.h>
 #include <autoxtime/ui/RegistrationWidget.h>
 #include <autoxtime/ui/TimingWidget.h>
 
+#include <QGridLayout>
 #include <QDockWidget>
 #include <QGuiApplication>
 #include <QLabel>
@@ -15,6 +17,7 @@ AUTOXTIME_UI_NAMESPACE_BEG
 MainWindow::MainWindow(QWidget* pParent)
     : QMainWindow(pParent),
       mpTabWidget(new QTabWidget(this)),
+      mpEventSelectionWidget(new EventSelectionWidget(this)),
       mpAdminWidget(new AdminWidget(this)),
       mpRegistrationWidget(new RegistrationWidget(this)),
       mpTimingWidget(new TimingWidget(this))
@@ -24,9 +27,23 @@ MainWindow::MainWindow(QWidget* pParent)
 
   // menu
   QMenuBar* p_menu_bar = menuBar();
-  QLabel* p_icon_label = new QLabel(this);
-  p_icon_label->setPixmap(icon.pixmap(32, 32));
-  p_menu_bar->setCornerWidget(p_icon_label);
+
+  // menu - event combo box
+  {
+    QFrame* p_frame = new QFrame(this);
+    QGridLayout* p_frame_layout = new QGridLayout(p_frame);
+    p_frame_layout->setContentsMargins(0, 0, 0, 0);
+    p_frame_layout->addWidget(mpEventSelectionWidget, 0, 0);
+
+    QLabel* p_icon_label = new QLabel(this);
+    p_icon_label->setPixmap(icon.pixmap(32, 32));
+    p_frame_layout->addWidget(p_icon_label, 0, 1);
+
+    connect(mpEventSelectionWidget, &EventSelectionWidget::eventChanged,
+            mpRegistrationWidget,   &RegistrationWidget::eventChanged);
+
+    p_menu_bar->setCornerWidget(p_frame);
+  }
 
   // menu - file
   {

@@ -43,14 +43,7 @@ class RegistrationTableModel : public QAbstractTableModel
     TABLE_COLUMN_CAR_MODEL,
     TABLE_COLUMN_CHECKED_IN
   };
-  enum TableData
-  {
-    TABLE_ROLE_EDIT = Qt::UserRole,
-    TABLE_ROLE_CAR_CLASS_ID,
-    TABLE_ROLE_DRIVER_ID,
-    TABLE_ROLE_EVENT_REGISTRATION_ID,
-    TABLE_ROLE_CAR_ID
-  };
+  static const std::unordered_map<TableColumn, QString> COLUMN_HEADER_MAP;
 
   inline std::uint64_t numCheckedInEntries() const;
 
@@ -60,6 +53,8 @@ class RegistrationTableModel : public QAbstractTableModel
   virtual QVariant	headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
   virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
   virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
+
+  void reset();
 
  signals:
   void numEntriesChanged(std::uint64_t numEntries,
@@ -88,15 +83,13 @@ class RegistrationTableModel : public QAbstractTableModel
                                      const QString& operation);
 
  private:
-  void reset();
 
   bool updateCar(const std::shared_ptr<autoxtime::proto::Car>& car);
   bool updateCarClass(const std::shared_ptr<autoxtime::proto::CarClass>& carClass);
   bool updateDriver(const std::shared_ptr<autoxtime::proto::Driver>& driver);
   bool updateEventRegistration(const std::shared_ptr<autoxtime::proto::EventRegistration>& eventRegistration);
   void updateCarClasses();
-
-  static const std::unordered_map<TableColumn, QString> COLUMN_HEADER_MAP;
+  void endResetIfPopulated();
 
   // models
   autoxtime::db::CarClassModel* mpCarClassModel;
@@ -124,11 +117,13 @@ class RegistrationTableModel : public QAbstractTableModel
   std::unordered_map<std::int64_t, std::shared_ptr<DataItem>> mEventRegistrations;
   std::vector<std::shared_ptr<DataItem>> mDataItems;
 
+  bool mCarsPopulated;
+  bool mCarClassesPopulated;
+  bool mDriversPopulated;
+  bool mEventRegistrationsPopulated;
+
   // ID of the event to be shown in the table
   std::int64_t mEventId;
-
-  // table
-  QStringList mTableColumnHeaders;
 
   // status
   std::uint64_t mNumCheckedInEntries;
