@@ -129,6 +129,11 @@ QVariant RegistrationTableModel::data(const QModelIndex& index, int role) const
     return data;
   }
 
+  // When an editor opens it asks for data in the Qt::EditRole
+  // We want to return the same data the user was looking at when they started editing
+  // Thus, this should be the same as the Qt::DisplayRole.
+  role = (role == Qt::EditRole) ? Qt::DisplayRole : role;
+
   switch (static_cast<TableColumn>(index.column()))
   {
     case TABLE_COLUMN_FIRST_NAME:
@@ -236,15 +241,24 @@ bool RegistrationTableModel::setData(const QModelIndex& index,
     return b_updated;
   }
 
+  // only update if the data changed
+  QVariant old = data(index, role);
+  if (value == old)
+  {
+    return b_updated;
+  }
+
   switch (static_cast<TableColumn>(index.column()))
   {
     case TABLE_COLUMN_FIRST_NAME:
       // driver
-      if (p_item->mpDriver != nullptr)
       {
-        p_item->mpDriver->set_first_name(value.toString().toStdString());
-        mpDriverModel->update(*p_item->mpDriver);
-        b_updated = true;
+        if (p_item->mpDriver != nullptr)
+        {
+          p_item->mpDriver->set_first_name(value.toString().toStdString());
+          mpDriverModel->update(*p_item->mpDriver);
+          b_updated = true;
+        }
       }
       break;
     case TABLE_COLUMN_LAST_NAME:
@@ -288,6 +302,11 @@ bool RegistrationTableModel::setData(const QModelIndex& index,
       // car
       if (p_item->mpCar != nullptr)
       {
+        AXT_DEBUG << "Setting car model data_str="
+                  << value.toString()
+                  << " valid=" << value.isValid()
+                  << " role="
+                  << role;
         p_item->mpCar->set_model(value.toString().toStdString());
         mpCarModel->update(*p_item->mpCar);
         b_updated = true;
@@ -317,6 +336,7 @@ bool RegistrationTableModel::setData(const QModelIndex& index,
       }
       break;
   }
+
   if (b_updated)
   {
     QVector<int> roles;

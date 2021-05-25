@@ -16,6 +16,9 @@ class TimingWidget : public QWidget
  public:
   explicit TimingWidget(QWidget* pParent = nullptr);
 
+ public slots:
+  void eventChanged(std::int64_t eventId);
+
  private:
   RegistrationTableWidget* mpRegTableWidget;
 };

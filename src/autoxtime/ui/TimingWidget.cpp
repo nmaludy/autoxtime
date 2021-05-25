@@ -15,4 +15,9 @@ TimingWidget::TimingWidget(QWidget* pParent)
   p_layout->addWidget(mpRegTableWidget, 0, 0);
 }
 
+void TimingWidget::eventChanged(std::int64_t eventId)
+{
+  mpRegTableWidget->setEventId(eventId);
+}
+
 AUTOXTIME_UI_NAMESPACE_END

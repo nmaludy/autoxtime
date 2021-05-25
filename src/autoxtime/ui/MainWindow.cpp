@@ -41,6 +41,8 @@ MainWindow::MainWindow(QWidget* pParent)
 
     connect(mpEventSelectionWidget, &EventSelectionWidget::eventChanged,
             mpRegistrationWidget,   &RegistrationWidget::eventChanged);
+    connect(mpEventSelectionWidget, &EventSelectionWidget::eventChanged,
+            mpTimingWidget,         &TimingWidget::eventChanged);
 
     p_menu_bar->setCornerWidget(p_frame);
   }
