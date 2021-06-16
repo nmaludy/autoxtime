@@ -51,11 +51,11 @@ jobs:
       - name: CMake Setup External
         shell: msys2 {0}
         run: |
-          cmake -v -S external -B build/external -G "MSYS Makefiles"
+          cmake -S external -B build/external -G "MSYS Makefiles"
       - name: Compile External
         shell: msys2 {0}
         run: |
-          cmake -v --build build/external --parallel
+          cmake --build build/external --parallel --verbose
       - name: CMake Setup
         shell: msys2 {0}
         run: |
