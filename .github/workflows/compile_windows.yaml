@@ -47,7 +47,7 @@ jobs:
         with:
           path: |
             build/external
-          key: ${{ runner.os }}-external-${{ hashFiles('external/cmake/*.cmake') }}
+          key: ${{ runner.os }}-external-v1-${{ hashFiles('external/cmake/*.cmake') }}
       - name: CMake Setup External
         shell: msys2 {0}
         run: |
@@ -55,7 +55,7 @@ jobs:
       - name: Compile External
         shell: msys2 {0}
         run: |
-          cmake --build build/external --parallel
+          cmake --build build/external --parallel --verbose
       - name: CMake Setup
         shell: msys2 {0}
         run: |

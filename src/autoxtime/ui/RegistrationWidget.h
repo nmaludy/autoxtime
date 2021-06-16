@@ -9,8 +9,6 @@ class QToolButton;
 class QSplitter;
 class QStatusBar;
 
-namespace autoxtime { namespace db { class EventModel; } }
-namespace autoxtime { namespace proto { class Event; } }
 namespace autoxtime { namespace ui { class RegistrationTableWidget; } }
 
 AUTOXTIME_UI_NAMESPACE_BEG
@@ -23,23 +21,13 @@ class RegistrationWidget : public QWidget
   explicit RegistrationWidget(QWidget* pParent = nullptr);
 
  public slots:
-  void setEvents(const std::vector<std::shared_ptr<autoxtime::proto::Event>>& events);
-  void eventComboIndexChanged(int index);
-
   void splitterClicked();
   void splitterMoved(int pos, int index);
-
+  void eventChanged(std::int64_t eventId);
 
  private:
   void updateStatusBar(std::uint64_t numEntries,
                        std::uint64_t numCheckedIn);
-
-
-  // models
-  autoxtime::db::EventModel* mpEventModel;
-
-  // combo box
-  QComboBox* mpEventComboBox;
 
   // splitter
   QSplitter* mpSplitter;

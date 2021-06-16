@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package autoxtime.proto;
+
+message Run {
+  optional int64 run_id = 1;
+  optional int64 event_id = 2;
+  optional int64 driver_id = 3;
+  optional int64 car_id = 4;
+
+  optional int64 order = 5;
+}

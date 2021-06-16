@@ -9,6 +9,7 @@ class QTabWidget;
 AUTOXTIME_UI_NAMESPACE_BEG
 
 class AdminWidget;
+class EventSelectionWidget;
 class RegistrationWidget;
 class TimingWidget;
 
@@ -21,6 +22,7 @@ class MainWindow : public QMainWindow
 
  private:
   QTabWidget* mpTabWidget;
+  EventSelectionWidget* mpEventSelectionWidget;
   AdminWidget* mpAdminWidget;
   RegistrationWidget* mpRegistrationWidget;
   TimingWidget* mpTimingWidget;

@@ -32,19 +32,18 @@ AUTOXTIME_NAMESPACE_BEG
 // Z format:
 //   Z?????????\r
 
-// Setting this to 10 because the last byte is a CR that we are splitting on
-const int RACEAMERICATLINK_MSG_EXPECTED_SIZE = 10;
 
 RaceAmericaTlinkCodec::RaceAmericaTlinkCodec(ITransport* pTransport, QObject* pParent)
-    : QObject(pParent),
-      mpTransport(pTransport),
+    : ICodec(pTransport, pParent),
       mDataBuffer()
-{
-  connect(mpTransport, &ITransport::dataRead, this, &RaceAmericaTlinkCodec::handleDataRead);
-}
+{}
 
-void RaceAmericaTlinkCodec::handleDataRead(const QByteArray& data)
+
+bool RaceAmericaTlinkCodec
+::decodeData(const QByteArray& data,
+             std::vector<std::shared_ptr<google::protobuf::Message>>& rMsgs)
 {
+  AXT_DEBUG << "RaceAmericaTlinkCodec::handleDataRead " << data.size();
   mDataBuffer.append(data);
 
   // yes, only search the newest line added so we don't have to scan the entire buffer
@@ -53,22 +52,25 @@ void RaceAmericaTlinkCodec::handleDataRead(const QByteArray& data)
   // TODO make this more efficient so we're not scanning multiple times
   // TODO should we split up the data here or should we just pass it on to the codec "raw"
   //     then let the codec buffer and figure it out?
+  // AXT_DEBUG << "RaceAmericaTlinkCodec::handleDataRead " << (int)data[0];
+  bool b_msgs = false;
   if (data.contains('\r'))
   {
+    AXT_DEBUG << "RaceAmericaTlinkCodec::handleDataRead - data contains cr";
     QList<QByteArray> lines = mDataBuffer.split('\r');
     mDataBuffer = lines.takeLast();
     for (const QByteArray& line : lines)
     {
-      if (line.size() != RACEAMERICATLINK_MSG_EXPECTED_SIZE)
+      if (line.size() != MSG_EXPECTED_SIZE)
       {
         AXT_WARNING
             << "Received RaceAmericaTlink data that is not the correct size. "
-            << "Expected=" << RACEAMERICATLINK_MSG_EXPECTED_SIZE
+            << "Expected=" << MSG_EXPECTED_SIZE
             << " Received=" << line.size()
             << " Data=" << line;
         continue;
       }
-      AXT_INFO << "Received a RaceAmericaTlink string of correct size: " << line;
+      // AXT_DEBUG << "Received a RaceAmericaTlink string of correct size: " << line;
 
       // byte  0 = eye / message type
       char msg_type = line[0];
@@ -95,9 +97,12 @@ void RaceAmericaTlinkCodec::handleDataRead(const QByteArray& data)
           << " fraction_str=" << fraction_str
           << " fraction=" << fraction
           << " timestamp=" << qSetRealNumberPrecision(10) << timestamp;
+      b_msgs = true;
+      // TODO
+      // rMsgs.push_back();
     }
   }
-
+  return b_msgs;
 }
 
 AUTOXTIME_NAMESPACE_END

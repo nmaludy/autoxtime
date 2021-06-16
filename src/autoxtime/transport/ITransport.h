@@ -2,9 +2,9 @@
 #define AUTOXTIME_TRANSPORT_ITRANSPORT
 
 #include <autoxtime/autoxtime.h>
-#include <QByteArray>
-#include <QList>
 #include <QObject>
+
+class QByteArray;
 
 AUTOXTIME_NAMESPACE_BEG
 
@@ -14,6 +14,8 @@ class ITransport : public QObject
 
  public:
   explicit ITransport(QObject* pParent = nullptr);
+
+  virtual bool open() = 0;
 
  signals:
   void dataRead(const QByteArray& data);

@@ -4,10 +4,12 @@
 #include <autoxtime/autoxtime.h>
 #include <autoxtime/transport/ITransport.h>
 
+#include <QString>
 #include <QSerialPortInfo>
-#include <QSerialPort>
-#include <QTimer>
-#include <QFile>
+
+class QSerialPort;
+class QTimer;
+class QFile;
 
 AUTOXTIME_NAMESPACE_BEG
 
@@ -16,21 +18,23 @@ class SerialPortAsyncReader : public ITransport
   Q_OBJECT
  public:
   SerialPortAsyncReader(const QString& portName = QString(), QObject* pParent = nullptr);
+  virtual ~SerialPortAsyncReader() = default;
 
+  virtual bool open() override;
+             
  private slots:
   void handleReadyRead();
   void handleTimeout();
-  void handleError(QSerialPort::SerialPortError error);
+  void handleError();
 
  private:
-  bool tryConnect();
   QSerialPortInfo findPortInfo(const QString& portName);
   void resetError();
 
   QString mPortName;
-  QSerialPort mSerialPort;
-  QTimer mTimer;
-  QFile mDataLogFile;
+  QSerialPort* mpSerialPort;
+  QTimer* mpTimer;
+  QFile* mpDataLogFile;
   bool mDataLogOpened;
 };
 
