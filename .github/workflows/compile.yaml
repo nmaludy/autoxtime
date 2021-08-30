@@ -157,6 +157,7 @@ jobs:
       - name: Install packages required for testing
         if: ${{ matrix.apt_packages }}
         run: |
+          sudo apt-get -y update
           sudo apt-get -y install ${{ matrix.apt_packages }}
       - name: CMake Setup
         run: |
