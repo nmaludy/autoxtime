@@ -17,6 +17,7 @@ class RunTableWidget : public QWidget
 
  public:
   explicit RunTableWidget(QWidget* pParent = nullptr);
+  virtual ~RunTableWidget() = default;
 
   inline RunTableModel* model();
   inline MultiSortFilterProxyModel* proxyModel() const;

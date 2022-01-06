@@ -22,16 +22,19 @@ RunTableWidget::RunTableWidget(QWidget* pParent)
   // table
   {
     mpSortFilterProxyModel->setSourceModel(mpRunTableModel);
+    mpSortFilterProxyModel->setSortLinkedListColumns(RunTableModel::TABLE_COLUMN_RUN_ID,
+                                                     RunTableModel::TABLE_COLUMN_PREVIOUS_RUN_ID);
+    mpSortFilterProxyModel->sort(RunTableModel::TABLE_COLUMN_RUN_ID);
     mpTableView->setModel(mpSortFilterProxyModel);
 
     // enable column headers
     mpTableView->horizontalHeader()->setVisible(true);
-    // disable row numbers
-    mpTableView->verticalHeader()->setVisible(false);
+    // enable row numbers
+    mpTableView->verticalHeader()->setVisible(true);
     // enable sorting
-    mpTableView->setSortingEnabled(true);
-    mpTableView->sortByColumn(RunTableModel::TABLE_COLUMN_DRIVER_NAME,
-                              Qt::AscendingOrder);
+    mpTableView->setSortingEnabled(false);
+    // mpTableView->sortByColumn(RunTableModel::TABLE_COLUMN_RUN_ID,
+    //                           Qt::AscendingOrder);
 
     // setup check boxes
     mpTableView->setItemDelegateForColumn(RunTableModel::TABLE_COLUMN_DNF,
