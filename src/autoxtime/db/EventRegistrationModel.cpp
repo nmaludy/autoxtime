@@ -1,9 +1,6 @@
 #include <autoxtime/db/EventRegistrationModel.h>
 
-#include <autoxtime/db/DbConnection.h>
 #include <autoxtime/proto/event_registration.pb.h>
-
-#include <QtDebug>
 
 AUTOXTIME_DB_NAMESPACE_BEG
 

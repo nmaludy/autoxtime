@@ -2,29 +2,19 @@
 #include <autoxtime/transport/ITransport.h>
 #include <autoxtime/log/Log.h>
 
+#include <qdebug.h>                  // for QDebug
+#include <qlist.h>                   // for QList
+
 AUTOXTIME_NAMESPACE_BEG
 
-// 13 byte fixed format message
-// First character is either B or R (although some modes of the Polaris unit may also give you a S and F, Start finish)
-// 2 signals are sent when an object passes completely through a light beam.
-// The beam break timestamp of the is sent with "B"
-// then the beam restore timestamp is sent with "R"
-// The 2nd character is a number 1-4 representing the eye number
-// Character 3-12 is a integer of the current "time" of the Polaris box when the signal is received from the eye
-// Character 13 is a carriage return. which is ASCII decimal (13) or hex "D"
-//
-// Setting this to 12 because the last byte is a CR that we are splitting on
-const int FARMTEK_MSG_EXPECTED_SIZE = 12;
-
 FarmtekCodec::FarmtekCodec(ITransport* pTransport, QObject* pParent)
-    : QObject(pParent),
-      mpTransport(pTransport),
+    : ICodec(pTransport, pParent),
       mDataBuffer()
-{
-  connect(mpTransport, &ITransport::dataRead, this, &FarmtekCodec::handleDataRead);
-}
+{}
 
-void FarmtekCodec::handleDataRead(const QByteArray& data)
+bool FarmtekCodec
+::decodeData(const QByteArray& data,
+             std::vector<std::shared_ptr<google::protobuf::Message>>& rMsgs)
 {
   // for (int i = 0; i < read_data.size(); ++i) {
   //    AXT_INFO << "handleReadyRead(): read data[" << i << "]: " << (int)read_data[i];
@@ -37,6 +27,7 @@ void FarmtekCodec::handleDataRead(const QByteArray& data)
   // TODO make this more efficient so we're not scanning multiple times
   // TODO should we split up the data here or should we just pass it on to the codec "raw"
   //     then let the codec buffer and figure it out?
+  bool b_msgs = false;
   if (data.contains('\r'))
   {
     QList<QByteArray> lines = mDataBuffer.split('\r');
@@ -68,8 +59,10 @@ void FarmtekCodec::handleDataRead(const QByteArray& data)
           << " eye=" << eye
           << " timestamp_str=" << timestamp_str
           << " timestamp_s=" << timestamp_s;
+      b_msgs = true;
     }
   }
+  return b_msgs;
 }
 
 AUTOXTIME_NAMESPACE_END

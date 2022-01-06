@@ -425,7 +425,7 @@ bool BaseModel::setFieldVariant(google::protobuf::Message* pMessage,
       p_reflection->SetUInt64(pMessage, pField, var.toULongLong(&b_ok));
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_DOUBLE:
-      p_reflection->SetDouble(pMessage, pField, var.toFloat(&b_ok));
+      p_reflection->SetDouble(pMessage, pField, var.toDouble(&b_ok));
       break;
     case google::protobuf::FieldDescriptor::CPPTYPE_FLOAT:
       p_reflection->SetFloat(pMessage, pField, var.toFloat(&b_ok));

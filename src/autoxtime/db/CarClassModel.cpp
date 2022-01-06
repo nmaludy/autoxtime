@@ -1,9 +1,6 @@
 #include <autoxtime/db/CarClassModel.h>
 
-#include <autoxtime/db/DbConnection.h>
 #include <autoxtime/proto/car_class.pb.h>
-
-#include <QtDebug>
 
 AUTOXTIME_DB_NAMESPACE_BEG
 

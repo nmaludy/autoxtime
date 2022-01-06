@@ -118,6 +118,10 @@ CREATE TABLE IF NOT EXISTS event_registration(
 
 CREATE TABLE IF NOT EXISTS run(
   run_id INT GENERATED ALWAYS AS IDENTITY,
+  event_id INT NOT NULL,
+  driver_id INT NOT NULL,
+  car_id INT NOT NULL,
+  previous_run_id INT,
   start_time NUMERIC,
   sector1_time NUMERIC,
   sector2_time NUMERIC,
@@ -125,9 +129,7 @@ CREATE TABLE IF NOT EXISTS run(
   pax_time NUMERIC,
   dnf bool,
   scored bool,
-  event_id INT NOT NULL,
-  driver_id INT NOT NULL,
-  car_id INT NOT NULL,
+  penalties INT,
   PRIMARY KEY(run_id),
   CONSTRAINT fk_event
     FOREIGN KEY(event_id)
@@ -148,18 +150,6 @@ CREATE TABLE IF NOT EXISTS raw_times(
   end_time TEXT,
   run_id INT NOT NULL,
   PRIMARY KEY(raw_id),
-  CONSTRAINT fk_run
-    FOREIGN KEY(run_id)
-      REFERENCES run(run_id)
-);
-
-CREATE TABLE IF NOT EXISTS penalties(
-  penalty INT,
-  raw_id INT,
-  run_id INT,
-  CONSTRAINT fk_raw_times
-    FOREIGN KEY(raw_id)
-      REFERENCES raw_times(raw_id),
   CONSTRAINT fk_run
     FOREIGN KEY(run_id)
       REFERENCES run(run_id)
@@ -186,6 +176,7 @@ CREATE TABLE IF NOT EXISTS points(
     FOREIGN KEY(car_id)
       REFERENCES car(car_id)
 );
+
 
 -- Functions
 -- https://www.postgresql.org/docs/9.1/sql-createfunction.html
@@ -333,6 +324,10 @@ CREATE TRIGGER notify_run
   ON run
 FOR EACH ROW EXECUTE PROCEDURE notify_trigger(
   'run_id',
+  'event_id',
+  'driver_id',
+  'car_id',
+  'previous_run_id',
   'start_time',
   'sector1_time',
   'sector2_time',
@@ -340,9 +335,7 @@ FOR EACH ROW EXECUTE PROCEDURE notify_trigger(
   'pax_time',
   'dnf',
   'scored',
-  'event_id',
-  'driver_id',
-  'car_id'
+  'penalties'
 );
 
 CREATE TRIGGER notify_raw_times
@@ -354,15 +347,6 @@ FOR EACH ROW EXECUTE PROCEDURE notify_trigger(
   'sector1_time',
   'sector2_time',
   'end_time',
-  'run_id'
-);
-
-CREATE TRIGGER notify_penalties
-  AFTER INSERT OR UPDATE OR DELETE
-  ON penalties
-FOR EACH ROW EXECUTE PROCEDURE notify_trigger(
-  'penalty',
-  'raw_id',
   'run_id'
 );
 

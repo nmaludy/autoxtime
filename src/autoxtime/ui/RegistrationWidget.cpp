@@ -1,8 +1,6 @@
 #include <autoxtime/ui/RegistrationWidget.h>
 
-#include <autoxtime/db/EventModel.h>
 #include <autoxtime/log/Log.h>
-#include <autoxtime/proto/event.pb.h>
 #include <autoxtime/ui/RegistrationTableWidget.h>
 
 #include <QComboBox>
@@ -17,31 +15,12 @@ AUTOXTIME_UI_NAMESPACE_BEG
 
 RegistrationWidget::RegistrationWidget(QWidget* pParent)
     : QWidget(pParent),
-      mpEventModel(new autoxtime::db::EventModel(this)),
-      mpEventComboBox(new QComboBox(this)),
       mpSplitter(new QSplitter(this)),
       mpSplitterButton(new QToolButton(this)),
       mpTableWidget(new RegistrationTableWidget(this)),
       mpStatusBar(new QStatusBar(this))
 {
   QGridLayout* p_layout = new QGridLayout(this);
-
-  // events combo box
-  {
-    // might want to change this later to not be alphabetical
-    mpEventComboBox->setInsertPolicy(QComboBox::InsertAlphabetically);
-
-    connect(mpEventComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
-            this,            &RegistrationWidget::eventComboIndexChanged);
-    connect(mpEventModel, &autoxtime::db::EventModel::listResult,
-            this,         &RegistrationWidget::setEvents);
-    mpEventModel->listAsync();
-
-    QLabel* p_label = new QLabel("Event");
-    p_label->setAlignment(p_label->alignment() | Qt::AlignRight);
-    p_layout->addWidget(p_label, 0, 0);
-    p_layout->addWidget(mpEventComboBox, 0, 1, 1, -1);
-  }
 
   // table
   {
@@ -101,34 +80,18 @@ RegistrationWidget::RegistrationWidget(QWidget* pParent)
   p_layout->setColumnStretch(1, 1);
 }
 
-void RegistrationWidget::setEvents(const autoxtime::db::EventModel::ProtoPtrVec& events)
+void RegistrationWidget::eventChanged(std::int64_t eventId)
 {
-  mpEventComboBox->clear();
-  for (const std::shared_ptr<autoxtime::proto::Event>& p_event : events)
-  {
-    mpEventComboBox->addItem(QString::fromStdString(p_event->name()),
-                             QVariant::fromValue(p_event->event_id()));
-  }
-}
-
-void RegistrationWidget::eventComboIndexChanged(int index)
-{
-  if (index == -1)
-  {
-    AXT_DEBUG << "Event combo box reset or cleared";
-    return;
-  }
-  // get current event ID and use it for binding in SQL queries
-  std::int64_t event_id = mpEventComboBox->currentData().toLongLong();
-  mpTableWidget->setEventId(event_id);
+  mpTableWidget->setEventId(eventId);
 }
 
 void RegistrationWidget::updateStatusBar(std::uint64_t numEntries,
                                          std::uint64_t numCheckedIn)
 {
-  mpStatusBar->showMessage(QString("Entries: %1    ✓ In: %2")
+  mpStatusBar->showMessage(QString("Entries: %1    ✓ In: %2    Missing: %3")
                            .arg(numEntries)
-                           .arg(numCheckedIn));
+                           .arg(numCheckedIn)
+                           .arg(numEntries - numCheckedIn));
 }
 
 void RegistrationWidget::splitterClicked()

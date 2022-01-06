@@ -2,26 +2,28 @@
 #define AUTOXTIME_CODEC_RACEAMERICATLINKCODEC
 
 #include <autoxtime/autoxtime.h>
+#include <autoxtime/codec/ICodec.h>
 
 // Qt
 #include <QObject>
 
 AUTOXTIME_NAMESPACE_BEG
 
-class ITransport;
-
-class RaceAmericaTlinkCodec : public QObject
+class RaceAmericaTlinkCodec : public ICodec
 {
   Q_OBJECT
 
  public:
   explicit RaceAmericaTlinkCodec(ITransport* pTransport, QObject* pParent = nullptr);
+  virtual ~RaceAmericaTlinkCodec() = default;
 
- public slots:
-  void handleDataRead(const QByteArray& data);
+  virtual bool decodeData(const QByteArray& data,
+                          std::vector<std::shared_ptr<google::protobuf::Message>>& rMsgs) override;
 
  private:
-  ITransport* mpTransport;
+  // Setting this to 10 because the last byte is a CR that we are splitting on
+  static constexpr int MSG_EXPECTED_SIZE = 10;
+  
   QByteArray mDataBuffer;
 };
 
