@@ -26,12 +26,12 @@ RunTableWidget::RunTableWidget(QWidget* pParent)
 
     // enable column headers
     mpTableView->horizontalHeader()->setVisible(true);
-    // disable row numbers
-    mpTableView->verticalHeader()->setVisible(false);
+    // enable row numbers
+    mpTableView->verticalHeader()->setVisible(true);
     // enable sorting
-    mpTableView->setSortingEnabled(true);
-    mpTableView->sortByColumn(RunTableModel::TABLE_COLUMN_DRIVER_NAME,
-                              Qt::AscendingOrder);
+    mpTableView->setSortingEnabled(false);
+    // mpTableView->sortByColumn(RunTableModel::TABLE_COLUMN_DRIVER_NAME,
+    //                           Qt::AscendingOrder);
 
     // setup check boxes
     mpTableView->setItemDelegateForColumn(RunTableModel::TABLE_COLUMN_DNF,

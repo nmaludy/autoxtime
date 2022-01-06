@@ -20,6 +20,7 @@ class MultiSortFilterProxyModel : public QSortFilterProxyModel
   inline const QList<int>& filterKeyColumnList() const;
   void setFilterKeyColumnList(const QList<int>& columns);
   void setFilterSmart(const QString& filter);
+  virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
  protected:
   virtual bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;

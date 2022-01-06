@@ -59,7 +59,6 @@ std::vector<const google::protobuf::FieldDescriptor*> BaseModel
   return field_descriptors;
 }
 
-
 std::unordered_map<std::string, const google::protobuf::FieldDescriptor*> BaseModel
 ::fieldNamesToFds(const google::protobuf::Descriptor* pDescriptor)
 {
@@ -349,11 +348,14 @@ std::vector<std::shared_ptr<google::protobuf::Message> > BaseModel
     for (int c = 0; c < column_count; ++c)
     {
       const std::string& col_name = col_names.at(c);
-      // AXT_DEBUG << "GOT QUERY RESULT - column = " << col_name;
       const google::protobuf::FieldDescriptor* p_fd = mFieldNamesToFds.at(col_name);
-      const QVariant& value = query.value(c);
-      // AXT_DEBUG << "GOT QUERY RESULT - value = " << value.toString();
-      setFieldVariant(p_msg.get(), p_fd, value);
+      if (!query.isNull(QString::fromStdString(col_name)))
+      {
+        // AXT_DEBUG << "GOT QUERY RESULT - column = " << col_name;
+        const QVariant& value = query.value(c);
+        // AXT_DEBUG << "GOT QUERY RESULT - value = " << value.toString();
+        setFieldVariant(p_msg.get(), p_fd, value);
+      }
     }
     results.push_back(p_msg);
   }

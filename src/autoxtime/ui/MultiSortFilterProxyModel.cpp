@@ -68,4 +68,18 @@ void MultiSortFilterProxyModel::setFilterSmart(const QString& filter)
   setFilterWildcard(filter);
 }
 
+QVariant MultiSortFilterProxyModel::headerData(int section,
+                                               Qt::Orientation orientation,
+                                               int role) const
+{
+  // return row numbers for vertical header, but only if source model
+  // returns a null/invalid QVariant
+  QVariant data = sourceModel()->headerData(section, orientation, role);
+  if (data.isNull() && role == Qt::DisplayRole && orientation == Qt::Vertical)
+  {
+    data = QVariant(section + 1);
+  }
+  return data;
+}
+
 AUTOXTIME_UI_NAMESPACE_END
