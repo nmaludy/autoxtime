@@ -22,6 +22,9 @@ RunTableWidget::RunTableWidget(QWidget* pParent)
   // table
   {
     mpSortFilterProxyModel->setSourceModel(mpRunTableModel);
+    mpSortFilterProxyModel->setSortLinkedListColumns(RunTableModel::TABLE_COLUMN_RUN_ID,
+                                                     RunTableModel::TABLE_COLUMN_PREVIOUS_RUN_ID);
+    mpSortFilterProxyModel->sort(RunTableModel::TABLE_COLUMN_RUN_ID);
     mpTableView->setModel(mpSortFilterProxyModel);
 
     // enable column headers
@@ -30,7 +33,7 @@ RunTableWidget::RunTableWidget(QWidget* pParent)
     mpTableView->verticalHeader()->setVisible(true);
     // enable sorting
     mpTableView->setSortingEnabled(false);
-    // mpTableView->sortByColumn(RunTableModel::TABLE_COLUMN_DRIVER_NAME,
+    // mpTableView->sortByColumn(RunTableModel::TABLE_COLUMN_RUN_ID,
     //                           Qt::AscendingOrder);
 
     // setup check boxes

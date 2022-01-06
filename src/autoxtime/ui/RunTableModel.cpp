@@ -26,6 +26,8 @@ using autoxtime::db::RunModel;
 AUTOXTIME_UI_NAMESPACE_BEG
 
 const std::unordered_map<RunTableModel::TableColumn, QString> RunTableModel::COLUMN_HEADER_MAP = {
+  { TABLE_COLUMN_RUN_ID,  "Run ID" },
+  { TABLE_COLUMN_PREVIOUS_RUN_ID,  "Previous Run ID" },
   { TABLE_COLUMN_RUN_NUMBER,  "Run" },
   { TABLE_COLUMN_CLASS, "Class" },
   { TABLE_COLUMN_CAR_NUM, "Number" },
@@ -122,6 +124,26 @@ QVariant RunTableModel::data(const QModelIndex& index, int role) const
 
   switch (static_cast<TableColumn>(index.column()))
   {
+    case TABLE_COLUMN_RUN_ID:
+      if (p_item->mpRun != nullptr && role == Qt::DisplayRole)
+      {
+        data = QVariant::fromValue(p_item->mpRun->run_id());
+      }
+      break;
+    case TABLE_COLUMN_PREVIOUS_RUN_ID:
+      if (p_item->mpRun != nullptr && role == Qt::DisplayRole)
+      {
+        if (p_item->mpRun->has_previous_run_id())
+        {
+          data = QVariant::fromValue(p_item->mpRun->previous_run_id());
+        }
+        else
+        {
+          // return invalid QVariant if previous run wasn't set
+          data = QVariant();
+        }
+      }
+      break;
     case TABLE_COLUMN_RUN_NUMBER:
       // TODO
       break;
@@ -251,6 +273,8 @@ bool RunTableModel::setData(const QModelIndex& index,
 
   switch (static_cast<TableColumn>(index.column()))
   {
+    case TABLE_COLUMN_RUN_ID: break;
+    case TABLE_COLUMN_PREVIOUS_RUN_ID: break;
     case TABLE_COLUMN_RUN_NUMBER: break;
     case TABLE_COLUMN_CLASS:
       // TODO
@@ -285,6 +309,8 @@ Qt::ItemFlags RunTableModel::flags(const QModelIndex &index) const
   Qt::ItemFlags flags = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
   switch (static_cast<TableColumn>(index.column()))
   {
+    case TABLE_COLUMN_RUN_ID: break;
+    case TABLE_COLUMN_PREVIOUS_RUN_ID: break;
     case TABLE_COLUMN_RUN_NUMBER: break;
     case TABLE_COLUMN_CLASS:
       flags |= Qt::ItemIsEditable;
@@ -318,9 +344,19 @@ void RunTableModel::setEventId(std::int64_t eventId)
   reset();
 
   // find all event runs, async SQL query
-  autoxtime::proto::Run run;
-  run.set_event_id(mEventId);
-  mpRunModel->findAsync(run);
+  // autoxtime::proto::Run run;
+  // run.set_event_id(mEventId);
+  // mpRunModel->findAsync(run);
+
+  // find all drivers registered for this event
+  {
+    std::string bind_event_id = ":event_id";
+    std::unordered_map<QString, QVariant> bindings;
+    bindings[bind_event_id.data()] = QVariant::fromValue(mEventId);
+    std::string custom =
+        " ORDER BY " + CarModel::PRIMARY_KEY;
+    mpRunModel->findCustomAsync(QString::fromStdString(custom), bindings);
+  }
 }
 
 void RunTableModel::reset()

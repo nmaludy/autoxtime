@@ -35,7 +35,9 @@ class RunTableModel : public QAbstractTableModel
 
   enum TableColumn
   {
-    TABLE_COLUMN_RUN_NUMBER = 0,
+    TABLE_COLUMN_RUN_ID = 0,
+    TABLE_COLUMN_PREVIOUS_RUN_ID,
+    TABLE_COLUMN_RUN_NUMBER,
     TABLE_COLUMN_CLASS,
     TABLE_COLUMN_CAR_NUM,
     TABLE_COLUMN_DRIVER_NAME,
