@@ -1,9 +1,6 @@
 #include <autoxtime/db/DriverModel.h>
 
-#include <autoxtime/db/DbConnection.h>
 #include <autoxtime/proto/driver.pb.h>
-
-#include <QtDebug>
 
 AUTOXTIME_DB_NAMESPACE_BEG
 

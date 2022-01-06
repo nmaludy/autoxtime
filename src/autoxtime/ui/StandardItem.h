@@ -15,7 +15,7 @@ class StandardItem : public QStandardItem
   {
     ROLE_EDIT = Qt::UserRole,
   };
-  
+
   StandardItem(int editRole = ROLE_EDIT);
   virtual ~StandardItem();
   virtual void setData(const QVariant& value, int role);

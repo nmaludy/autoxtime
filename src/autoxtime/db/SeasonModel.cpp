@@ -1,10 +1,6 @@
 #include <autoxtime/db/SeasonModel.h>
 
-#include <autoxtime/db/DbConnection.h>
 #include <autoxtime/proto/season.pb.h>
-
-#include <QtDebug>
-#include <QtConcurrent/QtConcurrent>
 
 AUTOXTIME_DB_NAMESPACE_BEG
 

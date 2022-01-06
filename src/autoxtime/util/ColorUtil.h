@@ -6,6 +6,7 @@
 #include <QColor>
 #include <QString>
 
+#include <string>
 #include <unordered_map>
 
 AUTOXTIME_UTIL_NAMESPACE_BEG
@@ -22,6 +23,7 @@ class ColorUtil
   // - "silver"
   // - "dark red"
   static QColor nameToColor(const QString& name);
+  static QColor nameToColor(const std::string& name);
 };
 
 AUTOXTIME_UTIL_NAMESPACE_END

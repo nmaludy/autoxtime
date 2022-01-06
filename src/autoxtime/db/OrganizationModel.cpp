@@ -1,9 +1,6 @@
 #include <autoxtime/db/OrganizationModel.h>
 
-#include <autoxtime/db/DbConnection.h>
 #include <autoxtime/proto/organization.pb.h>
-
-#include <QtDebug>
 
 AUTOXTIME_DB_NAMESPACE_BEG
 

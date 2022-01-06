@@ -2,7 +2,6 @@
 #include <autoxtime/config/ConfigStore.h>
 #include <autoxtime/log/Log.h>
 
-#include <iostream>
 #include <QTimer>
 
 AUTOXTIME_DB_NAMESPACE_BEG

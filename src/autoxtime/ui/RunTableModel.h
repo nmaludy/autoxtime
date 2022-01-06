@@ -1,5 +1,5 @@
-#ifndef AUTOXTIME_UI_REGISTRATIONTABLEMODEL
-#define AUTOXTIME_UI_REGISTRATIONTABLEMODEL
+#ifndef AUTOXTIME_UI_RUNTABLEMODEL
+#define AUTOXTIME_UI_RUNTABLEMODEL
 
 #include <autoxtime/ui/ui.h>
 
@@ -15,37 +15,38 @@ namespace autoxtime { namespace db { class CarModel; } }
 namespace autoxtime { namespace db { class CarClassModel; } }
 namespace autoxtime { namespace db { class DriverModel; } }
 namespace autoxtime { namespace db { class EventModel; } }
-namespace autoxtime { namespace db { class EventRegistrationModel; } }
+namespace autoxtime { namespace db { class RunModel; } }
 
 namespace autoxtime { namespace proto { class Car; } }
 namespace autoxtime { namespace proto { class CarClass; } }
 namespace autoxtime { namespace proto { class Driver; } }
-namespace autoxtime { namespace proto { class EventRegistration; } }
+namespace autoxtime { namespace proto { class Run; } }
 
 namespace google { namespace protobuf { class Message; } }
 
 AUTOXTIME_UI_NAMESPACE_BEG
 
-class RegistrationTableModel : public QAbstractTableModel
+class RunTableModel : public QAbstractTableModel
 {
   Q_OBJECT
 
  public:
-  explicit RegistrationTableModel(QWidget* pParent = nullptr);
+  explicit RunTableModel(QWidget* pParent = nullptr);
 
   enum TableColumn
   {
-    TABLE_COLUMN_FIRST_NAME = 0,
-    TABLE_COLUMN_LAST_NAME,
+    TABLE_COLUMN_RUN_NUMBER = 0,
     TABLE_COLUMN_CLASS,
     TABLE_COLUMN_CAR_NUM,
-    TABLE_COLUMN_CAR_COLOR,
+    TABLE_COLUMN_DRIVER_NAME,
     TABLE_COLUMN_CAR_MODEL,
-    TABLE_COLUMN_CHECKED_IN
+    TABLE_COLUMN_TIME_SECTOR_1,
+    TABLE_COLUMN_TIME_SECTOR_2,
+    TABLE_COLUMN_TIME_TOTAL,
+    TABLE_COLUMN_DNF,
+    TABLE_COLUMN_PENALTIES
   };
   static const std::unordered_map<TableColumn, QString> COLUMN_HEADER_MAP;
-
-  inline std::uint64_t numCheckedInEntries() const;
 
   virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -56,11 +57,7 @@ class RegistrationTableModel : public QAbstractTableModel
 
   void reset();
 
-  std::pair<std::int64_t, std::int64_t> indexCarDriverIds(const QModelIndex& index) const;
-
- signals:
-  void numEntriesChanged(std::uint64_t numEntries,
-                         std::uint64_t numCheckInEntries);
+  std::int64_t indexRunId(const QModelIndex& index) const;
 
  public slots:
   void setEventId(std::int64_t eventId);
@@ -69,7 +66,7 @@ class RegistrationTableModel : public QAbstractTableModel
   void setCarClasses(const std::vector<std::shared_ptr<autoxtime::proto::CarClass>>& carClasses);
   void setCars(const std::vector<std::shared_ptr<autoxtime::proto::Car>>& cars);
   void setDrivers(const std::vector<std::shared_ptr<autoxtime::proto::Driver>>& drivers);
-  void setEventRegistrations(const std::vector<std::shared_ptr<autoxtime::proto::EventRegistration>>& eventRegistrations);
+  void setRuns(const std::vector<std::shared_ptr<autoxtime::proto::Run>>& runs);
 
   void carNotification(const std::shared_ptr<google::protobuf::Message>& pMessage,
                        const QDateTime& timestamp,
@@ -80,16 +77,16 @@ class RegistrationTableModel : public QAbstractTableModel
   void driverNotification(const std::shared_ptr<google::protobuf::Message>& pMessage,
                           const QDateTime& timestamp,
                           const QString& operation);
-  void eventRegistrationNotification(const std::shared_ptr<google::protobuf::Message>& pMessage,
-                                     const QDateTime& timestamp,
-                                     const QString& operation);
+  void runNotification(const std::shared_ptr<google::protobuf::Message>& pMessage,
+                       const QDateTime& timestamp,
+                       const QString& operation);
 
  private:
 
   bool updateCar(const std::shared_ptr<autoxtime::proto::Car>& car);
   bool updateCarClass(const std::shared_ptr<autoxtime::proto::CarClass>& carClass);
   bool updateDriver(const std::shared_ptr<autoxtime::proto::Driver>& driver);
-  bool updateEventRegistration(const std::shared_ptr<autoxtime::proto::EventRegistration>& eventRegistration);
+  bool updateRun(const std::shared_ptr<autoxtime::proto::Run>& run);
   void updateCarClasses();
   void endResetIfPopulated();
 
@@ -97,16 +94,17 @@ class RegistrationTableModel : public QAbstractTableModel
   autoxtime::db::CarClassModel* mpCarClassModel;
   autoxtime::db::CarModel* mpCarModel;
   autoxtime::db::DriverModel* mpDriverModel;
-  autoxtime::db::EventRegistrationModel* mpEventRegistrationModel;
+  autoxtime::db::RunModel* mpRunModel;
 
   // data
   struct DataItem
   {
+    explicit DataItem();
     int row;
     std::shared_ptr<autoxtime::proto::Car> mpCar;
     std::shared_ptr<autoxtime::proto::CarClass> mpCarClass;
     std::shared_ptr<autoxtime::proto::Driver> mpDriver;
-    std::shared_ptr<autoxtime::proto::EventRegistration> mpEventRegistration;
+    std::shared_ptr<autoxtime::proto::Run> mpRun;
     QColor mCarColor;
   };
 
@@ -116,31 +114,23 @@ class RegistrationTableModel : public QAbstractTableModel
   std::unordered_map<std::int64_t, std::shared_ptr<DataItem>> mCars;
   std::unordered_map<std::int64_t, std::shared_ptr<autoxtime::proto::CarClass>> mCarClasses;
   std::unordered_map<std::int64_t, std::shared_ptr<DataItem>> mDrivers;
-  std::unordered_map<std::int64_t, std::shared_ptr<DataItem>> mEventRegistrations;
+  std::unordered_map<std::int64_t, std::shared_ptr<DataItem>> mRuns;
   std::vector<std::shared_ptr<DataItem>> mDataItems;
 
   bool mCarsPopulated;
   bool mCarClassesPopulated;
   bool mDriversPopulated;
-  bool mEventRegistrationsPopulated;
+  bool mRunsPopulated;
 
   // ID of the event to be shown in the table
   std::int64_t mEventId;
-
-  // status
-  std::uint64_t mNumCheckedInEntries;
 };
 
-inline std::int64_t RegistrationTableModel::eventId() const
+inline std::int64_t RunTableModel::eventId() const
 {
   return mEventId;
 }
 
-inline std::uint64_t RegistrationTableModel::numCheckedInEntries() const
-{
-  return mNumCheckedInEntries;
-}
-
 AUTOXTIME_UI_NAMESPACE_END
 
-#endif // AUTOXTIME_UI_REGISTRATIONTABLEMODEL
+#endif // AUTOXTIME_UI_RUNTABLEMODEL

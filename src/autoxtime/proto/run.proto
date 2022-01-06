@@ -7,6 +7,13 @@ message Run {
   optional int64 event_id = 2;
   optional int64 driver_id = 3;
   optional int64 car_id = 4;
-
-  optional int64 order = 5;
+  optional int64 previous_run_id = 5;
+  optional double start_time = 6;
+  optional double sector1_time = 7;
+  optional double sector2_time = 8;
+  optional double end_time = 9;
+  optional double pax_time = 10;
+  optional bool dnf = 11;
+  optional bool scored = 12;
+  optional int32 penalties = 13;
 }

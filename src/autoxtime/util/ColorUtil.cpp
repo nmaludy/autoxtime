@@ -43,4 +43,9 @@ QColor ColorUtil::nameToColor(const QString& name)
   return QColor();
 }
 
+QColor ColorUtil::nameToColor(const std::string& name)
+{
+  return nameToColor(QString::fromStdString(name));
+}
+
 AUTOXTIME_UTIL_NAMESPACE_END

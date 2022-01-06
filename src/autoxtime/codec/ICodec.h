@@ -32,7 +32,7 @@ class ICodec : public QObject
   virtual void handleDataRead(const QByteArray& data);
 
  signals:
-  virtual void messagesRead(const std::vector<std::shared_ptr<google::protobuf::Message>>& msgs);
+  void messagesRead(const std::vector<std::shared_ptr<google::protobuf::Message>>& msgs);
 
  protected:
   ITransport* mpTransport;

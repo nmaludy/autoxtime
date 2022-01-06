@@ -5,6 +5,4 @@ package autoxtime.proto;
 message Organization {
   optional int64 organization_id = 1;
   optional string name = 2;
-  // ID of the "current" Event that all displays should be working on
-  optional int64 current_event_id = 3;
 }
