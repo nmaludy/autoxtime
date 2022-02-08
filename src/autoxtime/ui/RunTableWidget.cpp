@@ -21,11 +21,12 @@ RunTableWidget::RunTableWidget(QWidget* pParent)
 
   // table
   {
-    mpSortFilterProxyModel->setSourceModel(mpRunTableModel);
-    mpSortFilterProxyModel->setSortLinkedListColumns(RunTableModel::TABLE_COLUMN_RUN_ID,
-                                                     RunTableModel::TABLE_COLUMN_PREVIOUS_RUN_ID);
-    mpSortFilterProxyModel->sort(RunTableModel::TABLE_COLUMN_RUN_ID);
-    mpTableView->setModel(mpSortFilterProxyModel);
+    // mpSortFilterProxyModel->setSourceModel(mpRunTableModel);
+    // mpSortFilterProxyModel->setSortLinkedListColumns(RunTableModel::TABLE_COLUMN_RUN_ID,
+    //                                                  RunTableModel::TABLE_COLUMN_PREVIOUS_RUN_ID);
+    // mpSortFilterProxyModel->sort(RunTableModel::TABLE_COLUMN_RUN_ID);
+    // mpTableView->setModel(mpSortFilterProxyModel);
+    mpTableView->setModel(mpRunTableModel);
 
     // enable column headers
     mpTableView->horizontalHeader()->setVisible(true);

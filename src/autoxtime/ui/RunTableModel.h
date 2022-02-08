@@ -101,8 +101,6 @@ class RunTableModel : public QAbstractTableModel
   // data
   struct DataItem
   {
-    explicit DataItem();
-    int row;
     std::shared_ptr<autoxtime::proto::Car> mpCar;
     std::shared_ptr<autoxtime::proto::CarClass> mpCarClass;
     std::shared_ptr<autoxtime::proto::Driver> mpDriver;
@@ -113,11 +111,16 @@ class RunTableModel : public QAbstractTableModel
   std::shared_ptr<DataItem> itemFromIndex(const QModelIndex& index) const;
   void itemDataChanged(const std::shared_ptr<DataItem>& pItem);
 
+  std::shared_ptr<DataItem> insertRun(const std::shared_ptr<autoxtime::proto::Run>& pRun);
+  void insertOrPendingRun(std::shared_ptr<DataItem> pItem);
+
   std::unordered_map<std::int64_t, std::shared_ptr<DataItem>> mCars;
   std::unordered_map<std::int64_t, std::shared_ptr<autoxtime::proto::CarClass>> mCarClasses;
   std::unordered_map<std::int64_t, std::shared_ptr<DataItem>> mDrivers;
   std::unordered_map<std::int64_t, std::shared_ptr<DataItem>> mRuns;
   std::vector<std::shared_ptr<DataItem>> mDataItems;
+  
+  std::unordered_map<std::int64_t, std::shared_ptr<DataItem>> mDataItemsPending;
 
   bool mCarsPopulated;
   bool mCarClassesPopulated;

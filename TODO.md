@@ -1,6 +1,14 @@
-# Current
-- Move the "import" inserts into the "save" button on the event, rather than the import.
-- changing event in registration window
+
+# Runs
+- Add runs to end
+- Delete selected run
+- Move run up/down
+- insert run in the middle
+- Change run class+car
+
+### timing / state machine
+- Assign start and sector times to runs in order
+
 
 # Timing
 - Global "current" event
@@ -10,6 +18,10 @@
   - Registraton widget should subscribe to "event" events so when current changes, we can switch
   - Show current event in the top bar next to icon
   - maybe some sort of like singleton function/class we can read-from/subscribe-to for current event?
+  
+# Random stuff
+- Move the "import" inserts into the "save" button on the event, rather than the import.
+- changing event in registration window
 
 
 ############

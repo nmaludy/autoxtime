@@ -452,24 +452,42 @@ bool RunTableModel
       mRuns.find(id);
 
   std::shared_ptr<DataItem> p_item;
-  bool b_new = false;
   if (iter != mRuns.end())
   {
     AXT_DEBUG << "run id exists in the map: " << id;
     // mapping from ID -> item already exists
     p_item = iter->second;
+
+    // if previous_run_id changes? need to move stuff around
+    bool b_move_run = (p_item->mpRun->has_previous_run_id() != pRun->has_previous_run_id() ||
+                       p_item->mpRun->previous_run_id() != pRun->previous_run_id());
+    
+    // update our event run point to contain the new data
+    p_item->mpRun = pRun;
+
+    if (b_move_run)
+    {
+      // remove run
+      std::vector<std::shared_ptr<DataItem>>::iterator di_iter =
+          std::find(mDataItems.begin(), mDataItems.end(), p_item);
+      int row_idx = di_iter - mDataItems.begin();
+      AXT_DEBUG << "run id [" << id << "] needs be moved, erasing row_idx=" << row_idx;
+      beginRemoveRows(QModelIndex(), row_idx, row_idx);
+      mDataItems.erase(di_iter);
+      endRemoveRows();
+      // insert it back into the right place, or add it to pending
+      insertOrPendingRun(p_item);
+      beginResetModel();
+      endResetModel();
+    }
   }
   else
   {
     AXT_DEBUG << "run id doesn't exists in the map: " << id;
-    int row_idx = mDataItems.size();
-    beginInsertRows(QModelIndex(), row_idx, row_idx);
-    p_item = std::make_shared<DataItem>();
-    p_item->row = row_idx;
-    mDataItems.push_back(p_item);
+    p_item = insertRun(pRun);
+
     // add mapping for this item
     mRuns[id] = p_item;
-    b_new = true;
   }
 
   // map related IDs to this item
@@ -500,14 +518,94 @@ bool RunTableModel
   }
   mCars[pRun->car_id()] = p_item;
 
-  // update our event run point to contain the new data
-  p_item->mpRun = pRun;
-  if (b_new)
-  {
-    endInsertRows();
-  }
+  // trigger data changed for the final update
   itemDataChanged(p_item);
   return true;
+}
+
+std::shared_ptr<RunTableModel::DataItem> RunTableModel
+::insertRun(const std::shared_ptr<autoxtime::proto::Run>& pRun)
+{
+  std::shared_ptr<DataItem> p_item = std::make_shared<DataItem>();
+  p_item->mpRun = pRun;
+  insertOrPendingRun(p_item);
+  return p_item;
+}
+ 
+void RunTableModel::insertOrPendingRun(std::shared_ptr<DataItem> pItem)
+{
+  std::vector<std::shared_ptr<DataItem>>::iterator insert_iter = mDataItems.end();
+  std::vector<std::shared_ptr<DataItem>>::iterator new_iter = mDataItems.end();
+
+  // is this the first run?
+  int64_t run_id = pItem->mpRun->run_id();
+  if (!pItem->mpRun->has_previous_run_id())
+  {
+    // insert at front
+    AXT_DEBUG << "insertOrPendingRun - found first run: " << run_id;
+    insert_iter = mDataItems.begin();
+    beginInsertRows(QModelIndex(), 0, 0);
+    new_iter = mDataItems.insert(insert_iter, pItem); // insert before insert_iter
+    endInsertRows();
+  }
+  else
+  {
+    // not first run, find where it is supposed to go?
+    // try to see if there is a run that matches our previous_run_id
+    int64_t previous_run_id = pItem->mpRun->previous_run_id();
+    insert_iter = std::find_if(mDataItems.begin(), mDataItems.end(),
+                               [&] (const std::shared_ptr<DataItem>& pi)
+                               {
+                                 int64_t run_id = pi->mpRun->run_id();
+                                 bool is_prev = run_id == previous_run_id;
+                                 return is_prev;
+                               }); 
+    // did we find the previous run id?
+    if (insert_iter != mDataItems.end())
+    {
+      ++insert_iter; // increment so the previous run is immediately before our insert
+      int row_idx = insert_iter - mDataItems.begin();  // compute the new item's index
+      AXT_DEBUG << "insertOrPendingRun - inserting run id [" << run_id << "] at row_idx=" << row_idx;
+      beginInsertRows(QModelIndex(), row_idx, row_idx);
+      new_iter = mDataItems.insert(insert_iter, pItem); // insert before insert_iter
+      endInsertRows();
+    }
+    else
+    {
+      // add to pending since we couldn't find previous run id
+      AXT_DEBUG << "insertOrPendingRun - assigning run id [" << run_id << "] to pending runs";
+      if (mDataItemsPending.find(previous_run_id) == mDataItemsPending.end())
+      {
+        mDataItemsPending[previous_run_id] = pItem;
+      }
+      else
+      {
+        AXT_ERROR << "insertOrPendingRun - found multiple runs that have the same previous_run_id... exising run_id=" << mDataItemsPending[previous_run_id]->mpRun->run_id()
+                  << " new run_id=" << run_id;
+      }
+    }
+  }
+
+  // if we inserted a new item
+  if (new_iter != mDataItems.end())
+  {
+    std::unordered_map<std::int64_t, std::shared_ptr<DataItem>>::iterator pending_iter =
+        mDataItemsPending.end();
+    // loop finding items that have this item as their previous run id
+    while ((pending_iter = mDataItemsPending.find(run_id)) != mDataItemsPending.end())
+    {
+      ++new_iter; // increment the previous run so we insert after it
+      int row_idx = new_iter - mDataItems.begin();  // compute the new item's index
+      // use this run's ID as lookup for next loop
+      run_id = pending_iter->second->mpRun->run_id();
+      AXT_DEBUG << "insertOrPendingRun - removing pending run id [" << run_id << "] and inserting at row_idx=" << row_idx;
+      beginInsertRows(QModelIndex(), row_idx, row_idx);
+      // transfer pending -> data items
+      new_iter = mDataItems.insert(new_iter, pending_iter->second);
+      mDataItemsPending.erase(pending_iter); // remove from pending
+      endInsertRows();
+    }
+  }
 }
 
 void RunTableModel
@@ -704,9 +802,11 @@ void RunTableModel::runNotification(const std::shared_ptr<google::protobuf::Mess
 
 void RunTableModel::itemDataChanged(const std::shared_ptr<DataItem>& pItem)
 {
-  int row = pItem->row;
-  if (row >= 0)
+  std::vector<std::shared_ptr<DataItem>>::const_iterator iter =
+      std::find(mDataItems.begin(), mDataItems.end(), pItem);
+  if (iter != mDataItems.end())
   {
+    int row = iter - mDataItems.begin();
     QModelIndex tl_idx = createIndex(row, 0);
     QModelIndex br_idx = createIndex(row, columnCount() - 1);
     emit dataChanged(tl_idx, br_idx);
@@ -733,9 +833,5 @@ std::int64_t RunTableModel::indexRunId(const QModelIndex& index) const
   }
   return p_item->mpRun->run_id();
 }
-
-RunTableModel::DataItem::DataItem()
-    : row(-1)
-{}
 
 AUTOXTIME_UI_NAMESPACE_END
